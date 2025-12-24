@@ -1,19 +1,6 @@
-import * as dotenv from 'dotenv';
-import * as path from 'path';
-
-dotenv.config({
-  path: path.resolve(process.cwd(), '.env'),
-  override: true,
-});
-
-console.log('EARLY DATABASE_URL =', process.env.DATABASE_URL);
-
-if (process.env.DB_MODE === 'prod') {
-  process.env.DATABASE_URL = process.env.DATABASE_URL_PROD!;
-}
-
-if (process.env.DB_MODE === 'local') {
-  process.env.DATABASE_URL = process.env.DATABASE_URL_LOCAL!;
+if (process.env.NODE_ENV !== 'production') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('dotenv').config();
 }
 
 import { NestFactory } from '@nestjs/core';
@@ -28,7 +15,6 @@ import { API_PREFIX } from './shared/constants/global.constants';
 import { SwaggerConfig } from './configs/config.interface';
 
 async function bootstrap() {
-  console.log('BOOT DATABASE_URL =', process.env.DATABASE_URL);
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix(API_PREFIX);
@@ -60,7 +46,8 @@ async function bootstrap() {
     SwaggerModule.setup(swaggerConfig.path || 'api', app, document);
   }
 
-  const PORT = process.env.API_PORT || GLOBAL_CONFIG.nest.port;
+  // const PORT = process.env.API_PORT || GLOBAL_CONFIG.nest.port;
+  const PORT = process.env.API_PORT || 8080;
   await app.listen(PORT);
 }
 bootstrap();
