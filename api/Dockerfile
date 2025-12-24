@@ -51,8 +51,8 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Use non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001 && \
+RUN groupadd --gid 1001 nodejs && \
+    useradd --uid 1001 --gid nodejs --shell /bin/bash --create-home nestjs && \
     chown -R nestjs:nodejs /app
 USER nestjs
 
