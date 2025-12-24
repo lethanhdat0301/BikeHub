@@ -1,0 +1,143 @@
+# Google Cloud Build configuration
+# Sử dụng file này để build và deploy tự động với Cloud Build
+# Trigger: gcloud builds submit --config=cloudbuild.yaml
+
+steps:
+  # Build API
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-api'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/api:$SHORT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/api:latest'
+      - '-f'
+      - 'api/Dockerfile'
+      - '.'
+
+  # Push API image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-api'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'gcr.io/$PROJECT_ID/api'
+    waitFor: ['build-api']
+
+  # Deploy API to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-api'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'api'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/api:$SHORT_SHA'
+      - '--region'
+      - 'asia-southeast1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+    waitFor: ['push-api']
+
+  # Build Frontend
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-frontend'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/frontend:latest'
+      - '-f'
+      - 'frontend/Dockerfile'
+      - '.'
+
+  # Push Frontend image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-frontend'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'gcr.io/$PROJECT_ID/frontend'
+    waitFor: ['build-frontend']
+
+  # Deploy Frontend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-frontend'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'frontend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
+      - '--region'
+      - 'asia-southeast1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+    waitFor: ['push-frontend']
+
+  # Build Admin
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-admin'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/admin:latest'
+      - '-f'
+      - 'admin/Dockerfile'
+      - '.'
+
+  # Push Admin image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-admin'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'gcr.io/$PROJECT_ID/admin'
+    waitFor: ['build-admin']
+
+  # Deploy Admin to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-admin'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'admin'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
+      - '--region'
+      - 'asia-southeast1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+    waitFor: ['push-admin']
+
+# Store images in Google Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/api:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/api:latest'
+  - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/frontend:latest'
+  - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/admin:latest'
+
+# Build timeout
+timeout: '1800s'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
