@@ -19,6 +19,10 @@ jobs:
             echo "SERVER_HOST=${{ vars.DEV_SERVER_HOST }}" >> $GITHUB_ENV
             echo "SERVER_USERNAME=${{ vars.DEV_SERVER_USERNAME }}" >> $GITHUB_ENV
           fi
+      - name: DEBUG ENV
+        run: |
+            echo "SERVER_HOST=$SERVER_HOST"
+            echo "SERVER_USERNAME=$SERVER_USERNAME"
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
