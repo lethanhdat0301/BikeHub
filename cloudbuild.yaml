@@ -9,7 +9,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/api:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/api:$BUILD_ID'
       - '-t'
       - 'gcr.io/$PROJECT_ID/api:latest'
       - '-f'
@@ -34,7 +34,7 @@ steps:
       - 'deploy'
       - 'api'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/api:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/api:$BUILD_ID'
       - '--region'
       - 'asia-southeast1'
       - '--platform'
@@ -47,7 +47,7 @@ steps:
       - '--set-secrets'
       - 'DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest'
       - '--add-cloudsql-instances'
-      - 'gen-lang-client-0406312695:asia-southeast1:bikehub-db'
+      - '$PROJECT_ID:asia-southeast1:bikehub-db'
     waitFor: ['push-api']
   
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -68,7 +68,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/frontend:$BUILD_ID'
       - '-t'
       - 'gcr.io/$PROJECT_ID/frontend:latest'
       - '-f'
@@ -93,7 +93,7 @@ steps:
       - 'deploy'
       - 'frontend'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/frontend:$BUILD_ID'
       - '--region'
       - 'asia-southeast1'
       - '--platform'
@@ -109,7 +109,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/admin:$BUILD_ID'
       - '-t'
       - 'gcr.io/$PROJECT_ID/admin:latest'
       - '-f'
@@ -134,7 +134,7 @@ steps:
       - 'deploy'
       - 'admin'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/admin:$BUILD_ID'
       - '--region'
       - 'asia-southeast1'
       - '--platform'
@@ -146,11 +146,11 @@ steps:
 
 # Store images in Google Container Registry
 images:
-  - 'gcr.io/$PROJECT_ID/api:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/api:$BUILD_ID'
   - 'gcr.io/$PROJECT_ID/api:latest'
-  - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/frontend:$BUILD_ID'
   - 'gcr.io/$PROJECT_ID/frontend:latest'
-  - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/admin:$BUILD_ID'
   - 'gcr.io/$PROJECT_ID/admin:latest'
 
 # Build timeout
