@@ -9,6 +9,7 @@ COPY package.json yarn.lock ./
 # Copy package files (chỉ trong api/)
 COPY api/package.json ./api/package.json
 
+
 # Install all dependencies
 RUN yarn install --frozen-lockfile
 
@@ -25,16 +26,16 @@ RUN yarn build
 # Production stage
 FROM node:18-alpine AS production
 
-WORKDIR /app
+WORKDIR /app/api
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
 # Copy built application and dependencies
 COPY --from=builder /app/api/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/api/prisma ./prisma
+COPY --from=builder /app/api/node_modules ./node_modules
 COPY --from=builder /app/api/package.json ./
+COPY --from=builder /app/api/prisma ./prisma
 
 # Set environment
 ENV NODE_ENV=production
