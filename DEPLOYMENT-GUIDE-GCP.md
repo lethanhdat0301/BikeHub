@@ -154,11 +154,9 @@ dist
 
 ### 3.3 Build và Deploy API
 ```bash
-# Di chuyển vào thư mục api
+# Build Docker image với Cloud Build (từ thư mục api)
 cd api
-
-# Build Docker image với Cloud Build
-gcloud builds submit --tag gcr.io/bikehub-prod/api
+gcloud builds submit --tag gcr.io/bikehub-prod/api .
 
 # Deploy lên Cloud Run
 gcloud run deploy api \
@@ -290,10 +288,9 @@ server {
 
 #### 4.3 Build và Deploy
 ```bash
+# Build và push image (từ thư mục frontend)
 cd frontend
-
-# Build và push image
-gcloud builds submit --tag gcr.io/bikehub-prod/frontend
+gcloud builds submit --tag gcr.io/bikehub-prod/frontend .
 
 # Deploy
 gcloud run deploy frontend \

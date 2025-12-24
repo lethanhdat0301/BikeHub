@@ -6,14 +6,13 @@ steps:
   # Build API
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-api'
+    dir: 'api'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/api:$BUILD_ID'
+      - 'gcr.io/$PROJECT_ID/api:$SHORT_SHA'
       - '-t'
       - 'gcr.io/$PROJECT_ID/api:latest'
-      - '-f'
-      - 'api/Dockerfile'
       - '.'
 
   # Push API image
@@ -65,14 +64,13 @@ steps:
   # Build Frontend
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-frontend'
+    dir: 'frontend'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/frontend:$BUILD_ID'
+      - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
       - '-t'
       - 'gcr.io/$PROJECT_ID/frontend:latest'
-      - '-f'
-      - 'frontend/Dockerfile'
       - '.'
 
   # Push Frontend image
@@ -106,14 +104,13 @@ steps:
   # Build Admin
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-admin'
+    dir: 'admin'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/admin:$BUILD_ID'
+      - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
       - '-t'
       - 'gcr.io/$PROJECT_ID/admin:latest'
-      - '-f'
-      - 'admin/Dockerfile'
       - '.'
 
   # Push Admin image

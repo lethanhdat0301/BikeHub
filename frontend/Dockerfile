@@ -5,26 +5,24 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json yarn.lock* ./
-COPY frontend/package.json ./frontend/
 
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
 # Copy source code
-COPY frontend/ ./frontend/
+COPY . .
 
 # Build application
-WORKDIR /app/frontend
 RUN yarn build
 
 # Production stage with Nginx
 FROM nginx:alpine AS production
 
 # Copy built files
-COPY --from=builder /app/frontend/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 8080 (Cloud Run default)
 EXPOSE 8080

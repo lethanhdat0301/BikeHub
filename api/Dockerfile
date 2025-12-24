@@ -3,11 +3,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy workspace files
-COPY package.json yarn.lock ./
+# Copy package files
+COPY package.json yarn.lock* ./
 
-
-# Install all dependencies
+# Install dependencies
 RUN yarn install --frozen-lockfile
 
 # Copy source code
@@ -27,11 +26,18 @@ WORKDIR /app
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
-# Copy built application and dependencies
+# Copy package files for production install
+COPY package.json yarn.lock* ./
+
+# Install production dependencies only
+RUN yarn install --production --frozen-lockfile
+
+# Copy built application
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package.json ./
+
+# Generate Prisma Client in production
+RUN npx prisma generate
 
 # Set environment
 ENV NODE_ENV=production
@@ -42,7 +48,8 @@ EXPOSE 8080
 
 # Use non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001
+    adduser -S nestjs -u 1001 && \
+    chown -R nestjs:nodejs /app
 USER nestjs
 
 # Health check

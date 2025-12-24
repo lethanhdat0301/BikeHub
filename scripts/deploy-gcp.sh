@@ -52,13 +52,13 @@ gcloud services enable \
 echo -e "${GREEN}[3/6] Build và Push Docker Images...${NC}"
 
 echo "  - Building API image..."
-gcloud builds submit --tag gcr.io/$PROJECT_ID/api api/
+(cd api && gcloud builds submit --tag gcr.io/$PROJECT_ID/api .)
 
 echo "  - Building Frontend image..."
-gcloud builds submit --tag gcr.io/$PROJECT_ID/frontend frontend/
+(cd frontend && gcloud builds submit --tag gcr.io/$PROJECT_ID/frontend .)
 
 echo "  - Building Admin image..."
-gcloud builds submit --tag gcr.io/$PROJECT_ID/admin admin/
+(cd admin && gcloud builds submit --tag gcr.io/$PROJECT_ID/admin .)
 
 # Deploy API
 echo -e "${GREEN}[4/6] Deploy API to Cloud Run...${NC}"
