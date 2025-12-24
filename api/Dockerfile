@@ -1,5 +1,5 @@
 # Multi-stage build for NestJS API
-FROM node:18-alpine AS builder
+FROM node:18-slim AS builder
 
 WORKDIR /app
 
@@ -19,12 +19,16 @@ RUN npx prisma generate
 RUN yarn build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:18-slim AS production
 
 WORKDIR /app
 
-# Install OpenSSL 1.1 compatibility and dumb-init
-RUN apk add --no-cache dumb-init openssl1.1-compat
+# Install OpenSSL and dumb-init
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl \
+    ca-certificates \
+    dumb-init \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files for production install
 COPY package.json yarn.lock* ./
