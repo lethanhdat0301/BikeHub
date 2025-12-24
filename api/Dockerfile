@@ -3,16 +3,20 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Copy workspace files
+COPY package.json yarn.lock ./
+
 # Copy package files (chỉ trong api/)
-COPY package.json yarn.lock* ./
+COPY api/package.json ./api/package.json
 
 # Install all dependencies
 RUN yarn install --frozen-lockfile
 
 # Copy source code
-COPY . .
+COPY api/ ./api/
 
 # Generate Prisma Client
+WORKDIR /app/api
 RUN npx prisma generate
 
 # Build the application
@@ -27,10 +31,10 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init
 
 # Copy built application and dependencies
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package.json ./
+COPY --from=builder /app/api/dist ./dist
+COPY --from=builder /app/api/node_modules ./node_modules
+COPY --from=builder /app/api/prisma ./prisma
+COPY --from=builder /app/api/package.json ./
 
 # Set environment
 ENV NODE_ENV=production
