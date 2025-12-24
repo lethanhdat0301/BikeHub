@@ -23,8 +23,8 @@ FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install OpenSSL 1.1 compatibility and dumb-init
+RUN apk add --no-cache dumb-init openssl1.1-compat
 
 # Copy package files for production install
 COPY package.json yarn.lock* ./
