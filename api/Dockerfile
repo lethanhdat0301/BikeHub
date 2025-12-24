@@ -11,7 +11,7 @@ COPY api/package.json ./api/
 RUN yarn install --frozen-lockfile
 
 # Copy source code
-COPY api/ ./api/
+COPY . .
 
 # Generate Prisma Client
 WORKDIR /app/api
