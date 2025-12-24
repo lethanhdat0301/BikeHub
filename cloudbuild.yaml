@@ -45,7 +45,7 @@ steps:
       - '--set-env-vars'
       - 'NODE_ENV=production'
       - '--set-secrets'
-      - 'DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest'
+      - 'DATABASE_URL=DATABASE_URL:latest,JWT_SIGNATURE=JWT_SIGNATURE:latest'
       - '--add-cloudsql-instances'
       - '$PROJECT_ID:asia-southeast1:bikehub-db'
     waitFor: ['push-api']
