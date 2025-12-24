@@ -21,7 +21,12 @@ import { AppController } from './app.controller';
     ParkModule,
     BikeModule,
     RentalModule,
-    ConfigModule.forRoot({ isGlobal: true, load: [() => GLOBAL_CONFIG] }),
+    // ConfigModule.forRoot({ isGlobal: true, load: [() => GLOBAL_CONFIG] }),
+    // ConfigModule.forRoot({ 
+    //   isGlobal: true, 
+    //   envFilePath: '.env',
+    //   load: [() => GLOBAL_CONFIG] 
+    // }),
     PaypalModule
   ],
   controllers: [AppController],

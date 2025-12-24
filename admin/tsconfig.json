@@ -46,6 +46,7 @@
     "strictNullChecks": false,
     "downlevelIteration": true,
     "baseUrl": "src",
+    "types": ["node"],
     "paths": {
       "@assets/*": ["./src/assetsassets/*"]
     },

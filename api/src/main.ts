@@ -1,5 +1,22 @@
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+dotenv.config({
+  path: path.resolve(process.cwd(), '.env'),
+  override: true,
+});
+
+console.log('EARLY DATABASE_URL =', process.env.DATABASE_URL);
+
+if (process.env.DB_MODE === 'prod') {
+  process.env.DATABASE_URL = process.env.DATABASE_URL_PROD!;
+}
+
+if (process.env.DB_MODE === 'local') {
+  process.env.DATABASE_URL = process.env.DATABASE_URL_LOCAL!;
+}
+
 import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import cors from 'cors';
@@ -11,6 +28,7 @@ import { API_PREFIX } from './shared/constants/global.constants';
 import { SwaggerConfig } from './configs/config.interface';
 
 async function bootstrap() {
+  console.log('BOOT DATABASE_URL =', process.env.DATABASE_URL);
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix(API_PREFIX);
@@ -27,9 +45,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  const configService = app.get<ConfigService>(ConfigService);
-  const swaggerConfig = configService.get<SwaggerConfig>('swagger');
-
+  const swaggerConfig = GLOBAL_CONFIG.swagger;
+  
   // Swagger Api
   if (swaggerConfig.enabled) {
     const options = new DocumentBuilder()

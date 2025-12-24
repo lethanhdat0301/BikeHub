@@ -15,6 +15,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: `${process.env.CALLBACK}/api/v1/auth/google/callback`,
       scope: ['email', 'profile'],
     });
+    console.log('GOOGLE CALLBACK =', `${process.env.CALLBACK}/api/v1/auth/google/callback`);
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any): Promise<any> {
