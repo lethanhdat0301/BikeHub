@@ -42,7 +42,25 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
+      - '--set-env-vars'
+      - 'NODE_ENV=production'
+      - '--set-secrets'
+      - 'DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest'
+      - '--add-cloudsql-instances'
+      - 'gen-lang-client-0406312695:asia-southeast1:bikehub-db'
     waitFor: ['push-api']
+  
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'migrate-db'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'jobs'
+      - 'execute'
+      - 'migrate-db'
+      - '--region'
+      - 'asia-southeast1'
+    waitFor: ['deploy-api']
 
   # Build Frontend
   - name: 'gcr.io/cloud-builders/docker'
