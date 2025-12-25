@@ -12,4 +12,5 @@ if (import.meta.env.VITE_MODE === 'local') {
 }
 export default axios.create({
   baseURL: BACKEND_URL,
+  withCredentials: true,
 });

@@ -37,8 +37,8 @@ export class AuthController {
 
     res.cookie('accessToken', loginData.accessToken, {
       expires: new Date(new Date().getTime() + JWT_EXPIRY_SECONDS),
-      sameSite: 'strict',
-      secure: false,
+      sameSite: 'none',
+      secure: true,
       httpOnly: true,
     });
 
@@ -67,8 +67,8 @@ export class AuthController {
   async googleAuthCallback(@Req() req, @Res() res) {
     res.cookie('accessToken', req.user.accessToken, {
       expires: new Date(new Date().getTime() + JWT_EXPIRY_SECONDS),
-      sameSite: 'strict',
-      secure: false,
+      sameSite: 'none',
+      secure: true,
       httpOnly: true,
     });
     console.log("redirecting to: ", process.env.REDIRECT_URL)
