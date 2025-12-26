@@ -47,7 +47,7 @@ const HowItWork: React.FC = () => {
   ];
   return (
     <Flex
-      id="howToRent"
+      id="howItWork"
       justifyContent={"space-around"}
       alignItems={"center"}
       flexDirection={"column"}

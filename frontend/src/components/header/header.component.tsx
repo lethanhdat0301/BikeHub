@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Button,
   HStack,
@@ -40,36 +40,60 @@ import { useLocation } from 'react-router-dom';
  */
 const Header: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState<string>('en');
-  
+
   const headerItems = [
-    { label: "Search", path: "#search" },
-    { label: "Booking Request", path: "#request-booking" },
-    { label: "Return", path: "#return" },
-    { label: "Track Order", path: "#tracking" },
-    { label: "How It Works", path: "#howItWork" }
+    { label: "Search", path: "search" },
+    { label: "Booking Request", path: "request-booking" },
+    { label: "Return", path: "return" },
+    { label: "Track Order", path: "tracking" },
+    { label: "How It Works", path: "howItWork", isHash: true }
   ];
-  
+
   const phoneNumbers = [
     { number: "+84 123 456 789", display: "0123 456 789" },
     { number: "+84 123 456 789", display: "0123 456 789" }
   ];
-  
+
   const socialLinks = {
     telegram: "https://t.me/yourusername", // Thay bằng Telegram username
     whatsapp: "https://wa.me/84123456789", // Thay bằng số điện thoại (84XXXXXXXXX)
     messenger: "https://m.me/yourpageid"    // Thay bằng Facebook Page ID
   };
-  
+
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
     // TODO: Implement language change logic
     console.log('Language changed to:', e.target.value);
   };
-  
+
   const location = useLocation();
   // const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleNavigation = (item: any) => {
+    if (item.isHash) {
+      // If on home page, just scroll
+      if (location.pathname === '/') {
+        const element = document.getElementById('howItWork');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else {
+        // If not on home page, navigate to home then scroll
+        navigate('/');
+        setTimeout(() => {
+          const element = document.getElementById('howItWork');
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    } else {
+      navigate('/' + item.path);
+    }
+  };
 
   return (
     <header className="flex justify-between items-center text-gray-700 py-2 px-4 sm:px-12 shadow-lg">
@@ -100,27 +124,27 @@ const Header: React.FC = () => {
           </Button>
         </Link>
         {headerItems.map((item, i) => (
-          <A key={i} href={window.location.origin + "/" + item.path}>
-            <Button
-              paddingStart={0}
-              paddingEnd={0}
-              className="group hover:text-teal-500 focus:text-teal-500"
-              variant="nav"
-              _hover={{ transition: "all 0.3s ease-in-out" }}
-              pos={"relative"}
-            >
-              {item.label}
-              <Box
-                position={"absolute"}
-                className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                _groupFocus={{ width: "100%" }}
-                _groupHover={{
-                  width: "100%",
-                  transition: "all 0.3s ease-in-out",
-                }}
-              />
-            </Button>
-          </A>
+          <Button
+            key={i}
+            paddingStart={0}
+            paddingEnd={0}
+            className="group hover:text-teal-500 focus:text-teal-500"
+            variant="nav"
+            _hover={{ transition: "all 0.3s ease-in-out" }}
+            pos={"relative"}
+            onClick={() => handleNavigation(item)}
+          >
+            {item.label}
+            <Box
+              position={"absolute"}
+              className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
+              _groupFocus={{ width: "100%" }}
+              _groupHover={{
+                width: "100%",
+                transition: "all 0.3s ease-in-out",
+              }}
+            />
+          </Button>
         ))}
       </HStack>
 
@@ -195,7 +219,7 @@ const Header: React.FC = () => {
         <option value="vi">Tiếng Việt</option>
       </Select>
 
-      
+
 
       <div>
         {!user?.id ? (
@@ -337,33 +361,35 @@ const Header: React.FC = () => {
                 </Button>
               </Link>
               {headerItems.map((item, i) => (
-                <A key={i} href={item.path} onClick={onClose}>
-                  <Button
-                    paddingStart={0}
-                    paddingEnd={0}
-                    className="group hover:text-teal-500 focus:text-teal-500"
-                    variant="nav"
-                    _hover={{ transition: "all 0.3s ease-in-out" }}
-                    pos={"relative"}
-                  >
-                    {item.label}
-                    <Box
-                      position={"absolute"}
-                      className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                      _groupFocus={{ width: "100%" }}
-                      _groupHover={{
-                        width: "100%",
-                        transition: "all 0.3s ease-in-out",
-                      }}
-                    />
-                  </Button>
-                </A>
+                <Button
+                  paddingStart={0}
+                  paddingEnd={0}
+                  className="group hover:text-teal-500 focus:text-teal-500"
+                  variant="nav"
+                  _hover={{ transition: "all 0.3s ease-in-out" }}
+                  pos={"relative"}
+                  onClick={() => {
+                    handleNavigation(item);
+                    onClose();
+                  }}
+                >
+                  {item.label}
+                  <Box
+                    position={"absolute"}
+                    className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
+                    _groupFocus={{ width: "100%" }}
+                    _groupHover={{
+                      width: "100%",
+                      transition: "all 0.3s ease-in-out",
+                    }}
+                  />
+                </Button>
               ))}
             </VStack>
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-    </header>
+    </header >
   );
 };
 
