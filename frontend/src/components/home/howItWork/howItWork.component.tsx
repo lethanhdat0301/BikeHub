@@ -2,44 +2,44 @@ import { Center, Flex, Heading, Box, Text } from "@chakra-ui/react";
 import React from "react";
 import { Reveal } from "../../motion/reveal.component";
 import {
-  FaMagnifyingGlassLocation,
-  FaMapLocationDot,
-  FaRoute,
+  FaMagnifyingGlass,
+  FaCalendarDays,
+  FaMotorcycle,
+  FaTruckFast,
 } from "react-icons/fa6";
 
-import { MdOutlineElectricBike } from "react-icons/md";
 import CardSteps from "./cardSteps.component";
 
-const HowToRent: React.FC = () => {
+const HowItWork: React.FC = () => {
   const dataSteps = [
     {
-      icon: FaMagnifyingGlassLocation,
-      title: "Location",
-      text: "Pick the location and the date.",
+      icon: FaMagnifyingGlass,
+      title: "Find Your Bike",
+      text: "Browse our wide selection of motorcycles and find the perfect one for your trip.",
       after: true,
       delay: 0.5,
       id: 1,
     },
     {
-      icon: MdOutlineElectricBike,
-      title: "Choose A Bike",
-      text: "Select the bike you like.",
+      icon: FaCalendarDays,
+      title: "Book & Pay",
+      text: "Select your rental dates, provide your details, and complete the secure payment.",
       after: true,
       delay: 1.0,
       id: 2,
     },
     {
-      icon: FaRoute,
-      title: "Enjoy Your Ride",
-      text: "Explore new sights and places with comfort.",
+      icon: FaMotorcycle,
+      title: "Receive Your Bike",
+      text: "We deliver the motorcycle directly to your location at the specified time.",
       after: true,
       delay: 1.5,
       id: 3,
     },
     {
-      icon: FaMapLocationDot,
-      title: "Return The Bike",
-      text: "Leave the bike at one of our parks.",
+      icon: FaTruckFast,
+      title: "Free Delivery & Return",
+      text: "We will deliver and pick up the motorcycle right at your location with no extra fee.",
       after: false,
       delay: 2,
       id: 4,
@@ -75,34 +75,8 @@ const HowToRent: React.FC = () => {
             size={{ base: "sm", md: "2xl" }}
             className="capitalize text-center"
           >
-            How to rent
+            How It Works
           </Heading>
-        </Reveal>
-        <Reveal>
-          <Heading
-            as="h1"
-            size={{ base: "xl", md: "2xl" }}
-            className="py-4 text-center"
-            color={"orange.500"}
-          >
-            Simple & Easy Steps
-          </Heading>
-        </Reveal>
-        <Reveal>
-          <Text
-            className="font-medium text-gray-500 text-center"
-            fontSize={{ base: "xs", md: "md" }}
-          >
-            Choose Location, Bike & Enjoy Your Ride
-          </Text>
-        </Reveal>
-        <Reveal>
-          <Text
-            className="text-md font-medium text-gray-500 text-center"
-            fontSize={{ base: "xs", md: "md" }}
-          >
-            When you finish, return the bike to one of our parking stations.
-          </Text>
         </Reveal>
       </Center>
       <Flex flexDirection={{ base: "column", md: "row" }} gap={4} justifyContent="space-between">
@@ -121,4 +95,4 @@ const HowToRent: React.FC = () => {
   );
 };
 
-export default HowToRent;
+export default HowItWork;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Button,
@@ -21,11 +21,13 @@ import {
   DrawerBody,
   useDisclosure,
   VStack,
+  Select,
   // DrawerHeader,
   DrawerCloseButton,
   // useColorMode,
 } from "@chakra-ui/react";
 import { TbLogout } from "react-icons/tb";
+import { FaTelegram, FaWhatsapp, FaFacebookMessenger, FaPhone } from "react-icons/fa";
 import LogoutButton from "../logoutButton.component";
 import { useAuth } from "../../hooks/useAuth";
 import logoImage from "../../assets/images/logov2.png";
@@ -38,12 +40,33 @@ import { useLocation } from 'react-router-dom';
  */
 const Header: React.FC = () => {
   const { user } = useAuth();
+  const [language, setLanguage] = useState<string>('en');
+  
   const headerItems = [
-    { label: "Choose us", path: "#chooseUs" },
-    { label: "How To Rent", path: "#howToRent" },
-    { label: "We Offer", path: "#weOffer" },
-    { label: "Clients", path: "#clients" },
+    { label: "Search", path: "#search" },
+    { label: "Booking Request", path: "#request-booking" },
+    { label: "Return", path: "#return" },
+    { label: "Track Order", path: "#tracking" },
+    { label: "How It Works", path: "#howItWork" }
   ];
+  
+  const phoneNumbers = [
+    { number: "+84 123 456 789", display: "0123 456 789" },
+    { number: "+84 123 456 789", display: "0123 456 789" }
+  ];
+  
+  const socialLinks = {
+    telegram: "https://t.me/yourusername", // Thay bằng Telegram username
+    whatsapp: "https://wa.me/84123456789", // Thay bằng số điện thoại (84XXXXXXXXX)
+    messenger: "https://m.me/yourpageid"    // Thay bằng Facebook Page ID
+  };
+  
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLanguage(e.target.value);
+    // TODO: Implement language change logic
+    console.log('Language changed to:', e.target.value);
+  };
+  
   const location = useLocation();
   // const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -99,29 +122,80 @@ const Header: React.FC = () => {
             </Button>
           </A>
         ))}
-        <A href="https://github.com/nuuxcode/BikeHub/#team-and-roles" isExternal>
-          <Button
-            paddingStart={0}
-            paddingEnd={0}
-            className="group hover:text-teal-500 focus:text-teal-500"
-            variant="nav"
-            _hover={{ transition: "all 0.3s ease-in-out" }}
-            pos={"relative"}
-            size={{ base: "sm", md: "md" }}
-          >
-            Our Team
-            <Box
-              position={"absolute"}
-              className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-              _groupFocus={{ width: "100%" }}
-              _groupHover={{
-                width: "100%",
-                transition: "all 0.3s ease-in-out",
-              }}
-            />
-          </Button>
-        </A>
       </HStack>
+
+      {/* Social Media Icons */}
+      <HStack spacing={2} display={{ base: "none", md: "flex" }}>
+        <IconButton
+          as="a"
+          href={socialLinks.telegram}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Telegram"
+          icon={<FaTelegram />}
+          size="md"
+          variant="ghost"
+          colorScheme="telegram"
+          _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+          transition="all 0.2s"
+        />
+        <IconButton
+          as="a"
+          href={socialLinks.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp"
+          icon={<FaWhatsapp />}
+          size="md"
+          variant="ghost"
+          colorScheme="whatsapp"
+          _hover={{ bg: "green.50", transform: "scale(1.1)" }}
+          transition="all 0.2s"
+        />
+        <IconButton
+          as="a"
+          href={socialLinks.messenger}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Messenger"
+          icon={<FaFacebookMessenger />}
+          size="md"
+          variant="ghost"
+          colorScheme="messenger"
+          _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+          transition="all 0.2s"
+        />
+      </HStack>
+
+      {/* Phone Numbers */}
+      <VStack spacing={1} display={{ base: "none", lg: "flex" }} align="flex-start">
+        {phoneNumbers.map((phone, index) => (
+          <HStack key={index} spacing={1}>
+            <FaPhone size={12} color="#319795" />
+            <Text fontSize="sm" fontWeight="medium" color="teal.600">
+              <a href={`tel:${phone.number}`}>{phone.display}</a>
+            </Text>
+          </HStack>
+        ))}
+      </VStack>
+
+      {/* Language Selector */}
+      <Select
+        value={language}
+        onChange={handleLanguageChange}
+        size="sm"
+        width="100px"
+        display={{ base: "none", md: "block" }}
+        borderColor="teal.300"
+        _hover={{ borderColor: "teal.500" }}
+        focusBorderColor="teal.500"
+      >
+
+        <option value="en">English</option>
+        <option value="vi">Tiếng Việt</option>
+      </Select>
+
+      
 
       <div>
         {!user?.id ? (
