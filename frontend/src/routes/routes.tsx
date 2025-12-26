@@ -14,6 +14,7 @@ import PaymentPage from "../pages/PaymentPage"
 import Profile from "../pages/profile/Profile.page";
 import BookingPage from "../pages/booking/booking.page";
 import PaymentSuccessPage from '../pages/booking/PaymentSuccess.page';
+import SearchPage from "../pages/search/search.tsx";
 
 
 const Routes: React.FC = () => {
@@ -71,6 +72,8 @@ const Routes: React.FC = () => {
       />
       <Route path="/paypal" element={<PaymentPage />} />
       <Route path="*" element={<NotFoundPage />} />
+      <Route path="/" element={<HomePage />} />
+      <Route path="/search" element={<SearchPage />} />
     </ReactRouterRoutes>
   );
 };

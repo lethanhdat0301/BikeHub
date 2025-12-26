@@ -71,7 +71,6 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
               variant="solid"
               colorScheme={Status[bike.status as keyof typeof Status]}
             >
-              <TagLabel>{bike.Park.name}</TagLabel>
             </Tag>
           </ModalHeader>
           <ModalCloseButton />

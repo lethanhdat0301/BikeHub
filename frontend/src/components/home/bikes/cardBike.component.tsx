@@ -6,13 +6,15 @@ import {
   Heading,
   Text,
   useDisclosure,
+  Badge,
+  HStack,
+  VStack,
+  Divider,
 } from "@chakra-ui/react";
 import { Reveal } from "../../motion/reveal.component";
 import bikeImage from "../../../assets/images/bikes/bike1.jpg";
-import { FaStar } from "react-icons/fa6";
-import { FaHeart } from "react-icons/fa";
-import { MdPeopleOutline } from "react-icons/md";
-import { IoSpeedometerOutline } from "react-icons/io5";
+import { FaStar, FaHeart, FaGasPump, FaBolt, FaUsers } from "react-icons/fa";
+import { GiGearStickPattern } from "react-icons/gi";
 import BikeDetails from "./bikeDetails.component";
 
 export type Bike = {
@@ -22,29 +24,37 @@ export type Bike = {
   lock: boolean;
   location: string;
   price: number;
-  park_id: number;
   image: string;
-  Park: {
-    name: string;
-  };
 };
 
 const CardBike = ({ bike }: { bike: Bike }) => {
   const [liked, setLiked] = useState(false);
-  // const { onOpen } = useDisclosure();
   const { isOpen, onClose, onOpen } = useDisclosure();
+
+  // Mock data - you can replace with real data from API
+  const bikeData = {
+    rating: 4.5,
+    reviewCount: 128,
+    provider: "Phu Quoc Bike Rentals",
+    condition: bike.id % 3 === 0 ? "excellent" : bike.id % 2 === 0 ? "good" : "excellent",
+    features: bike.id % 2 === 0 ? ["New-model", "Recently Serviced"] : ["Recently Serviced"],
+    seats: 2,
+    fuelType: bike.id % 3 === 0 ? "electric" : "gas",
+    transmission: bike.id % 2 === 0 ? "automatic" : "manual",
+  };
+
   return (
     <Flex
-      width={{ base: "100%", sm: "265px" }}
+      width={{ base: "100%", sm: "320px" }}
       bg={"white"}
       direction="column"
       justifyContent="space-between"
-      className="p-3 border rounded-lg"
-      gap={1}
+      className="border rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+      overflow="hidden"
     >
+      {/* Image Section */}
       <Box
-        className="w-full h-40 rounded-lg"
-        position={"relative"}
+        className="w-full h-52 relative"
         bgImage={bike.image ? bike.image : bikeImage}
         bgPosition={"center"}
         bgRepeat={"no-repeat"}
@@ -52,62 +62,150 @@ const CardBike = ({ bike }: { bike: Bike }) => {
       >
         <FaHeart
           onClick={() => setLiked(!liked)}
-          className={`text-gray-600 absolute top-2 right-2 w-5 h-5 cursor-pointer ${liked &&
-            "text-red-500 berder-red-600 text-opacity-100 drop-shadow-lg"
+          className={`absolute top-3 right-3 w-6 h-6 cursor-pointer transition-all ${liked
+            ? "text-red-500 drop-shadow-lg scale-110"
+            : "text-white drop-shadow-md hover:scale-110"
             }`}
         />
-      </Box>
-      <Reveal>
-        <Heading mt={3} as="h1" size="md" fontWeight={500} className="capitalize">
-          {bike.model}
-        </Heading>
-      </Reveal>
-      <Reveal>
-        <Text mb={2} fontWeight={500} className="text-xs text-gray-500 font-medium ">
-          {bike?.Park?.name}
-        </Text>
-      </Reveal>
-      {/* <Reveal>
-        <Text fontWeight={500} className="text-xs text-gray-500 font-medium ">
-          {bike.id % 2 === 0 ? 'Best choice for men' : 'Best choice for women'}
-        </Text>
-      </Reveal> */}
-      <Reveal width="full" delay={0.25}>
-        <Flex justifyContent={"space-between"} mb={3}>
-          <Heading as="h3" size="md" fontWeight={500} color={"gray.700"}>
-            ${bike.price}/hour
-          </Heading>
-          <Flex
-            rounded={"md"}
-            gap={2}
-            alignItems={"center"}
+        {bikeData.features.includes("New-model") && (
+          <Badge
+            position="absolute"
+            top="3"
+            left="3"
+            colorScheme="green"
+            fontSize="xs"
             px={2}
-            py={0.5}
-            bgColor={"orange.100"}
-            color={"orange.400"}
-            fontWeight={"semibold"}
+            py={1}
           >
-            <FaStar />
-            <Text>4.0</Text>
-          </Flex>
-        </Flex>
-      </Reveal>
-      <hr />
-      <Flex my={2}>
-        <Flex className="w-1/2 gap-2">
-          <MdPeopleOutline size={26} color="orange" />
-          <Text className="text-gray-500 font-medium">: 2</Text>
-        </Flex>
-        <Flex className="w-1/2 gap-2">
-          <IoSpeedometerOutline size={26} color="orange" />
-          <Text className="text-gray-500 font-medium">: 35/h</Text>
-        </Flex>
-      </Flex>
-      <Button colorScheme="teal" size="sm" onClick={onOpen}>
+            New Model
+          </Badge>
+        )}
+      </Box>
+
+      <VStack p={4} spacing={3} align="stretch">
+        {/* Bike Name */}
         <Reveal>
-          <Text>More Detail</Text>
+          <Heading as="h3" size="md" fontWeight={600} className="capitalize">
+            {bike.model}
+          </Heading>
         </Reveal>
-      </Button>
+
+        {/* Price & Rating */}
+        <Reveal>
+          <Flex justifyContent="space-between" alignItems="center">
+            <Heading as="h4" size="md" color="teal.600" fontWeight={700}>
+              ${bike.price}
+              <Text as="span" fontSize="sm" fontWeight={400} color="gray.600">
+                /day
+              </Text>
+            </Heading>
+            <HStack
+              spacing={1}
+              bg="orange.50"
+              px={2}
+              py={1}
+              borderRadius="md"
+            >
+              <FaStar color="#F6AD55" size={16} />
+              <Text fontWeight={600} fontSize="sm" color="orange.600">
+                {bikeData.rating}
+              </Text>
+              <Text fontSize="xs" color="gray.500">
+                ({bikeData.reviewCount})
+              </Text>
+            </HStack>
+          </Flex>
+        </Reveal>
+
+        <Divider />
+
+        {/* Provider */}
+        <Reveal>
+          <Text fontSize="sm" color="gray.600">
+            <Text as="span" fontWeight={600}>
+              Provided by:{" "}
+            </Text>
+            {bikeData.provider}
+          </Text>
+        </Reveal>
+
+        {/* Condition & Features */}
+        <Reveal>
+          <VStack align="stretch" spacing={1}>
+            <HStack spacing={2}>
+              <Text fontSize="sm" fontWeight={600} color="gray.700">
+                Condition:
+              </Text>
+              <Badge
+                colorScheme={bikeData.condition === "excellent" ? "green" : "blue"}
+                fontSize="xs"
+                textTransform="capitalize"
+              >
+                {bikeData.condition}
+              </Badge>
+            </HStack>
+            <HStack spacing={2} flexWrap="wrap">
+              {bikeData.features.map((feature, idx) => (
+                <Badge key={idx} colorScheme="purple" fontSize="xs" variant="subtle">
+                  {feature}
+                </Badge>
+              ))}
+            </HStack>
+          </VStack>
+        </Reveal>
+
+        <Divider />
+
+        {/* Specifications */}
+        <Reveal>
+          <HStack spacing={4} justifyContent="space-between" fontSize="sm">
+            <HStack spacing={1}>
+              <FaUsers color="#319795" size={16} />
+              <Text color="gray.700" fontWeight={500}>
+                {bikeData.seats} seats
+              </Text>
+            </HStack>
+            <HStack spacing={1}>
+              {bikeData.fuelType === "gas" ? (
+                <FaGasPump color="#319795" size={16} />
+              ) : (
+                <FaBolt color="#319795" size={16} />
+              )}
+              <Text color="gray.700" fontWeight={500} textTransform="capitalize">
+                {bikeData.fuelType}
+              </Text>
+            </HStack>
+          </HStack>
+        </Reveal>
+
+        <Reveal>
+          <HStack spacing={1} fontSize="sm">
+            <GiGearStickPattern color="#319795" size={18} />
+            <Text color="gray.700" fontWeight={500} textTransform="capitalize">
+              {bikeData.transmission}
+            </Text>
+          </HStack>
+        </Reveal>
+
+        {/* View Details Button */}
+        <Reveal>
+          <Button
+            colorScheme="teal"
+            size="md"
+            width="full"
+            onClick={onOpen}
+            mt={2}
+            _hover={{
+              transform: "translateY(-2px)",
+              boxShadow: "lg",
+            }}
+            transition="all 0.2s"
+          >
+            View Details
+          </Button>
+        </Reveal>
+      </VStack>
+
       <BikeDetails isOpen={isOpen} onClose={onClose} bike={bike} />
     </Flex>
   );

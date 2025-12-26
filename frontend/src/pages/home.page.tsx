@@ -1,7 +1,7 @@
 import React from "react";
-import LandingSwiper from "../components/home/landingSwiper/landingSwiper.component";
+import SearchBike from "../components/home/searchBike/searchBike.component";
 import HowItWork from "../components/home/howItWork/howItWork.component";
-import SwiperBikes from "../components/home/bikes/swiperBikes.component";
+import BikeList from "../components/home/bikes/bikeList.component";
 import SwiperReviews from "../components/home/reviews/swiperReviews.component";
 import WhyChoose from "../components/home/whyChoose/whyChoose.component";
 
@@ -9,10 +9,10 @@ import WhyChoose from "../components/home/whyChoose/whyChoose.component";
 const HomePage: React.FC = () => {
   return (
     <>
-      <LandingSwiper />
+      <SearchBike />
       <HowItWork />
       <WhyChoose />
-      <SwiperBikes />
+      <BikeList />
       <SwiperReviews />
     </>
   );
