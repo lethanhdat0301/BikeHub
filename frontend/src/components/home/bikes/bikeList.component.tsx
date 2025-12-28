@@ -1,44 +1,58 @@
-import React from "react";
-import { Box, Center, Heading, SimpleGrid } from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Box, Center, Heading, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
 import CardBike from "./cardBike.component";
 import { Reveal } from "../../motion/reveal.component";
+import bikeService from "../../../services/bikeService";
 import bike1 from "../../../assets/images/bikes/bike1.jpg";
 import bike2 from "../../../assets/images/bikes/bike2.webp";
 import bike3 from "../../../assets/images/bikes/bike3.webp";
 
+interface Bike {
+    id: number;
+    model: string;
+    status: string;
+    lock: boolean;
+    location: string;
+    price: number;
+    park_id: number;
+    image?: string;
+}
+
 const BikeList: React.FC = () => {
-    const bikes = [
-        {
-            id: 1,
-            model: "Mountain Bike Pro",
-            status: "AVAILABLE",
-            lock: false,
-            location: "Downtown",
-            price: 50,
-            park_id: 1,
-            image: bike1
-        },
-        {
-            id: 2,
-            model: "City Cruiser",
-            status: "AVAILABLE",
-            lock: false,
-            location: "Beach Area",
-            price: 30,
-            park_id: 2,
-            image: bike2
-        },
-        {
-            id: 3,
-            model: "Sport Racing",
-            status: "AVAILABLE",
-            lock: false,
-            location: "Mountain Trail",
-            price: 70,
-            park_id: 3,
-            image: bike3
-        }
-    ];
+    console.log("🔵 BikeList component rendered!");
+
+    const [bikes, setBikes] = useState<Bike[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Default images to rotate through
+    const defaultImages = [bike1, bike2, bike3];
+
+    useEffect(() => {
+        const fetchBikes = async () => {
+            try {
+                setLoading(true);
+                console.log("🚴 Đang lấy dữ liệu xe từ database...");
+                const data = await bikeService.getAllBikes();
+                console.log("✅ Dữ liệu xe từ database:", data);
+                console.log(`📊 Tổng số xe: ${data.length}`);
+                // Add default images to bikes if they don't have one
+                const bikesWithImages = data.map((bike, index) => ({
+                    ...bike,
+                    image: bike.image || defaultImages[index % defaultImages.length]
+                }));
+                setBikes(bikesWithImages);
+                setError(null);
+            } catch (err) {
+                console.error("❌ Error loading bikes:", err);
+                setError("Không thể tải danh sách xe. Vui lòng thử lại sau.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBikes();
+    }, []);
 
     return (
         <Box
@@ -80,9 +94,25 @@ const BikeList: React.FC = () => {
                 mt={5}
                 className="w-4/5"
             >
-                {bikes.map((bike) => (
-                    <CardBike key={bike.id} bike={bike} />
-                ))}
+                {loading ? (
+                    <Center gridColumn="1 / -1" py={10}>
+                        <Spinner size="xl" color="orange.500" thickness="4px" />
+                    </Center>
+                ) : error ? (
+                    <Center gridColumn="1 / -1" py={10}>
+                        <Text color="red.500" fontSize="lg">{error}</Text>
+                    </Center>
+                ) : bikes.length === 0 ? (
+                    <Center gridColumn="1 / -1" py={10}>
+                        <Text fontSize="lg" color="gray.500">
+                            Hiện tại chưa có xe nào. Vui lòng quay lại sau.
+                        </Text>
+                    </Center>
+                ) : (
+                    bikes.map((bike) => (
+                        <CardBike key={bike.id} bike={bike} />
+                    ))
+                )}
             </SimpleGrid>
         </Box>
     );

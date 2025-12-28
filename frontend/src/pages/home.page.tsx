@@ -7,6 +7,8 @@ import WhyChoose from "../components/home/whyChoose/whyChoose.component";
 
 
 const HomePage: React.FC = () => {
+  console.log("🏠 HomePage rendered!");
+
   return (
     <>
       <SearchBike />
