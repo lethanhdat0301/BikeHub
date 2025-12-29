@@ -6,7 +6,6 @@ import { FaFileInvoiceDollar } from "react-icons/fa";
 
 import Widget from "components/widget/Widget";
 
-import { User, Park, Bike, Rental } from "@prisma/client";
 import TopCustomers from "./components/TopCustomers";
 import HistoryTable from "./components/HistoryTable";
 import RevenueChart from "./components/RevenueChart";
