@@ -44,6 +44,17 @@ class BikeService {
       throw error;
     }
   }
+
+  async getBikesByPark(parkId: number, status?: string, limit?: number): Promise<Bike[]> {
+    try {
+      const endpoint = `/bikes/park/${parkId}/${status || ''}/${limit || ''}`;
+      const response = await axios.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching bikes for park ${parkId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export default new BikeService();

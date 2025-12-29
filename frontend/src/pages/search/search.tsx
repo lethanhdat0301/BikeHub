@@ -41,7 +41,7 @@ const SearchPage: React.FC = () => {
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
     const [selectedTransmission, setSelectedTransmission] = useState<string[]>([]);
 
-    const location = searchParams.get("location");
+    const parkId = searchParams.get("parkId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
@@ -51,16 +51,16 @@ const SearchPage: React.FC = () => {
             try {
                 console.log("🔍 Đang tải xe từ database cho trang search...");
 
-                // Lấy tất cả xe từ database
-                let data = await bikeService.getAllBikes();
-                console.log(`✅ Đã tải ${data.length} xe từ database`);
-
-                // Filter by location if provided
-                if (location && location !== "") {
-                    console.log(`🔍 Lọc theo location: ${location}`);
-                    data = data.filter(bike =>
-                        bike.location && bike.location.toLowerCase() === location.toLowerCase()
-                    );
+                let data;
+                // Nếu có parkId, lọc theo park, nếu không lấy tất cả
+                if (parkId) {
+                    console.log(`🔍 Lọc xe theo park ID: ${parkId}`);
+                    data = await bikeService.getBikesByPark(Number(parkId), 'available');
+                    console.log(`✅ Đã tải ${data.length} xe từ park ${parkId}`);
+                } else {
+                    // Lấy tất cả xe có status available
+                    data = await bikeService.getBikesByStatus('available');
+                    console.log(`✅ Đã tải ${data.length} xe available`);
                 }
 
                 // Chỉ lấy 12 xe đầu tiên
@@ -84,7 +84,7 @@ const SearchPage: React.FC = () => {
         };
 
         fetchBikes();
-    }, [location, startDate, endDate]);
+    }, [parkId, startDate, endDate]);
 
     // Apply filters
     useEffect(() => {
@@ -121,7 +121,7 @@ const SearchPage: React.FC = () => {
                     Search Results
                 </Heading>
                 <Text color="gray.600">
-                    {location && `Location: ${location}`}
+                    {parkId && `Park ID: ${parkId}`}
                     {startDate && ` | From: ${startDate}`}
                     {endDate && ` | To: ${endDate}`}
                 </Text>

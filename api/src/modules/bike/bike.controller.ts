@@ -73,9 +73,23 @@ export class BikeController {
       price: number;
       park_id: number;
       image?: string;
+      // Thông tin đánh giá
+      rating?: number;
+      review_count?: number;
+      // Thông tin cung cấp
+      dealer_name?: string;
+      dealer_contact?: string;
+      // Thông tin kỹ thuật
+      seats?: number;
+      fuel_type?: string;
+      transmission?: string;
     },
   ): Promise<BikeModel> {
-    const { model, status, lock, location, price, park_id, image } = bikeData;
+    const { 
+      model, status, lock, location, price, park_id, image,
+      rating, review_count, dealer_name, dealer_contact,
+      seats, fuel_type, transmission
+    } = bikeData;
     return this.bikeService.create({
       model,
       status,
@@ -83,6 +97,13 @@ export class BikeController {
       location,
       price,
       image,
+      rating,
+      review_count,
+      dealer_name,
+      dealer_contact,
+      seats,
+      fuel_type,
+      transmission,
       Park: {
         connect: { id: park_id },
       },
