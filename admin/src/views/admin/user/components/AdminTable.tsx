@@ -131,7 +131,7 @@ const AdminTable: React.FC<Props> = ({
                     className="cursor-pointer border-b-[1px] border-gray-200 pb-2 pr-4 pt-4 text-start"
                   >
                     <div className="flex items-center justify-between text-md dark:text-white">
-                      <span>{column.render("Header")}</span>
+                      <span>{column.render("Header") as any}</span>
                       <span>
                         {column.isSorted
                           ? column.isSortedDesc
