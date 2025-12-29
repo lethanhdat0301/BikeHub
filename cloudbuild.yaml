@@ -107,6 +107,8 @@ steps:
     dir: 'admin'
     args:
       - 'build'
+      - '--build-arg'
+      - 'REACT_APP_API_URL=https://api-289273895966.asia-southeast1.run.app/api/v1/'
       - '-t'
       - 'gcr.io/$PROJECT_ID/admin:$SHORT_SHA'
       - '-t'
