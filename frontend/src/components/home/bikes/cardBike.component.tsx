@@ -25,22 +25,35 @@ export type Bike = {
   location: string;
   price: number;
   image: string;
+  // Extended fields from database
+  rating?: number;
+  review_count?: number;
+  dealer_name?: string;
+  dealer_contact?: string;
+  seats?: number;
+  fuel_type?: string;
+  transmission?: string;
+  Park?: {
+    id: number;
+    name: string;
+    location: string;
+  };
 };
 
 const CardBike = ({ bike }: { bike: Bike }) => {
   const [liked, setLiked] = useState(false);
   const { isOpen, onClose, onOpen } = useDisclosure();
 
-  // Mock data - you can replace with real data from API
+  // Use real data from database with fallbacks
   const bikeData = {
-    rating: 4.5,
-    reviewCount: 128,
-    provider: "Phu Quoc Bike Rentals",
-    condition: bike.id % 3 === 0 ? "excellent" : bike.id % 2 === 0 ? "good" : "excellent",
-    features: bike.id % 2 === 0 ? ["New-model", "Recently Serviced"] : ["Recently Serviced"],
-    seats: 2,
-    fuelType: bike.id % 3 === 0 ? "electric" : "gas",
-    transmission: bike.id % 2 === 0 ? "automatic" : "manual",
+    rating: bike.rating || 0,
+    reviewCount: bike.review_count || 0,
+    provider: bike.dealer_name || bike.Park?.name || "BikeHub",
+    condition: bike.rating && bike.rating >= 4.5 ? "excellent" : bike.rating && bike.rating >= 3.5 ? "good" : "fair",
+    features: bike.rating && bike.rating >= 4.5 ? ["Highly Rated", "Recently Serviced"] : ["Recently Serviced"],
+    seats: bike.seats || 2,
+    fuelType: bike.fuel_type || "gasoline",
+    transmission: bike.transmission || "manual",
   };
 
   return (
