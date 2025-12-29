@@ -14,7 +14,7 @@ interface Bike {
 class BikeService {
   async getAllBikes(): Promise<Bike[]> {
     try {
-      const response = await axios.get('/api/v1/bikes/');
+      const response = await axios.get('/bikes/');
       return response.data;
     } catch (error) {
       console.error("Error fetching bikes:", error);
@@ -24,7 +24,7 @@ class BikeService {
 
   async getBikeById(id: number): Promise<Bike> {
     try {
-      const response = await axios.get(`/api/v1/bikes/bike/${id}`);
+      const response = await axios.get(`/bikes/bike/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching bike with id ${id}:`, error);
@@ -35,8 +35,8 @@ class BikeService {
   async getBikesByStatus(status: string, limit?: number): Promise<Bike[]> {
     try {
       const endpoint = limit 
-        ? `/api/v1/bikes/status/${status}/${limit}`
-        : `/api/v1/bikes/status/${status}`;
+        ? `/bikes/status/${status}/${limit}`
+        : `/bikes/status/${status}`;
       const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {

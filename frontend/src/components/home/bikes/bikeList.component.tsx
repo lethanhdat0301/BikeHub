@@ -18,6 +18,73 @@ interface Bike {
     image?: string;
 }
 
+// Default images nếu xe không có ảnh
+const defaultImages = [bike1, bike2, bike3];
+
+// Mock data để hiển thị khi database trống
+const mockBikes: Bike[] = [
+    {
+        id: 1,
+        model: "Mountain Bike Pro",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Downtown",
+        price: 50,
+        park_id: 1,
+        image: bike1
+    },
+    {
+        id: 2,
+        model: "City Cruiser",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Beach Area",
+        price: 30,
+        park_id: 2,
+        image: bike2
+    },
+    {
+        id: 3,
+        model: "Sport Racing",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Mountain Trail",
+        price: 70,
+        park_id: 3,
+        image: bike3
+    },
+    {
+        id: 4,
+        model: "Urban Commuter",
+        status: "AVAILABLE",
+        lock: false,
+        location: "City Center",
+        price: 40,
+        park_id: 1,
+        image: bike1
+    },
+    {
+        id: 5,
+        model: "Electric Bike",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Riverside",
+        price: 80,
+        park_id: 2,
+        image: bike2
+    },
+    {
+        id: 6,
+        model: "Folding Bike",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Station",
+        price: 35,
+        park_id: 3,
+        image: bike3
+    }
+];
+
 const BikeList: React.FC = () => {
     console.log("🔵 BikeList component rendered!");
 
@@ -25,27 +92,62 @@ const BikeList: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Default images to rotate through
-    const defaultImages = [bike1, bike2, bike3];
-
     useEffect(() => {
         const fetchBikes = async () => {
             try {
                 setLoading(true);
-                console.log("🚴 Đang lấy dữ liệu xe từ database...");
-                const data = await bikeService.getAllBikes();
-                console.log("✅ Dữ liệu xe từ database:", data);
+                console.log("🚴 Đang lấy xe từ database...");
+                console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_PROD);
+                
+                // Thử lấy tất cả bikes trước
+                let data = await bikeService.getAllBikes();
+                console.log("✅ Tất cả xe từ database:", data);
                 console.log(`📊 Tổng số xe: ${data.length}`);
-                // Add default images to bikes if they don't have one
+                
+                // Kiểm tra status của xe đầu tiên
+                if (data && data.length > 0) {
+                    console.log("🔍 Status của xe đầu tiên:", data[0].status);
+                    console.log("🔍 Xe đầu tiên:", data[0]);
+                    
+                    // Lấy danh sách các status khác nhau
+                    const statuses = [...new Set(data.map(bike => bike.status))];
+                    console.log("🔍 Các status có trong database:", statuses);
+                }
+
+                // Nếu có dữ liệu, lọc theo status (case-insensitive) và giới hạn 6
+                if (data && data.length > 0) {
+                    const availableBikes = data.filter(bike => 
+                        bike.status && bike.status.toLowerCase() === "available"
+                    );
+                    console.log(`✅ Xe available: ${availableBikes.length}`);
+                    
+                    if (availableBikes.length > 0) {
+                        data = availableBikes.slice(0, 6);
+                    } else {
+                        // Nếu không có xe available, lấy 6 xe bất kỳ
+                        console.log("⚠️ Không có xe available, lấy 6 xe đầu tiên");
+                        data = data.slice(0, 6);
+                    }
+                } else {
+                    console.log("⚠️ Database trống, sử dụng mock data");
+                    data = mockBikes;
+                }
+
+                // Thêm ảnh mặc định nếu cần
                 const bikesWithImages = data.map((bike, index) => ({
                     ...bike,
                     image: bike.image || defaultImages[index % defaultImages.length]
                 }));
+
                 setBikes(bikesWithImages);
                 setError(null);
-            } catch (err) {
+            } catch (err: any) {
                 console.error("❌ Error loading bikes:", err);
-                setError("Không thể tải danh sách xe. Vui lòng thử lại sau.");
+                console.error("❌ Error details:", err.response?.data || err.message);
+                console.log("⚠️ Lỗi khi tải từ API, sử dụng mock data");
+                // Nếu có lỗi, dùng mock data
+                setBikes(mockBikes);
+                setError(null);
             } finally {
                 setLoading(false);
             }

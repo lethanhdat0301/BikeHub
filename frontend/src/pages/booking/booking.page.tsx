@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -16,8 +16,10 @@ import {
   useToast,
   InputGroup,
   InputLeftAddon,
+  Badge,
 } from "@chakra-ui/react";
-import { FaPhone, FaWhatsapp, FaTelegram } from "react-icons/fa";
+import { FaPhone, FaWhatsapp, FaTelegram, FaCheckCircle } from "react-icons/fa";
+import bookingRequestService from "../../services/bookingRequestService";
 
 const RequestBookingPage: React.FC = () => {
   const toast = useToast();
@@ -28,6 +30,24 @@ const RequestBookingPage: React.FC = () => {
     pickupLocation: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+
+  // Auto-fill name if user is logged in
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      try {
+        const user = JSON.parse(userString);
+        setFormData(prev => ({
+          ...prev,
+          name: user.name || "",
+          contactDetails: user.phone || "",
+        }));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,33 +66,59 @@ const RequestBookingPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual API call
-      console.log("Form submitted:", formData);
+      // Get user_id if logged in
+      const userString = localStorage.getItem("user");
+      let userId = undefined;
+      if (userString) {
+        try {
+          const user = JSON.parse(userString);
+          userId = user.id;
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log("📤 Gửi booking request đến admin...");
+
+      // Call API to create booking request
+      const response = await bookingRequestService.createBookingRequest({
+        user_id: userId,
+        name: formData.name,
+        contact_method: formData.contactMethod,
+        contact_details: formData.contactDetails,
+        pickup_location: formData.pickupLocation,
+      });
+
+      console.log("✅ Booking request đã được tạo:", response);
+
+      setRequestSent(true);
 
       toast({
-        title: "Request Sent!",
-        description: "We'll get back to you soon with the best options.",
+        title: "Request Sent Successfully! 🎉",
+        description: "Your booking request has been sent to admin. We'll contact you soon!",
         status: "success",
-        duration: 5000,
+        duration: 7000,
         isClosable: true,
+        position: "top",
       });
 
-      // Reset form
-      setFormData({
-        name: "",
+      // Reset form (but keep name if logged in)
+      setFormData(prev => ({
+        name: userId ? prev.name : "",
         contactMethod: "phone",
-        contactDetails: "",
+        contactDetails: userId ? prev.contactDetails : "",
         pickupLocation: "",
-      });
-    } catch (error) {
+      }));
+
+      // Reset requestSent after 5 seconds
+      setTimeout(() => setRequestSent(false), 5000);
+    } catch (error: any) {
+      console.error("❌ Error submitting booking request:", error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.response?.data?.message || "Something went wrong. Please try again.",
         status: "error",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     } finally {
@@ -128,6 +174,20 @@ const RequestBookingPage: React.FC = () => {
               Don't want to browse? Just tell us what you need and we'll get
               back to you with the best options.
             </Text>
+            {requestSent && (
+              <Badge
+                colorScheme="green"
+                fontSize="md"
+                p={2}
+                mt={4}
+                borderRadius="md"
+              >
+                <HStack spacing={2}>
+                  <FaCheckCircle />
+                  <Text>Request sent to admin successfully!</Text>
+                </HStack>
+              </Badge>
+            )}
           </Box>
 
           {/* Form */}
@@ -272,7 +332,7 @@ const RequestBookingPage: React.FC = () => {
             textAlign="center"
           >
             <Text color="teal.700" fontSize="sm">
-              💡 We typically respond within 24 hours with personalized
+              💡 Your request will be sent to our admin team. We typically respond within 24 hours with personalized
               motorcycle recommendations based on your needs.
             </Text>
           </Box>

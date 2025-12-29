@@ -33,17 +33,18 @@ model Park {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
-  role       String   @default("user")
-  Rental     Rental[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  birthdate  DateTime
-  phone      String?
-  image      String?
+  id             Int              @id @default(autoincrement())
+  name           String
+  email          String           @unique
+  password       String
+  role           String           @default("user")
+  Rental         Rental[]
+  BookingRequest BookingRequest[]
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+  birthdate      DateTime
+  phone          String?
+  image          String?
 }
 
 model Rental {
@@ -61,4 +62,18 @@ model Rental {
   qrcode     String?
   payment_id String?
   order_id   String?
+}
+
+model BookingRequest {
+  id              Int      @id @default(autoincrement())
+  user_id         Int?
+  name            String
+  contact_method  String
+  contact_details String
+  pickup_location String
+  status          String   @default("PENDING")
+  admin_notes     String?
+  User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }
