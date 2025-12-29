@@ -1,7 +1,7 @@
 import React from "react";
 import RegisterForm from "../../components/auth/registerForm/registerForm.component";
 import signupImage from "../../assets/images/signupImage.png";
-import logoImage from "../../assets/images/logov2.png";
+import logoImage from "../../assets/images/logoofficial.png";
 import { Image } from "@chakra-ui/react";
 
 const SignupPage: React.FC = () => {

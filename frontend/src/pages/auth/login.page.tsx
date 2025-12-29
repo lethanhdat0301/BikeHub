@@ -1,7 +1,7 @@
 import React from "react";
 import LoginForm from "../../components/auth/loginForm/loginForm.component";
 import loginImage from "../../assets/images/loginImage.png";
-import logoImage from "../../assets/images/logov2.png";
+import logoImage from "../../assets/images/logoofficial.png";
 import { Image } from "@chakra-ui/react";
 
 const LoginPage: React.FC = () => {

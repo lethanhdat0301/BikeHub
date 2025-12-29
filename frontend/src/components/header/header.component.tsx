@@ -30,7 +30,7 @@ import { TbLogout } from "react-icons/tb";
 import { FaTelegram, FaWhatsapp, FaFacebookMessenger, FaPhone } from "react-icons/fa";
 import LogoutButton from "../logoutButton.component";
 import { useAuth } from "../../hooks/useAuth";
-import logoImage from "../../assets/images/logov2.png";
+import logoImage from "../../assets/images/logoofficial.png";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { useLocation } from 'react-router-dom';
 /**
@@ -224,7 +224,8 @@ const Header: React.FC = () => {
       <div>
         {!user?.id ? (
           <>
-            <Link to="/login">
+            {/* Temporarily disabled signin/signup */}
+            {/* <Link to="/login">
               <Button
                 colorScheme="teal"
                 variant={location.pathname === '/login' || location.pathname === '/' ? 'solid' : 'outline'}
@@ -241,156 +242,156 @@ const Header: React.FC = () => {
               >
                 Signup
               </Button>
-            </Link>
+            </Link> */}
           </>
         ) : (
           <Flex alignItems={"center"}>
-            <Menu>
-              <MenuButton
-                as={Button}
-                rounded={"full"}
-                variant={"link"}
-                cursor={"pointer"}
-                minW={0}
-              >
-                <Avatar
-                  size={"lg"}
-                  src={user?.image}
-                />
-              </MenuButton>
-              <MenuList zIndex={99}>
-                <Center>
-                  <Avatar
-                    size={"2xl"}
-                    src={user?.image}
-                  />
-                </Center>
-                <Center>
-                  <Text
-                    color="teal.400"
-                    fontWeight={500}
-                    fontSize={18}
-                    className="my-1 capitalize"
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    rounded={"full"}
+                    variant={"link"}
+                    cursor={"pointer"}
+                    minW={0}
                   >
-                    {user?.name}
-                  </Text>
-                </Center>
-                <br />
-                <MenuDivider />
-                <MenuItem
-                  justifyContent={"center"}
-                  _hover={{ bg: "none" }}
-                  _focus={{ bg: "none" }}
-                  color="gray.700"
-                  px="14px"
-                >
-                  <Link
-                    to="/profile"
-                    className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
-                  >
-                    <Text fontWeight={500} fontSize={16}>
-                      Profile
-                    </Text>
-                  </Link>
-                </MenuItem>
-                <MenuItem
-                  justifyContent={"center"}
-                  _hover={{ bg: "none" }}
-                  _focus={{ bg: "none" }}
-                  color="gray.700"
-                  px="14px"
-                >
-                  <Link
-                    to="/setting-profile/information"
-                    className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
-                  >
-                    <Text fontWeight={500} fontSize={16}>
-                      Settings
-                    </Text>
-                  </Link>
-                </MenuItem>
-                <MenuItem
-                  _hover={{ bg: "none" }}
-                  _focus={{ bg: "none" }}
-                  color="red.400"
-                  borderRadius="8px"
-                  px="14px"
-                >
-                  <LogoutButton>
-                    <TbLogout className="mr-2 text-red-500" />
-                    <Text color="red.400">Logout</Text>
-                  </LogoutButton>
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          </Flex>
-        )}
-      </div>
-      <IconButton
-        size={"sm"}
-        aria-label="Toggle navigation"
-        icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-        onClick={onOpen}
-        display={{ base: "block", md: "none" }}
-      />
-      <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerBody>
-            <VStack as="nav" spacing="8">
-              <Link to="/">
-                <Button
-                  paddingStart={0}
-                  paddingEnd={0}
-                  className="group hover:text-teal-500 focus:text-teal-500"
-                  variant="nav"
-                  _hover={{ transition: "all 0.3s ease-in-out" }}
-                  pos={"relative"}
-                >
-                  Home
-                  <Box
-                    position={"absolute"}
-                    className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                    _groupFocus={{ width: "100%" }}
-                    _groupHover={{
-                      width: "100%",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  />
-                </Button>
-              </Link>
-              {headerItems.map((item, i) => (
-                <Button
-                  paddingStart={0}
-                  paddingEnd={0}
-                  className="group hover:text-teal-500 focus:text-teal-500"
-                  variant="nav"
-                  _hover={{ transition: "all 0.3s ease-in-out" }}
-                  pos={"relative"}
-                  onClick={() => {
-                    handleNavigation(item);
-                    onClose();
-                  }}
-                >
-                  {item.label}
-                  <Box
-                    position={"absolute"}
-                    className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                    _groupFocus={{ width: "100%" }}
-                    _groupHover={{
-                      width: "100%",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  />
-                </Button>
-              ))}
-            </VStack>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-    </header >
-  );
+                    <Avatar
+                      size={"lg"}
+                      src={user?.image}
+                    />
+                  </MenuButton>
+                  <MenuList zIndex={99}>
+                    <Center>
+                      <Avatar
+                        size={"2xl"}
+                        src={user?.image}
+                      />
+                    </Center>
+                    <Center>
+                      <Text
+                        color="teal.400"
+                        fontWeight={500}
+                        fontSize={18}
+                        className="my-1 capitalize"
+                      >
+                        {user?.name}
+                      </Text>
+                    </Center>
+                    <br />
+                    <MenuDivider />
+                    <MenuItem
+                      justifyContent={"center"}
+                      _hover={{ bg: "none" }}
+                      _focus={{ bg: "none" }}
+                      color="gray.700"
+                      px="14px"
+                    >
+                      <Link
+                        to="/profile"
+                        className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
+                      >
+                        <Text fontWeight={500} fontSize={16}>
+                          Profile
+                        </Text>
+                      </Link>
+                    </MenuItem>
+                    <MenuItem
+                      justifyContent={"center"}
+                      _hover={{ bg: "none" }}
+                      _focus={{ bg: "none" }}
+                      color="gray.700"
+                      px="14px"
+                    >
+                      <Link
+                        to="/setting-profile/information"
+                        className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
+                      >
+                        <Text fontWeight={500} fontSize={16}>
+                          Settings
+                        </Text>
+                      </Link>
+                    </MenuItem>
+                    <MenuItem
+                      _hover={{ bg: "none" }}
+                      _focus={{ bg: "none" }}
+                      color="red.400"
+                      borderRadius="8px"
+                      px="14px"
+                    >
+                      <LogoutButton>
+                        <TbLogout className="mr-2 text-red-500" />
+                        <Text color="red.400">Logout</Text>
+                      </LogoutButton>
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </Flex>
+            )}
+          </div>
+          <IconButton
+              size={"sm"}
+              aria-label="Toggle navigation"
+              icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+              onClick={onOpen}
+              display={{ base: "block", md: "none" }}
+            />
+            <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerCloseButton />
+                <DrawerBody>
+                  <VStack as="nav" spacing="8">
+                    <Link to="/">
+                      <Button
+                        paddingStart={0}
+                        paddingEnd={0}
+                        className="group hover:text-teal-500 focus:text-teal-500"
+                        variant="nav"
+                        _hover={{ transition: "all 0.3s ease-in-out" }}
+                        pos={"relative"}
+                      >
+                        Home
+                        <Box
+                          position={"absolute"}
+                          className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
+                          _groupFocus={{ width: "100%" }}
+                          _groupHover={{
+                            width: "100%",
+                            transition: "all 0.3s ease-in-out",
+                          }}
+                        />
+                      </Button>
+                    </Link>
+                    {headerItems.map((item, i) => (
+                      <Button
+                        paddingStart={0}
+                        paddingEnd={0}
+                        className="group hover:text-teal-500 focus:text-teal-500"
+                        variant="nav"
+                        _hover={{ transition: "all 0.3s ease-in-out" }}
+                        pos={"relative"}
+                        onClick={() => {
+                          handleNavigation(item);
+                          onClose();
+                        }}
+                      >
+                        {item.label}
+                        <Box
+                          position={"absolute"}
+                          className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
+                          _groupFocus={{ width: "100%" }}
+                          _groupHover={{
+                            width: "100%",
+                            transition: "all 0.3s ease-in-out",
+                          }}
+                        />
+                      </Button>
+                    ))}
+                  </VStack>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
+          </header >
+        );
 };
 
-export default Header;
+        export default Header;
