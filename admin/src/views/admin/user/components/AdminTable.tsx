@@ -130,9 +130,8 @@ const AdminTable: React.FC<Props> = ({
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     className="cursor-pointer border-b-[1px] border-gray-200 pb-2 pr-4 pt-4 text-start"
                   >
-                    <div className="text-md flex items-center justify-between dark:text-white">
-                      {column.render("Header")}
-                      {/* Add a sort direction indicator */}
+                    <div className="flex items-center justify-between text-md dark:text-white">
+                      <span>{column.render("Header")}</span>
                       <span>
                         {column.isSorted
                           ? column.isSortedDesc
