@@ -5,6 +5,7 @@ steps:
       - 'build'
       - '--build-arg'
       - 'VITE_API_URL=https://api-289273895966.asia-southeast1.run.app/api/v1/'
+      - 'VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
       - '-t'
       - 'gcr.io/$PROJECT_ID/frontend'
       - '.'
