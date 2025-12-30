@@ -221,11 +221,11 @@ const Header: React.FC = () => {
 
 
 
-      <div>
+      {/* <div>
         {!user?.id ? (
-          <>
-            {/* Temporarily disabled signin/signup */}
-            {/* <Link to="/login">
+          <> */}
+      {/* Temporarily disabled signin/signup */}
+      {/* <Link to="/login">
               <Button
                 colorScheme="teal"
                 variant={location.pathname === '/login' || location.pathname === '/' ? 'solid' : 'outline'}
@@ -243,7 +243,7 @@ const Header: React.FC = () => {
                 Signup
               </Button>
             </Link> */}
-          </>
+      {/* </>
         ) : (
           <Flex alignItems={"center"}>
                 <Menu>
@@ -326,72 +326,72 @@ const Header: React.FC = () => {
                 </Menu>
               </Flex>
             )}
-          </div>
-          <IconButton
-              size={"sm"}
-              aria-label="Toggle navigation"
-              icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-              onClick={onOpen}
-              display={{ base: "block", md: "none" }}
-            />
-            <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>
-              <DrawerOverlay />
-              <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerBody>
-                  <VStack as="nav" spacing="8">
-                    <Link to="/">
-                      <Button
-                        paddingStart={0}
-                        paddingEnd={0}
-                        className="group hover:text-teal-500 focus:text-teal-500"
-                        variant="nav"
-                        _hover={{ transition: "all 0.3s ease-in-out" }}
-                        pos={"relative"}
-                      >
-                        Home
-                        <Box
-                          position={"absolute"}
-                          className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                          _groupFocus={{ width: "100%" }}
-                          _groupHover={{
-                            width: "100%",
-                            transition: "all 0.3s ease-in-out",
-                          }}
-                        />
-                      </Button>
-                    </Link>
-                    {headerItems.map((item, i) => (
-                      <Button
-                        paddingStart={0}
-                        paddingEnd={0}
-                        className="group hover:text-teal-500 focus:text-teal-500"
-                        variant="nav"
-                        _hover={{ transition: "all 0.3s ease-in-out" }}
-                        pos={"relative"}
-                        onClick={() => {
-                          handleNavigation(item);
-                          onClose();
-                        }}
-                      >
-                        {item.label}
-                        <Box
-                          position={"absolute"}
-                          className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                          _groupFocus={{ width: "100%" }}
-                          _groupHover={{
-                            width: "100%",
-                            transition: "all 0.3s ease-in-out",
-                          }}
-                        />
-                      </Button>
-                    ))}
-                  </VStack>
-                </DrawerBody>
-              </DrawerContent>
-            </Drawer>
-          </header >
-        );
+          </div> */}
+      <IconButton
+        size={"sm"}
+        aria-label="Toggle navigation"
+        icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+        onClick={onOpen}
+        display={{ base: "block", md: "none" }}
+      />
+      <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerBody>
+            <VStack as="nav" spacing="8">
+              <Link to="/">
+                <Button
+                  paddingStart={0}
+                  paddingEnd={0}
+                  className="group hover:text-teal-500 focus:text-teal-500"
+                  variant="nav"
+                  _hover={{ transition: "all 0.3s ease-in-out" }}
+                  pos={"relative"}
+                >
+                  Home
+                  <Box
+                    position={"absolute"}
+                    className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
+                    _groupFocus={{ width: "100%" }}
+                    _groupHover={{
+                      width: "100%",
+                      transition: "all 0.3s ease-in-out",
+                    }}
+                  />
+                </Button>
+              </Link>
+              {headerItems.map((item, i) => (
+                <Button
+                  paddingStart={0}
+                  paddingEnd={0}
+                  className="group hover:text-teal-500 focus:text-teal-500"
+                  variant="nav"
+                  _hover={{ transition: "all 0.3s ease-in-out" }}
+                  pos={"relative"}
+                  onClick={() => {
+                    handleNavigation(item);
+                    onClose();
+                  }}
+                >
+                  {item.label}
+                  <Box
+                    position={"absolute"}
+                    className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
+                    _groupFocus={{ width: "100%" }}
+                    _groupHover={{
+                      width: "100%",
+                      transition: "all 0.3s ease-in-out",
+                    }}
+                  />
+                </Button>
+              ))}
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </header >
+  );
 };
 
-        export default Header;
+export default Header;

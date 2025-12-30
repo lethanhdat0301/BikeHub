@@ -242,7 +242,12 @@ const SearchPage: React.FC = () => {
                             </VStack>
                         </Center>
                     ) : (
-                        <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={6}>
+                        <SimpleGrid
+                            columns={{ base: 1, md: 2, xl: 3 }}
+                            spacing={{ base: 6, md: 8, xl: 10 }}
+                            spacingX={{ base: 6, md: 8, xl: 12 }}
+                            spacingY={{ base: 6, md: 8, xl: 10 }}
+                        >
                             {filteredBikes.map((bike: any) => (
                                 <CardBike key={bike.id} bike={bike} />
                             ))}

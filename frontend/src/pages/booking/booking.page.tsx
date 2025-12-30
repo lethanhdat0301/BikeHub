@@ -152,24 +152,27 @@ const RequestBookingPage: React.FC = () => {
     <Box
       minH="100vh"
       bgGradient="linear(to-br, teal.50, white)"
-      py={{ base: 8, md: 16 }}
+      py={{ base: 4, md: 16 }}
+      px={{ base: 4, md: 0 }}
+      overflowX="hidden"
     >
-      <Container maxW="container.md">
-        <VStack spacing={8}>
+      <Container maxW="container.md" px={{ base: 0, md: 4 }}>
+        <VStack spacing={{ base: 4, md: 8 }}>
           {/* Header */}
-          <Box textAlign="center">
+          <Box textAlign="center" px={{ base: 2, md: 0 }}>
             <Heading
               as="h1"
-              size={{ base: "xl", md: "2xl" }}
+              size={{ base: "lg", md: "2xl" }}
               color="teal.700"
               mb={3}
             >
               Motorcycle Booking Request
             </Heading>
             <Text
-              fontSize={{ base: "md", md: "lg" }}
+              fontSize={{ base: "sm", md: "lg" }}
               color="gray.600"
               maxW="2xl"
+              px={{ base: 2, md: 0 }}
             >
               Don't want to browse? Just tell us what you need and we'll get
               back to you with the best options.
@@ -177,14 +180,14 @@ const RequestBookingPage: React.FC = () => {
             {requestSent && (
               <Badge
                 colorScheme="green"
-                fontSize="md"
-                p={2}
+                fontSize={{ base: "xs", md: "md" }}
+                p={{ base: 1, md: 2 }}
                 mt={4}
                 borderRadius="md"
               >
-                <HStack spacing={2}>
+                <HStack spacing={2} flexWrap="wrap" justifyContent="center">
                   <FaCheckCircle />
-                  <Text>Request sent to admin successfully!</Text>
+                  <Text fontSize={{ base: "xs", md: "sm" }}>Request sent to admin successfully!</Text>
                 </HStack>
               </Badge>
             )}
@@ -196,14 +199,14 @@ const RequestBookingPage: React.FC = () => {
             onSubmit={handleSubmit}
             w="full"
             bg="white"
-            p={{ base: 6, md: 8 }}
+            p={{ base: 4, md: 8 }}
             borderRadius="xl"
             boxShadow="2xl"
           >
-            <VStack spacing={6} align="stretch">
+            <VStack spacing={{ base: 4, md: 6 }} align="stretch">
               {/* Name */}
               <FormControl isRequired>
-                <FormLabel fontWeight="semibold" color="gray.700">
+                <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
                   Name or Nickname
                 </FormLabel>
                 <Input
@@ -213,7 +216,7 @@ const RequestBookingPage: React.FC = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  size="lg"
+                  size={{ base: "md", md: "lg" }}
                   borderColor="teal.300"
                   _hover={{ borderColor: "teal.500" }}
                   focusBorderColor="teal.500"
@@ -222,7 +225,7 @@ const RequestBookingPage: React.FC = () => {
 
               {/* Preferred Contact */}
               <FormControl isRequired>
-                <FormLabel fontWeight="semibold" color="gray.700">
+                <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
                   Preferred Contact Method
                 </FormLabel>
                 <RadioGroup
@@ -231,23 +234,23 @@ const RequestBookingPage: React.FC = () => {
                     setFormData({ ...formData, contactMethod: value })
                   }
                 >
-                  <Stack direction={{ base: "column", sm: "row" }} spacing={4}>
-                    <Radio value="phone" colorScheme="teal">
+                  <Stack direction={{ base: "column", sm: "row" }} spacing={{ base: 2, sm: 4 }}>
+                    <Radio value="phone" colorScheme="teal" size={{ base: "sm", md: "md" }}>
                       <HStack spacing={2}>
-                        <FaPhone />
-                        <Text>Phone</Text>
+                        <FaPhone size={14} />
+                        <Text fontSize={{ base: "sm", md: "md" }}>Phone</Text>
                       </HStack>
                     </Radio>
-                    <Radio value="whatsapp" colorScheme="teal">
+                    <Radio value="whatsapp" colorScheme="teal" size={{ base: "sm", md: "md" }}>
                       <HStack spacing={2}>
-                        <FaWhatsapp />
-                        <Text>WhatsApp</Text>
+                        <FaWhatsapp size={14} />
+                        <Text fontSize={{ base: "sm", md: "md" }}>WhatsApp</Text>
                       </HStack>
                     </Radio>
-                    <Radio value="telegram" colorScheme="teal">
+                    <Radio value="telegram" colorScheme="teal" size={{ base: "sm", md: "md" }}>
                       <HStack spacing={2}>
-                        <FaTelegram />
-                        <Text>Telegram</Text>
+                        <FaTelegram size={14} />
+                        <Text fontSize={{ base: "sm", md: "md" }}>Telegram</Text>
                       </HStack>
                     </Radio>
                   </Stack>
@@ -256,10 +259,10 @@ const RequestBookingPage: React.FC = () => {
 
               {/* Contact Details */}
               <FormControl isRequired>
-                <FormLabel fontWeight="semibold" color="gray.700">
+                <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
                   Your Contact Details
                 </FormLabel>
-                <InputGroup size="lg">
+                <InputGroup size={{ base: "md", md: "lg" }}>
                   <InputLeftAddon bg="teal.50" color="teal.600">
                     {getContactIcon()}
                   </InputLeftAddon>
@@ -282,7 +285,7 @@ const RequestBookingPage: React.FC = () => {
 
               {/* Pickup Location */}
               <FormControl isRequired>
-                <FormLabel fontWeight="semibold" color="gray.700">
+                <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
                   Where do you want to pick it up?
                 </FormLabel>
                 <Input
@@ -295,7 +298,7 @@ const RequestBookingPage: React.FC = () => {
                       pickupLocation: e.target.value,
                     })
                   }
-                  size="lg"
+                  size={{ base: "md", md: "lg" }}
                   borderColor="teal.300"
                   _hover={{ borderColor: "teal.500" }}
                   focusBorderColor="teal.500"
@@ -306,8 +309,8 @@ const RequestBookingPage: React.FC = () => {
               <Button
                 type="submit"
                 colorScheme="teal"
-                size="lg"
-                fontSize="md"
+                size={{ base: "md", md: "lg" }}
+                fontSize={{ base: "sm", md: "md" }}
                 fontWeight="bold"
                 isLoading={isSubmitting}
                 loadingText="Sending..."
@@ -316,7 +319,8 @@ const RequestBookingPage: React.FC = () => {
                   boxShadow: "xl",
                 }}
                 transition="all 0.2s"
-                mt={4}
+                mt={{ base: 2, md: 4 }}
+                w="full"
               >
                 Send Request
               </Button>
@@ -326,12 +330,12 @@ const RequestBookingPage: React.FC = () => {
           {/* Additional Info */}
           <Box
             bg="teal.50"
-            p={4}
+            p={{ base: 3, md: 4 }}
             borderRadius="lg"
             w="full"
             textAlign="center"
           >
-            <Text color="teal.700" fontSize="sm">
+            <Text color="teal.700" fontSize={{ base: "xs", md: "sm" }} px={{ base: 2, md: 0 }}>
               💡 Your request will be sent to our admin team. We typically respond within 24 hours with personalized
               motorcycle recommendations based on your needs.
             </Text>

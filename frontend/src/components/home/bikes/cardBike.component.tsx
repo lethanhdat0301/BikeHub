@@ -58,7 +58,9 @@ const CardBike = ({ bike }: { bike: Bike }) => {
 
   return (
     <Flex
-      width={{ base: "100%", sm: "320px" }}
+      width="100%"
+      maxW={{ base: "100%", sm: "380px" }}
+      mx="auto"
       bg={"white"}
       direction="column"
       justifyContent="space-between"
@@ -95,32 +97,33 @@ const CardBike = ({ bike }: { bike: Bike }) => {
         )}
       </Box>
 
-      <VStack p={4} spacing={3} align="stretch">
+      <VStack p={{ base: 3, md: 4 }} spacing={{ base: 2, md: 3 }} align="stretch">
         {/* Bike Name */}
         <Reveal>
-          <Heading as="h3" size="md" fontWeight={600} className="capitalize">
+          <Heading as="h3" size={{ base: "sm", md: "md" }} fontWeight={600} className="capitalize" noOfLines={1}>
             {bike.model}
           </Heading>
         </Reveal>
 
         {/* Price & Rating */}
         <Reveal>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Heading as="h4" size="md" color="teal.600" fontWeight={700}>
+          <Flex justifyContent="space-between" alignItems="center" gap={2}>
+            <Heading as="h4" size={{ base: "sm", md: "md" }} color="teal.600" fontWeight={700}>
               ${bike.price}
-              <Text as="span" fontSize="sm" fontWeight={400} color="gray.600">
+              <Text as="span" fontSize={{ base: "xs", md: "sm" }} fontWeight={400} color="gray.600">
                 /day
               </Text>
             </Heading>
             <HStack
               spacing={1}
               bg="orange.50"
-              px={2}
+              px={{ base: 1.5, md: 2 }}
               py={1}
               borderRadius="md"
+              flexShrink={0}
             >
-              <FaStar color="#F6AD55" size={16} />
-              <Text fontWeight={600} fontSize="sm" color="orange.600">
+              <FaStar color="#F6AD55" size={14} />
+              <Text fontWeight={600} fontSize={{ base: "xs", md: "sm" }} color="orange.600">
                 {bikeData.rating}
               </Text>
               <Text fontSize="xs" color="gray.500">
@@ -134,7 +137,7 @@ const CardBike = ({ bike }: { bike: Bike }) => {
 
         {/* Provider */}
         <Reveal>
-          <Text fontSize="sm" color="gray.600">
+          <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600" noOfLines={1}>
             <Text as="span" fontWeight={600}>
               Provided by:{" "}
             </Text>
@@ -146,7 +149,7 @@ const CardBike = ({ bike }: { bike: Bike }) => {
         <Reveal>
           <VStack align="stretch" spacing={1}>
             <HStack spacing={2}>
-              <Text fontSize="sm" fontWeight={600} color="gray.700">
+              <Text fontSize={{ base: "xs", md: "sm" }} fontWeight={600} color="gray.700">
                 Condition:
               </Text>
               <Badge
@@ -171,18 +174,18 @@ const CardBike = ({ bike }: { bike: Bike }) => {
 
         {/* Specifications */}
         <Reveal>
-          <HStack spacing={4} justifyContent="space-between" fontSize="sm">
+          <HStack spacing={{ base: 2, md: 4 }} justifyContent="space-between" fontSize={{ base: "xs", md: "sm" }}>
             <HStack spacing={1}>
-              <FaUsers color="#319795" size={16} />
+              <FaUsers color="#319795" size={14} />
               <Text color="gray.700" fontWeight={500}>
                 {bikeData.seats} seats
               </Text>
             </HStack>
             <HStack spacing={1}>
               {bikeData.fuelType === "gas" ? (
-                <FaGasPump color="#319795" size={16} />
+                <FaGasPump color="#319795" size={14} />
               ) : (
-                <FaBolt color="#319795" size={16} />
+                <FaBolt color="#319795" size={14} />
               )}
               <Text color="gray.700" fontWeight={500} textTransform="capitalize">
                 {bikeData.fuelType}
@@ -192,8 +195,8 @@ const CardBike = ({ bike }: { bike: Bike }) => {
         </Reveal>
 
         <Reveal>
-          <HStack spacing={1} fontSize="sm">
-            <GiGearStickPattern color="#319795" size={18} />
+          <HStack spacing={1} fontSize={{ base: "xs", md: "sm" }}>
+            <GiGearStickPattern color="#319795" size={16} />
             <Text color="gray.700" fontWeight={500} textTransform="capitalize">
               {bikeData.transmission}
             </Text>
@@ -204,10 +207,10 @@ const CardBike = ({ bike }: { bike: Bike }) => {
         <Reveal>
           <Button
             colorScheme="teal"
-            size="md"
+            size={{ base: "sm", md: "md" }}
             width="full"
             onClick={onOpen}
-            mt={2}
+            mt={{ base: 1, md: 2 }}
             _hover={{
               transform: "translateY(-2px)",
               boxShadow: "lg",

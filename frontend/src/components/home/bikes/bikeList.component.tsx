@@ -98,17 +98,17 @@ const BikeList: React.FC = () => {
                 setLoading(true);
                 console.log("🚴 Đang lấy xe từ database...");
                 console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_PROD);
-                
+
                 // Thử lấy tất cả bikes trước
                 let data = await bikeService.getAllBikes();
                 console.log("✅ Tất cả xe từ database:", data);
                 console.log(`📊 Tổng số xe: ${data.length}`);
-                
+
                 // Kiểm tra status của xe đầu tiên
                 if (data && data.length > 0) {
                     console.log("🔍 Status của xe đầu tiên:", data[0].status);
                     console.log("🔍 Xe đầu tiên:", data[0]);
-                    
+
                     // Lấy danh sách các status khác nhau
                     const statuses = [...new Set(data.map(bike => bike.status))];
                     console.log("🔍 Các status có trong database:", statuses);
@@ -116,11 +116,11 @@ const BikeList: React.FC = () => {
 
                 // Nếu có dữ liệu, lọc theo status (case-insensitive) và giới hạn 6
                 if (data && data.length > 0) {
-                    const availableBikes = data.filter(bike => 
+                    const availableBikes = data.filter(bike =>
                         bike.status && bike.status.toLowerCase() === "available"
                     );
                     console.log(`✅ Xe available: ${availableBikes.length}`);
-                    
+
                     if (availableBikes.length > 0) {
                         data = availableBikes.slice(0, 6);
                     } else {
@@ -192,9 +192,11 @@ const BikeList: React.FC = () => {
 
             <SimpleGrid
                 columns={{ base: 1, md: 2, lg: 3 }}
-                spacing={6}
+                spacing={{ base: 4, md: 6, lg: 8 }}
+                gap={{ base: 4, md: 6, lg: 8 }}
                 mt={5}
                 className="w-4/5"
+                px={{ base: 4, md: 0 }}
             >
                 {loading ? (
                     <Center gridColumn="1 / -1" py={10}>
