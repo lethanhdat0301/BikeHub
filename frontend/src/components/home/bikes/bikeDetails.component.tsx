@@ -52,9 +52,9 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
 
   return (
     <>
-      <Modal onClose={onClose} size={"4xl"} isOpen={isOpen}>
+      <Modal onClose={onClose} size={{ base: "full", md: "4xl" }} isOpen={isOpen}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent mx={{ base: 4, md: 0 }} my={{ base: 4, md: "auto" }} maxH={{ base: "90vh", md: "auto" }} overflowY={{ base: "auto", md: "initial" }}>
           <ModalHeader className="flex gap-3 items-center">
             <Text className="font-bold text-teal-700">{bike.model}</Text>
             <Tag

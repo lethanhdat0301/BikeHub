@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Container,
@@ -17,20 +17,51 @@ import {
   InputGroup,
   InputLeftAddon,
   Badge,
+  Select,
+  FormHelperText,
 } from "@chakra-ui/react";
-import { FaPhone, FaWhatsapp, FaTelegram, FaCheckCircle } from "react-icons/fa";
+import { FaPhone, FaWhatsapp, FaTelegram, FaCheckCircle, FaEnvelope } from "react-icons/fa";
+import ReCAPTCHA from "react-google-recaptcha";
 import bookingRequestService from "../../services/bookingRequestService";
+import { getAllParks, Park } from "../../services/parkService";
 
 const RequestBookingPage: React.FC = () => {
   const toast = useToast();
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     contactMethod: "phone",
     contactDetails: "",
     pickupLocation: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
+  const [parks, setParks] = useState<Park[]>([]);
+  const [loadingParks, setLoadingParks] = useState(true);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+
+  // Fetch parks
+  useEffect(() => {
+    const fetchParks = async () => {
+      try {
+        const data = await getAllParks();
+        setParks(data);
+      } catch (error) {
+        console.error("Error loading parks:", error);
+        toast({
+          title: "Error",
+          description: "Could not load pickup locations",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } finally {
+        setLoadingParks(false);
+      }
+    };
+    fetchParks();
+  }, []);
 
   // Auto-fill name if user is logged in
   useEffect(() => {
@@ -41,6 +72,7 @@ const RequestBookingPage: React.FC = () => {
         setFormData(prev => ({
           ...prev,
           name: user.name || "",
+          email: user.email || "",
           contactDetails: user.phone || "",
         }));
       } catch (error) {
@@ -52,10 +84,36 @@ const RequestBookingPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.contactDetails || !formData.pickupLocation) {
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.contactDetails || !formData.pickupLocation) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Validate reCAPTCHA
+    if (!recaptchaToken) {
+      toast({
+        title: "reCAPTCHA Required",
+        description: "Please complete the reCAPTCHA verification",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -102,13 +160,18 @@ const RequestBookingPage: React.FC = () => {
         position: "top",
       });
 
-      // Reset form (but keep name if logged in)
+      // Reset form (but keep name and email if logged in)
       setFormData(prev => ({
         name: userId ? prev.name : "",
+        email: userId ? prev.email : "",
         contactMethod: "phone",
         contactDetails: userId ? prev.contactDetails : "",
         pickupLocation: "",
       }));
+
+      // Reset reCAPTCHA
+      setRecaptchaToken(null);
+      recaptchaRef.current?.reset();
 
       // Reset requestSent after 5 seconds
       setTimeout(() => setRequestSent(false), 5000);
@@ -223,6 +286,32 @@ const RequestBookingPage: React.FC = () => {
                 />
               </FormControl>
 
+              {/* Email for Notifications */}
+              <FormControl isRequired>
+                <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
+                  Email (For Notifications)
+                </FormLabel>
+                <InputGroup size={{ base: "md", md: "lg" }}>
+                  <InputLeftAddon bg="teal.50" color="teal.600">
+                    <FaEnvelope />
+                  </InputLeftAddon>
+                  <Input
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    borderColor="teal.300"
+                    _hover={{ borderColor: "teal.500" }}
+                    focusBorderColor="teal.500"
+                  />
+                </InputGroup>
+                <FormHelperText fontSize="xs" color="gray.500">
+                  We'll send booking confirmations and updates to this email
+                </FormHelperText>
+              </FormControl>
+
               {/* Preferred Contact */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
@@ -286,11 +375,10 @@ const RequestBookingPage: React.FC = () => {
               {/* Pickup Location */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Where do you want to pick it up?
+                  Pickup Location (Park)
                 </FormLabel>
-                <Input
-                  type="text"
-                  placeholder="Enter pickup location"
+                <Select
+                  placeholder="Select a park to pick up"
                   value={formData.pickupLocation}
                   onChange={(e) =>
                     setFormData({
@@ -302,7 +390,43 @@ const RequestBookingPage: React.FC = () => {
                   borderColor="teal.300"
                   _hover={{ borderColor: "teal.500" }}
                   focusBorderColor="teal.500"
-                />
+                  isDisabled={loadingParks}
+                >
+                  {parks.map((park) => (
+                    <option key={park.id} value={park.name}>
+                      {park.name} - {park.location}
+                    </option>
+                  ))}
+                </Select>
+                {loadingParks && (
+                  <Text fontSize="xs" color="gray.500" mt={1}>
+                    Loading parks...
+                  </Text>
+                )}
+              </FormControl>
+
+              {/* Google reCAPTCHA */}
+              <FormControl isRequired>
+                <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
+                  Verification
+                </FormLabel>
+                <Box
+                  display="flex"
+                  justifyContent={{ base: "center", md: "flex-start" }}
+                  transform={{ base: "scale(0.85)", sm: "scale(0.95)", md: "scale(1)" }}
+                  transformOrigin={{ base: "center", md: "left" }}
+                >
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ""}
+                    onChange={(token) => setRecaptchaToken(token)}
+                    onExpired={() => setRecaptchaToken(null)}
+                    onErrored={() => setRecaptchaToken(null)}
+                  />
+                </Box>
+                <FormHelperText fontSize="xs" color="gray.500">
+                  Please verify you're not a robot to prevent spam
+                </FormHelperText>
               </FormControl>
 
               {/* Submit Button */}
