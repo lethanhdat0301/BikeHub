@@ -78,6 +78,9 @@ const SearchBike: React.FC = () => {
             minH="500px"
             display="flex"
             alignItems="center"
+            width="100%"
+            maxW="100vw"
+            overflowX="hidden"
         >
             <Container maxW="container.lg">
                 <VStack spacing={8} align="center">

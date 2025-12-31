@@ -96,12 +96,17 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="flex justify-between items-center text-gray-700 py-2 px-4 sm:px-12 shadow-lg">
-      <Link to="/">
+    <header className="flex justify-between items-center text-gray-700 py-2 px-4 sm:px-12 shadow-lg" style={{ maxWidth: '100vw', width: '100%' }}>
+      <Link to="/" style={{ flexShrink: 0 }}>
         <img src={logoImage} className="sm:w-36 w-24 max-w-none" />
       </Link>
 
-      <HStack as="nav" spacing="8" display={{ base: "none", md: "flex" }}>
+      <HStack as="nav" spacing={{ base: "5", lg: "8" }} display={{ base: "none", md: "flex" }} flexShrink={1} overflowX="auto" css={{
+        '&::-webkit-scrollbar': {
+          display: 'none'
+        },
+        scrollbarWidth: 'none'
+      }}>
         <Link to="/">
           <Button
             paddingStart={0}
@@ -110,6 +115,8 @@ const Header: React.FC = () => {
             variant="nav"
             _hover={{ transition: "all 0.3s ease-in-out" }}
             pos={"relative"}
+            fontSize={{ base: "sm", lg: "md" }}
+            whiteSpace="nowrap"
           >
             Home
             <Box
@@ -133,6 +140,8 @@ const Header: React.FC = () => {
             _hover={{ transition: "all 0.3s ease-in-out" }}
             pos={"relative"}
             onClick={() => handleNavigation(item)}
+            fontSize={{ base: "sm", lg: "md" }}
+            whiteSpace="nowrap"
           >
             {item.label}
             <Box
@@ -149,7 +158,7 @@ const Header: React.FC = () => {
       </HStack>
 
       {/* Social Media Icons */}
-      <HStack spacing={2} display={{ base: "none", md: "flex" }}>
+      <HStack spacing={2} display={{ base: "none", lg: "flex" }} flexShrink={0}>
         <IconButton
           as="a"
           href={socialLinks.telegram}
@@ -157,7 +166,7 @@ const Header: React.FC = () => {
           rel="noopener noreferrer"
           aria-label="Telegram"
           icon={<FaTelegram />}
-          size="md"
+          size="sm"
           variant="ghost"
           colorScheme="telegram"
           _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
@@ -170,7 +179,7 @@ const Header: React.FC = () => {
           rel="noopener noreferrer"
           aria-label="WhatsApp"
           icon={<FaWhatsapp />}
-          size="md"
+          size="sm"
           variant="ghost"
           colorScheme="whatsapp"
           _hover={{ bg: "green.50", transform: "scale(1.1)" }}
@@ -183,7 +192,7 @@ const Header: React.FC = () => {
           rel="noopener noreferrer"
           aria-label="Messenger"
           icon={<FaFacebookMessenger />}
-          size="md"
+          size="sm"
           variant="ghost"
           colorScheme="messenger"
           _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
@@ -192,11 +201,11 @@ const Header: React.FC = () => {
       </HStack>
 
       {/* Phone Numbers */}
-      <VStack spacing={1} display={{ base: "none", lg: "flex" }} align="flex-start">
+      <VStack spacing={1} display={{ base: "none", xl: "flex" }} align="flex-start" flexShrink={0}>
         {phoneNumbers.map((phone, index) => (
           <HStack key={index} spacing={1}>
             <FaPhone size={12} color="#319795" />
-            <Text fontSize="sm" fontWeight="medium" color="teal.600">
+            <Text fontSize="xs" fontWeight="medium" color="teal.600">
               <a href={`tel:${phone.number}`}>{phone.display}</a>
             </Text>
           </HStack>
@@ -208,11 +217,12 @@ const Header: React.FC = () => {
         value={language}
         onChange={handleLanguageChange}
         size="sm"
-        width="100px"
-        display={{ base: "none", md: "block" }}
+        width="90px"
+        display={{ base: "none", lg: "block" }}
         borderColor="teal.300"
         _hover={{ borderColor: "teal.500" }}
         focusBorderColor="teal.500"
+        flexShrink={0}
       >
 
         <option value="en">English</option>

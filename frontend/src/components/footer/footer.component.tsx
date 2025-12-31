@@ -42,7 +42,7 @@ const Footer = () => {
           <Link to="/">
             <Image src={logoImage} width={"150px"} />
           </Link>
-          <Flex gap="8" mr={{ base: 0, md: 35 }} flexDirection={{ base: "column", md: "row" }} alignItems={{ base: "flex-start", md: "center" }}>
+          <Flex gap="8" flex={1} justifyContent="center" flexDirection={{ base: "column", md: "row" }} alignItems="center">
             <Link to="/">
               <Button
                 paddingStart={0}
