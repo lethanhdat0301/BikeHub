@@ -70,23 +70,23 @@ const WhyChoose = () => {
   const data = [
     {
       id: 1,
-      title: "Community Vibes",
+      title: "Smart Booking",
       description:
-        "When you choose BikeHub, you join a community of like-minded cyclists. Share your favorite routes, discover new ones, and be part of a movement that celebrates the joy of biking.",
+        "Book in seconds via our Chatbot. No complex selection required—simply leave your details.",
       icon: IoTimeOutline,
     },
     {
       id: 2,
-      title: "Pay as You Ride",
+      title: "Doorstep Delivery",
       description:
-        "No need to commit to long-term contracts. With BikeHub, you pay for the ride when you need it. Tailor your biking experience to your schedule and your wallet.",
+        "Free pickup and delivery within a 10km radius in Phu Quoc, Nha Trang, and Ha Giang.",
       icon: CiWallet,
     },
     {
       id: 3,
-      title: "Easy Rentals",
+      title: "Flexible Payment",
       description:
-        "With the BikeHub app, renting a bike is as easy as a few taps. Find your ride, unlock, and roll out. We've streamlined the process so you can focus on the joy of riding.",
+        "We accept Cash, Bank Transfer, PayPal, or Credit Card swipe upon delivery.",
       icon: MdDirectionsBike,
     },
   ];
@@ -111,10 +111,10 @@ const WhyChoose = () => {
             textAlign="center"
             px={{ base: 4, md: 0 }}
           >
-            Why Choose BikeHub 🚴‍♂️✨
+            Why Choose RentnRide 🚴‍♂️✨
           </Heading>
         </Reveal>
-        <Reveal>
+        {/* <Reveal>
           <Box px={{ base: 4, md: 0 }} textAlign="center">
             <Text className="text-gray-500 sm:text-base text-sm font-medium mb-5" maxWidth="600px" mb={2} mx="auto">
               🚲 Dive into urban adventures on stylish, eco-friendly bikes.
@@ -132,7 +132,7 @@ const WhyChoose = () => {
               Choose BikeHub – Where Every Ride is an Adventure!🚴‍♀️
             </Text>
           </Box>
-        </Reveal>
+        </Reveal> */}
         <Box className=" w-full flex md:flex-row flex-col justify-evenly gap-5 ">
           <Box className="flex-1 text-center">
             <Image

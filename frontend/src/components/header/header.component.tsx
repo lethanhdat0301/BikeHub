@@ -101,6 +101,7 @@ const Header: React.FC = () => {
         <img src={logoImage} className="sm:w-36 w-24 max-w-none" />
       </Link>
 
+      {/* Desktop navigation */}
       <HStack as="nav" spacing={{ base: "5", lg: "8" }} display={{ base: "none", md: "flex" }} flexShrink={1} overflowX="auto" css={{
         '&::-webkit-scrollbar': {
           display: 'none'
@@ -157,7 +158,74 @@ const Header: React.FC = () => {
         ))}
       </HStack>
 
+      {/* Mobile: Language & Contact (right of logo) */}
+      <Box display={{ base: 'flex', md: 'none' }} alignItems="center" gap={2} ml={2}>
+        {/* Language selector */}
+        {/* Social icons */}
+        <HStack spacing={1}>
+          <IconButton
+            as="a"
+            href={socialLinks.telegram}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+            icon={<FaTelegram />}
+            size="sm"
+            variant="ghost"
+            colorScheme="telegram"
+            _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+            transition="all 0.2s"
+          />
+          <IconButton
+            as="a"
+            href={socialLinks.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            icon={<FaWhatsapp />}
+            size="sm"
+            variant="ghost"
+            colorScheme="whatsapp"
+            _hover={{ bg: "green.50", transform: "scale(1.1)" }}
+            transition="all 0.2s"
+          />
+          <IconButton
+            as="a"
+            href={socialLinks.messenger}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Messenger"
+            icon={<FaFacebookMessenger />}
+            size="sm"
+            variant="ghost"
+            colorScheme="messenger"
+            _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+            transition="all 0.2s"
+          />
+        </HStack>
+        {/* Phone number (first) */}
+        <HStack spacing={1}>
+          <FaPhone size={12} color="#319795" />
+          <Text fontSize="xs" fontWeight="medium" color="teal.600">
+            <a href={`tel:${phoneNumbers[0].number}`}>{phoneNumbers[0].display}</a>
+          </Text>
+        </HStack>
+        <Select
+          value={language}
+          onChange={handleLanguageChange}
+          size="sm"
+          width="80px"
+          borderColor="teal.300"
+          _hover={{ borderColor: "teal.500" }}
+          focusBorderColor="teal.500"
+        >
+          <option value="en">EN</option>
+          <option value="vi">VI</option>
+        </Select>
+      </Box>
+
       {/* Social Media Icons */}
+      {/* Desktop social icons */}
       <HStack spacing={2} display={{ base: "none", lg: "flex" }} flexShrink={0}>
         <IconButton
           as="a"
@@ -201,6 +269,7 @@ const Header: React.FC = () => {
       </HStack>
 
       {/* Phone Numbers */}
+      {/* Desktop phone numbers */}
       <VStack spacing={1} display={{ base: "none", xl: "flex" }} align="flex-start" flexShrink={0}>
         {phoneNumbers.map((phone, index) => (
           <HStack key={index} spacing={1}>
@@ -213,6 +282,7 @@ const Header: React.FC = () => {
       </VStack>
 
       {/* Language Selector */}
+      {/* Desktop language selector */}
       <Select
         value={language}
         onChange={handleLanguageChange}
@@ -224,7 +294,6 @@ const Header: React.FC = () => {
         focusBorderColor="teal.500"
         flexShrink={0}
       >
-
         <option value="en">English</option>
         <option value="vi">Tiếng Việt</option>
       </Select>
@@ -349,7 +418,7 @@ const Header: React.FC = () => {
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerBody>
-            <VStack as="nav" spacing="8">
+            <VStack as="nav" spacing="6">
               <Link to="/">
                 <Button
                   paddingStart={0}
@@ -358,6 +427,7 @@ const Header: React.FC = () => {
                   variant="nav"
                   _hover={{ transition: "all 0.3s ease-in-out" }}
                   pos={"relative"}
+                  onClick={onClose}
                 >
                   Home
                   <Box
@@ -373,6 +443,7 @@ const Header: React.FC = () => {
               </Link>
               {headerItems.map((item, i) => (
                 <Button
+                  key={i}
                   paddingStart={0}
                   paddingEnd={0}
                   className="group hover:text-teal-500 focus:text-teal-500"
@@ -396,6 +467,78 @@ const Header: React.FC = () => {
                   />
                 </Button>
               ))}
+
+              {/* Mobile: Language selector */}
+              <Box w="100%">
+                <Select
+                  value={language}
+                  onChange={handleLanguageChange}
+                  size="md"
+                  width="100%"
+                  borderColor="teal.300"
+                  _hover={{ borderColor: "teal.500" }}
+                  focusBorderColor="teal.500"
+                  mt={2}
+                >
+                  <option value="en">English</option>
+                  <option value="vi">Tiếng Việt</option>
+                </Select>
+              </Box>
+
+              {/* Mobile: Social icons */}
+              <HStack spacing={4} w="100%" justify="center" mt={2}>
+                <IconButton
+                  as="a"
+                  href={socialLinks.telegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Telegram"
+                  icon={<FaTelegram />}
+                  size="md"
+                  variant="ghost"
+                  colorScheme="telegram"
+                  _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+                  transition="all 0.2s"
+                />
+                <IconButton
+                  as="a"
+                  href={socialLinks.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp"
+                  icon={<FaWhatsapp />}
+                  size="md"
+                  variant="ghost"
+                  colorScheme="whatsapp"
+                  _hover={{ bg: "green.50", transform: "scale(1.1)" }}
+                  transition="all 0.2s"
+                />
+                <IconButton
+                  as="a"
+                  href={socialLinks.messenger}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Messenger"
+                  icon={<FaFacebookMessenger />}
+                  size="md"
+                  variant="ghost"
+                  colorScheme="messenger"
+                  _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+                  transition="all 0.2s"
+                />
+              </HStack>
+
+              {/* Mobile: Phone numbers */}
+              <VStack spacing={1} align="center" w="100%" mt={2}>
+                {phoneNumbers.map((phone, index) => (
+                  <HStack key={index} spacing={1}>
+                    <FaPhone size={14} color="#319795" />
+                    <Text fontSize="sm" fontWeight="medium" color="teal.600">
+                      <a href={`tel:${phone.number}`}>{phone.display}</a>
+                    </Text>
+                  </HStack>
+                ))}
+              </VStack>
             </VStack>
           </DrawerBody>
         </DrawerContent>

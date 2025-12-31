@@ -25,7 +25,7 @@ const SwiperReviews = () => {
       avatar:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       review:
-        "BikeHub has redefined my biking experience! The bikes are not just means of transport; they're gateways to adventure. The seamless rental process and quality bikes keep me coming back. BikeHub, you've turned my daily commute into a joyride!",
+        "RentnRide made my Ha Giang Loop adventure unforgettable! The manual bike was powerful enough for the steep passes, and having the helmet and rain gear included saved me so much hassle. Highly recommended!",
     },
     {
       id: 2,
@@ -35,7 +35,7 @@ const SwiperReviews = () => {
         "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
       review:
-        "I've tried numerous bike rental services, but BikeHub stands out for its commitment to excellence. The bikes are well-maintained, and the customer service is unmatched. Whether it's a weekend getaway or a daily ride to work, BikeHub is my go-to choice.",
+        "I loved the chatbot booking feature! It took less than 2 minutes to rent a scooter. They delivered it right to my resort in Phu Quoc for free. The bike was new, clean, and fuel-efficient.",
     },
     {
       id: 3,
@@ -88,12 +88,12 @@ const SwiperReviews = () => {
             size={{ base: "md", md: "lg" }}
             className="capitalizesl sm:text-start text-center"
           >
-            What Our Clients Say
+            What Our Riders Say
           </Heading>
         </Reveal>
         <Reveal>
           <Text className="text-gray-500 sm:text-base text-sm font-medium sm:text-start text-center">
-            Discovering the Joy of Riding with BikeHub
+            Discovering Vietnam on two wheels with RentnRide.
           </Text>
         </Reveal>
         <Flex gap={3} alignSelf={{ base: "center", md: "start" }} zIndex={99}>
