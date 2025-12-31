@@ -20,11 +20,22 @@
     "front:start": "serve -l 3000 -s ~/BikeHub/frontend/dist",
     "api:dev": "yarn workspace @bike/api start:dev",
     "api:build": "yarn workspace @bike/api build",
-    "api:start": "yarn workspace @bike/api start:prod"
+    "api:start": "yarn workspace @bike/api start:prod",
+    "start:all": "node scripts/start-all.js"
   },
   "keywords": [
     "nestjs",
     "react",
     "monorepo"
-  ]
+  ],
+  "dependencies": {
+    "reflect-metadata": "0.1.14"
+  },
+  "prisma": {
+    "schema": "api/prisma/client/schema.prisma",
+    "seed": "ts-node api/prisma/seeds/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3"
+  }
 }

@@ -22,7 +22,7 @@ const columnHeaders = [
 
 const Tables = () => {
   const [tableData, setTableData] = useState([]);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(

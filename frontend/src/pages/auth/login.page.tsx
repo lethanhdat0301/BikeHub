@@ -5,15 +5,15 @@ import logoImage from "../../assets/images/logoofficial.png";
 import { Image } from "@chakra-ui/react";
 
 const LoginPage: React.FC = () => {
-  let GoogleLogin: string | undefined;
-  if (import.meta.env.VITE_MODE === "prod") {
-    GoogleLogin = import.meta.env.VITE_BACK_END_PROD as string;
-  }
-  if (import.meta.env.VITE_MODE === "dev") {
-    GoogleLogin = import.meta.env.VITE_BACK_END_DEV as string;
-  }
-  if (import.meta.env.VITE_MODE === "local") {
-    GoogleLogin = import.meta.env.VITE_BACK_END_LOCAL as string;
+  // Resolve backend URL for OAuth links; fall back to Vite's MODE if VITE_MODE unset
+  const mode = import.meta.env.VITE_MODE ?? import.meta.env.MODE;
+  let GoogleLogin: string = "";
+  if (mode === "prod") {
+    GoogleLogin = (import.meta.env.VITE_BACK_END_PROD as string) ?? "";
+  } else if (mode === "dev") {
+    GoogleLogin = (import.meta.env.VITE_BACK_END_DEV as string) ?? "";
+  } else if (mode === "local") {
+    GoogleLogin = (import.meta.env.VITE_BACK_END_LOCAL as string) ?? "";
   }
 
   return (

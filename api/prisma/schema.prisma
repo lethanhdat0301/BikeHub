@@ -44,6 +44,8 @@ model Park {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   image      String?
+  dealer_id  Int?
+  Dealer     User?    @relation("DealerParks", fields: [dealer_id], references: [id])
 }
 
 model User {
@@ -53,6 +55,7 @@ model User {
   password       String
   role           String           @default("user")
   Rental         Rental[]
+  Parks          Park[]           @relation("DealerParks")
   BookingRequest BookingRequest[]
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt

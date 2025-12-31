@@ -2,6 +2,7 @@
 
 import { HiX } from "react-icons/hi";
 import Links from "./components/Links";
+import useAuth from "utils/auth/AuthHook";
 
 import SidebarCard from "components/sidebar/componentsrtl/SidebarCard";
 import routes from "routes";
@@ -11,6 +12,21 @@ const Sidebar = (props: {
   onClose: React.MouseEventHandler<HTMLSpanElement>;
 }) => {
   const { open, onClose } = props;
+  const { user } = useAuth();
+
+  // Filter routes based on role: admin sees all; dealer sees only bikes and rentals
+  const filteredRoutes = (() => {
+    if (!user || !user.role) return routes;
+    if (user.role === "admin") return routes;
+    if (user.role === "dealer") {
+      return routes.filter((r) =>
+        ["default", "bikes", "rentals", "parks", "sign-in"].includes(r.path)
+      );
+    }
+    // default: hide admin pages for regular users
+    return routes.filter((r) => r.layout !== "/admin");
+  })();
+
   return (
     <div
       className={`sm:none duration-175 linear fixed !z-50 flex min-h-full flex-col bg-white pb-10 shadow-2xl shadow-white/5 transition-all dark:!bg-navy-800 dark:text-white md:!z-50 lg:!z-50 xl:!z-0 ${
@@ -33,7 +49,7 @@ const Sidebar = (props: {
       {/* Nav item */}
 
       <ul className="mb-auto pt-1">
-        <Links routes={routes} />
+        <Links routes={filteredRoutes} />
       </ul>
 
       {/* Free Horizon Card */}

@@ -1,5 +1,6 @@
 import AdminTable from "../user/components/AdminTable";
 import { useEffect, useState } from "react";
+// import useAuth from "../../../utils/auth/AuthHook";
 
 const columnHeaders = [
   {
@@ -30,6 +31,7 @@ const columnHeaders = [
 
 const Tables = () => {
   const [tableData, setTableData] = useState([]);
+  // const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +39,11 @@ const Tables = () => {
         `${process.env.REACT_APP_API_URL}bikes`,
         { credentials: "include" }
       );
+      // let url = `${process.env.REACT_APP_API_URL}bikes`;
+      // if (user && user.role === "dealer") {
+      //   url += `?dealer_id=${user.id}`;
+      // }
+      // const response = await fetch(url, { credentials: "include" });
       console.log("-response------------")
       console.log(response)
       const data = await response.json();
@@ -44,6 +51,10 @@ const Tables = () => {
       console.log(data)
       console.log("-------------")
       setTableData(data);
+      // normalize response: accept array or { data: [...] }
+      // if (Array.isArray(data)) setTableData(data);
+      // else if (data && Array.isArray((data as any).data)) setTableData((data as any).data);
+      // else setTableData([]);
     };
     fetchData();
   }, []);

@@ -7,6 +7,7 @@ CREATE TABLE "Bike" (
     "location" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "park_id" INTEGER NOT NULL,
+    "owner_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -20,7 +21,7 @@ CREATE TABLE "Park" (
     "location" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-
+    "dealer_id" INTEGER NOT NULL,
     CONSTRAINT "Park_pkey" PRIMARY KEY ("id")
 );
 
