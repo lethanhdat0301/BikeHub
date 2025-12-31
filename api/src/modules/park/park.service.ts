@@ -5,13 +5,13 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ParkService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findOne(
-    parkWhereUniqueInput: Prisma.ParkWhereUniqueInput,
+    where: Prisma.ParkWhereUniqueInput,
   ): Promise<Park | null> {
     return this.prisma.park.findUnique({
-      where: parkWhereUniqueInput,
+      where,
       include: {
         Bike: true,
       },
@@ -68,7 +68,9 @@ export class ParkService {
       take,
       cursor,
       where,
-      orderBy,
+      orderBy: {
+        created_at: 'desc',
+      },
       include: {
         Bike: true,
       },
@@ -76,8 +78,13 @@ export class ParkService {
   }
 
   async create(data: Prisma.ParkCreateInput): Promise<Park> {
+    const safeData: any = { ...(data as any) };
+    // Normalize/sanitize incoming payloads: remove any lowercase `dealer` or `dealer_id` fields
+    if (safeData.dealer) delete safeData.dealer;
+    if ('dealer_id' in safeData) delete safeData.dealer_id;
+    // `Dealer` relation should be provided server-side (controller)
     return this.prisma.park.create({
-      data,
+      data: safeData,
     });
   }
 
@@ -85,16 +92,15 @@ export class ParkService {
     where: Prisma.ParkWhereUniqueInput;
     data: Prisma.ParkUpdateInput;
   }): Promise<Park> {
-    const { data, where } = params;
-    return this.prisma.park.update({
-      data,
-      where,
-    });
+    const { where, data } = params;
+    const safeData: any = { ...(data as any) };
+    // Prevent changing dealer via update payload
+    if (safeData.dealer) delete safeData.dealer;
+    if ('dealer_id' in safeData) delete safeData.dealer_id;
+    return this.prisma.park.update({ where, data: safeData });
   }
 
   async delete(where: Prisma.ParkWhereUniqueInput): Promise<Park> {
-    return this.prisma.park.delete({
-      where,
-    });
+    return this.prisma.park.delete({ where });
   }
 }

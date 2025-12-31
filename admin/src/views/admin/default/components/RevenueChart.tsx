@@ -23,7 +23,7 @@ const RevenueChart = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}rentals`,
+          `${process.env.REACT_APP_API_URL}rentals/list`,
           {
             withCredentials: true,
           }

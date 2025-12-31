@@ -12,6 +12,8 @@ import { Rental as RentalModel } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt.guard';
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { Roles } from '../auth/auth.roles.decorator';
 import { ROLES_ENUM } from '../../shared/constants/global.constants';
 
@@ -28,6 +30,22 @@ export class RentalController {
   @UseGuards(JwtAuthGuard)
   async getAllRentals(): Promise<RentalModel[]> {
     return this.rentalService.findAll({});
+  }
+
+  // Public listing that returns dealer-scoped rentals when a dealer token is present,
+  // admin gets all rentals, anonymous callers get an empty list.
+  @Get('/list')
+  @UseGuards(OptionalJwtAuthGuard)
+  async listRentals(@CurrentUser() user: any): Promise<RentalModel[]> {
+    if (user && user.role === ROLES_ENUM.DEALER) {
+      return this.rentalService.findAll({ where: { Bike: { Park: { dealer_id: user.id } } }, orderBy: { created_at: 'desc' } });
+    }
+
+    if (user && user.role === ROLES_ENUM.ADMIN) {
+      return this.rentalService.findAll({ orderBy: { created_at: 'desc' } });
+    }
+
+    return [];
   }
 
   @Get('rental/check')

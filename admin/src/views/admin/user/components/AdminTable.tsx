@@ -63,7 +63,7 @@ const AdminTable: React.FC<Props> = ({
     previousPage,
     state: { pageIndex },
   } = useTable(
-    { columns, data, initialState: { sortBy: [{ id: "id", desc: false }] } },
+    { columns, data, initialState: { sortBy: [{ id: "created_at", desc: true }] } },
     useGlobalFilter,
     useSortBy,
     usePagination
@@ -91,9 +91,9 @@ const AdminTable: React.FC<Props> = ({
             credentials: "include",
           }
         );
-        console.log("-response------------")
-        console.log(response)
-        console.log("-------------")
+        // console.log("-response------------")
+        // console.log(response)
+        // console.log("-------------")
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }

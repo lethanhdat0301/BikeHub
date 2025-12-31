@@ -1,5 +1,6 @@
 import AdminTable from "../user/components/AdminTable";
 import { useEffect, useState } from "react";
+import useAuth from "utils/auth/AuthHook";
 
 const columnHeaders = [
   {
@@ -22,6 +23,7 @@ const columnHeaders = [
 
 const Tables = () => {
   const [tableData, setTableData] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,18 +31,19 @@ const Tables = () => {
         `${process.env.REACT_APP_API_URL}parks`,
         { credentials: "include" }
       );
-      console.log("-response------------")
-      console.log(response)
-      console.log("-------------")
       const data = await response.json();
-      console.log("-response------------")
-      console.log(data)
-      console.log("-------------")
-      setTableData(data);
+
+      // If token-based auth didn't propagate user to backend, also apply client-side filter
+      let list = Array.isArray(data) ? data : [];
+      if (user && user.role === "dealer") {
+        list = list.filter((p: any) => p.dealer_id === user.id);
+      }
+
+      setTableData(list);
     };
 
     fetchData();
-  }, []);
+  }, [user]);
 
   return (
     <div className="mt-5">

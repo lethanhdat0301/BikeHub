@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import InputField from "components/fields/InputField";
 import Checkbox from "components/checkbox";
 import useAuth from "utils/auth/AuthHook";
+import axios from "axios";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -11,29 +12,32 @@ export default function SignIn() {
   const navigate = useNavigate();
   const { logIn } = useAuth();
 
-  const handleLogin = async (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent the form from refreshing the page
-    console.log(process.env.REACT_APP_API_URL);
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const data = { "email": email, "password": password}
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}auth/login`,
+        data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
+
+      const user = res.data?.user;
+
+      if (user.role !== "admin" && user.role !== "dealer") {
+        setError("This page is only for admins and dealers");
+        return;
       }
-    );
 
-    const data = await response.json();
-
-    if (data?.user?.role === "admin") {
-      console.log("data.user", data.user)
-      logIn(data.user);
+      logIn(user);
+      console.log()
       navigate("/admin");
-    } else if (data?.user?.role === "user") {
-      setError("This page only for admins");
-    } else {
-      setError(data?.message || data?.error);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -82,7 +86,7 @@ export default function SignIn() {
           </div>
           {error && <div className="text-center text-red-500">{error}</div>}
           <button
-            onClick={handleLogin}
+            type="submit"
             className="linear mt-2 w-full rounded-xl bg-teal-600 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-teal-600 active:bg-teal-700 dark:bg-teal-400 dark:text-white dark:hover:bg-teal-300 dark:active:bg-teal-200"
           >
             Sign In

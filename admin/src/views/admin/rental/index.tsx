@@ -1,5 +1,6 @@
 import AdminTable from "../user/components/AdminTable";
 import { useEffect, useState } from "react";
+import useAuth from "../../../utils/auth/AuthHook";
 
 const columnHeaders = [
   {
@@ -26,13 +27,16 @@ const columnHeaders = [
 
 const Tables = () => {
   const [tableData, setTableData] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}rentals`,
-        { credentials: "include" }
-      );
+      let url = `${process.env.REACT_APP_API_URL}rentals`;
+      if (user && user.role === "dealer") {
+        // limit rentals to bikes belonging to this dealer
+        url += `?dealer_id=${user.id}`;
+      }
+      const response = await fetch(url, { credentials: "include" });
       console.log("-response------------")
       console.log(response)
       console.log("-------------")
@@ -40,7 +44,9 @@ const Tables = () => {
       console.log("-response------------")
       console.log(data)
       console.log("-------------")
-      setTableData(data);
+      if (Array.isArray(data)) setTableData(data);
+      else if (data && Array.isArray((data as any).data)) setTableData((data as any).data);
+      else setTableData([]);
     };
 
     fetchData();

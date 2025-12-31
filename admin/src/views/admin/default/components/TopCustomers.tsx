@@ -24,58 +24,41 @@ const TopCustomers = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [rentalsResponse, usersResponse] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_URL}rentals`, {
-            withCredentials: true,
-          }),
-          axios.get(`${process.env.REACT_APP_API_URL}users`, {
-            withCredentials: true,
-          }),
-        ]);
-        console.log("-response usersResponse------------")
-        console.log(usersResponse.data)
+        const rentalsResponse = await axios.get(`${process.env.REACT_APP_API_URL}rentals/list`, {
+          withCredentials: true,
+        });
         console.log("-response rentalsResponse------------")
         console.log(rentalsResponse.data)
         console.log("-------------")
         const rentals: Rental[] = rentalsResponse.data;
-        const users: User[] = usersResponse.data;
-        console.log("rentals", rentals)
-        console.log("usersx", users)
-        console.log("usersx lenght", users.length)
+
         // Count rentals by user
         const rentalCounts: { [userId: string]: number } = {};
-        let num = 0;
+        const userMap: { [userId: string]: string } = {};
+
         rentals.forEach((rental) => {
-          console.log("---------")
-          console.log(rental.user_id)
-          if (rental.user_id in rentalCounts) {
-            rentalCounts[rental.user_id]++;
-          } else {
-            rentalCounts[rental.user_id] = 1;
+          rentalCounts[rental.user_id] = (rentalCounts[rental.user_id] || 0) + 1;
+          // Use user name if included in rental.User
+          if ((rental as any).User && (rental as any).User.name) {
+            userMap[rental.user_id] = (rental as any).User.name;
           }
-          console.log(rentalCounts[rental.user_id])
-          console.log("lop:", num++)
         });
-        console.log("rentalCounts", rentalCounts)
-        console.log("rental lenght", rentalCounts.length)
-        // Sort users by rental count and take top 5
-        const sortedUsers = users
-          .sort((a, b) => {
-            const countA = rentalCounts[a.id] || 0;
-            const countB = rentalCounts[b.id] || 0;
-            console.log(`Comparing ${a.id}: ${countA} with ${b.id}: ${countB}`);
-            return countB - countA;
-          })
-          .slice(0, 5);
-        console.log("sortedUsers", sortedUsers)
-        console.log("sorteduser lenght", sortedUsers.length)
+
+        // Convert to array of { id, name, count }
+        const usersFromRentals = Object.keys(rentalCounts).map((id) => ({
+          id,
+          name: userMap[id] || id,
+          count: rentalCounts[id],
+        }));
+
+        // Sort by count and take top 5
+        const sortedUsers = usersFromRentals.sort((a, b) => b.count - a.count).slice(0, 5);
+
         const chartDataTransform = {
           name: "Rents Count",
-          data: sortedUsers.map((user) => rentalCounts[user.id]),
+          data: sortedUsers.map((u) => u.count),
         };
-        console.log("chartDataTransform", chartDataTransform)
-        const customerNames = sortedUsers.map((user) => user.name);
-        console.log(sortedUsers)
+        const customerNames = sortedUsers.map((u) => u.name);
         setChartData([chartDataTransform]);
         setCustomerNames(customerNames);
       } catch (error) {

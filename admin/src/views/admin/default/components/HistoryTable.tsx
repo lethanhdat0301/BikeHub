@@ -107,37 +107,23 @@ export default function HistoryTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [rentalsResponse, usersResponse] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_URL}rentals`, {
-            withCredentials: true,
-          }),
-          axios.get(`${process.env.REACT_APP_API_URL}users`, {
-            withCredentials: true,
-          }),
-        ]);
-        console.log("-response------------")
-        console.log(usersResponse)
+        const rentalsResponse = await axios.get(`${process.env.REACT_APP_API_URL}rentals/list`, {
+          withCredentials: true,
+        });
         console.log("-response------------")
         console.log(rentalsResponse)
         console.log("-------------")
         const rentals: Rental[] = rentalsResponse.data;
-        const users: User[] = usersResponse.data;
 
         // Sort rentals by date and take the last 5
         const sortedRentals = rentals
-          .sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          )
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 6);
 
-        // Replace user_id with user name
+        // Replace user_id with user name (use rental.User if present)
         const rentalsWithUserName = sortedRentals.map((rental) => ({
           ...rental,
-          user_id:
-            users.find((user) => user.id === rental.user_id)?.name ||
-            rental.user_id,
+          user_id: (rental as any).User?.name || rental.user_id,
         }));
 
         setTableData(rentalsWithUserName);

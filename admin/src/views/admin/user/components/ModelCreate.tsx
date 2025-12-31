@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import useAuth from "utils/auth/AuthHook";
 import Switch from "components/switch";
 import ReactDOM from "react-dom";
 import axios from "axios";
@@ -6,17 +7,24 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
   module,
   children,
 }) => {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [fields, setFields] = useState([]);
   const [formValues, setFormValues] = useState<{ [key: string]: any }>({});
+  const [parks, setParks] = useState<any[]>([]);
+
+  // Error popup state
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorTitle, setErrorTitle] = useState<string | null>(null);
+  const [errorBody, setErrorBody] = useState<string | null>(null);
 
 
   useEffect(() => {
     const getFields = async (module: string): Promise<string[]> => {
-      console.log("getFields")
+      // console.log("getFields")
       try {
-        console.log(`${process.env.REACT_APP_API_URL}${module}s${module === "user" ? "" : "/" + module
-          }/2`)
+        // console.log(`${process.env.REACT_APP_API_URL}${module}s${module === "user" ? "" : "/" + module
+        //   }/2`)
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}${module}s${module === "user" ? "" : "/" + module
           }/check`,
@@ -24,18 +32,34 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
             withCredentials: true,
           }
         );
-        console.log("response ", response)
+        // console.log("response ", response)
         if (response.status !== 200) {
           throw new Error("Network response was not ok");
         }
 
         const result: any = response.data;
 
-        let fields = Object.keys(result);
+        // If API returns an array sample or empty, fall back to sensible defaults for each module
+        let sample: any = result;
+        if (Array.isArray(result) && result.length > 0) sample = result[0];
 
-        const excludedFields = ["created_at", "updated_at", "id"];
+        const defaultFieldsMap: { [key: string]: string[] } = {
+          park: ["name", "location", "image"],
+          bike: ["model", "status", "lock", "location", "price", "park_id", "image"],
+          user: ["name", "email", "password", "role", "birthdate", "phone", "image"],
+          rental: ["user_id", "bike_id", "start_time", "end_time", "status", "price"],
+        };
+
+        let fields =
+          sample && typeof sample === "object" && Object.keys(sample).length > 0
+            ? Object.keys(sample)
+            : defaultFieldsMap[module] || [];
+
+        // Exclude internal/relation fields by default (always exclude dealer_id from the create form)
+        const excludedFields = ["created_at", "updated_at", "id", "Bike", "bike", "dealer_id"];
         fields = fields.filter((field) => !excludedFields.includes(field));
-        console.log("fields", fields)
+
+        // console.log("fields", fields);
         return fields;
       } catch (error) {
         console.error(error);
@@ -49,7 +73,32 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
     };
 
     fetchFields();
-  }, [module]);
+  }, [module, user]);
+
+  // Fetch parks when park_id is needed
+  useEffect(() => {
+    const fetchParks = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}parks`, {
+          credentials: "include",
+        });
+        const result = await response.json();
+        let list = Array.isArray(result) ? result : [];
+        // If backend doesn't filter by dealer, filter client-side
+        if (user && user.role === "dealer") {
+          list = list.filter((p: any) => p.dealer_id === user.id);
+        }
+        setParks(list);
+      } catch (err) {
+        console.error("Failed to fetch parks:", err);
+        setParks([]);
+      }
+    };
+
+    if (fields.includes("park_id")) {
+      fetchParks();
+    }
+  }, [fields, user]);
 
   const handleChange = (event: any) => {
     let value =
@@ -76,16 +125,17 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
     const data = Object.fromEntries(
       Object.entries(formValues).map(([key, value]) => {
         if (key.endsWith("time") || key === "birthdate") {
-          console.log(value);
+          // console.log(value);
           value = new Date(value).toISOString();
-          console.log(value);
+          // console.log(value);
         }
         return [key, value];
       })
     );
 
     const createItem = async (module: string, data: { [key: string]: any }) => {
-      console.log("birthdate", data.birthdate)
+      // console.log("birthdate", data);
+      // console.log("birthdate", module);
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}${module}s/${module}`,
         {
@@ -97,20 +147,84 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
           body: JSON.stringify(data),
         }
       );
-      console.log("-response------------")
-      console.log(response)
-      console.log("-------------")
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+      // console.log("-response------------");
+      // console.log(response);
+      // console.log("-------------");
+      let result: any = null;
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        result = await response.text();
       }
-      const result = await response.json();
-      console.log("-resulte------------")
-      console.log(result)
-      console.log("-------------")
+      if (!response.ok) {
+        console.error("Create failed:", response.status, result);
+        // Throw structured error so caller can render detailed messages
+        throw { status: response.status, result };
+      }
+      // console.log("-resulte------------");
+      // console.log(result);
+      // console.log("-------------");
       return result;
     };
-    await createItem(module, data);
-    setIsOpen(false);
+    try {
+      // Loại bỏ các trường không hợp lệ trước khi gửi lên server (always exclude dealer_id)
+      const forbiddenFields = ["id", "created_at", "updated_at", "Bike", "bike", "dealer_id"];
+
+      const filteredData = Object.keys(data)
+        .filter((key) => !forbiddenFields.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = (data as any)[key];
+          return obj;
+        }, {} as any);
+
+      // Client-side validation to avoid sending invalid park payloads
+      if (module === "park") {
+        if (!filteredData.name || !filteredData.location) {
+          setErrorTitle('Create failed (validation)');
+          setErrorBody('Both name and location are required to create a park.');
+          setErrorOpen(true);
+          return;
+        }
+      }
+
+      await createItem(module, filteredData);
+      setIsOpen(false);
+    } catch (err: any) {
+      console.error("Error creating item:", err);
+
+      // Build user-friendly error message
+      let title = 'Create failed';
+      let body = 'An unexpected error occurred.';
+
+      if (err && typeof err === 'object') {
+        if (err.status) title = `Create failed (status ${err.status})`;
+        const payload = err.result || err;
+        if (payload && typeof payload === 'object') {
+          if (Array.isArray(payload.message)) {
+            body = payload.message.join('\n');
+          } else if (payload.message) {
+            body = String(payload.message);
+          } else if (payload.error) {
+            body = String(payload.error);
+          } else {
+            try {
+              body = JSON.stringify(payload, null, 2);
+            } catch (e) {
+              body = String(payload);
+            }
+          }
+        } else if (typeof payload === 'string') {
+          body = payload;
+        }
+      } else if (typeof err === 'string') {
+        body = err;
+      }
+
+      setErrorTitle(title);
+      setErrorBody(body);
+      setErrorOpen(true);
+    }
   };
 
   return (
@@ -185,10 +299,25 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
                           />
+                        ) : field === "park_id" ? (
+                          <select
+                            name={field}
+                            value={formValues[field] || ""}
+                            onChange={handleChange}
+                            className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
+                          >
+                            <option value="">Select a park</option>
+                            {parks.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.name} {p.location ? ` - ${p.location}` : ""}
+                              </option>
+                            ))}
+                          </select>
                         ) : (
                           <input
                             type={field.endsWith("id") ? "number" : "text"}
                             name={field}
+                            value={formValues[field] || ''}
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
                           />
@@ -218,6 +347,26 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
           </div>,
           document.body
         )}
+
+        {errorOpen &&
+          ReactDOM.createPortal(
+            <div className="fixed inset-0 z-30 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black opacity-30" onClick={() => setErrorOpen(false)}></div>
+              <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+                <h4 className="mb-2 text-lg font-semibold">{errorTitle}</h4>
+                <pre className="mb-4 max-h-64 overflow-auto whitespace-pre-wrap text-sm">{errorBody}</pre>
+                <div className="text-right">
+                  <button
+                    className="inline-flex items-center gap-2 rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
+                    onClick={() => setErrorOpen(false)}
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
     </>
   );
 };

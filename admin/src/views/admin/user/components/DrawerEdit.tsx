@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import useAuth from "utils/auth/AuthHook";
+import Switch from "components/switch";
 
 type EditDrawerProps = {
   isOpen: boolean;
@@ -7,7 +9,9 @@ type EditDrawerProps = {
 };
 
 const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<any>(null);
+  const [parks, setParks] = useState<any[]>([]);
 
   useEffect(() => {
     if (data) {
@@ -26,11 +30,39 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
+
+      // If editing a bike and park_id exists in the model, fetch available parks
+      const fetchParks = async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_API_URL}parks`, {
+            credentials: "include",
+          });
+          const list = await response.json();
+          let filtered = Array.isArray(list) ? list : [];
+          if (user && user.role === "dealer") {
+            filtered = filtered.filter((p: any) => p.dealer_id === user.id);
+          }
+          setParks(filtered);
+        } catch (err) {
+          console.error("Error fetching parks:", err);
+          setParks([]);
+        }
+      };
+
+      fetchParks();
     }
-  }, [data]);
+  }, [data, user]);
 
   const handleSave = () => {
     if (formData) {
+      const forbiddenFields = ["id", "created_at", "updated_at", "dealer_id", "Bike"];
+      const filteredData = Object.keys(formData)
+        .filter((key) => !forbiddenFields.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = formData[key];
+          return obj;
+        }, {} as any);
+
       const url = `${process.env.REACT_APP_API_URL}${data.module}s/${data.module}/${data.id}`;
       const method = "PUT";
 
@@ -40,7 +72,7 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(filteredData),
       })
         .then((response) => response.json())
         .then((data) => {
@@ -54,10 +86,23 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
   };
 
   const handleChange = (event: any) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
-    });
+    let value: any;
+    if (event && event.target) {
+      if (event.target.type === "checkbox") {
+        value = event.target.checked;
+      } else if (event.target.name.endsWith("id")) {
+        value = Number(event.target.value);
+      } else {
+        value = event.target.value;
+      }
+      setFormData({
+        ...formData,
+        [event.target.name]: value,
+      });
+    } else if (typeof event === "object") {
+      // fallback for switch components that might call onChange with value
+      // e.g., setFormData({ ...formData, lock: event });
+    }
   };
 
   return (
@@ -94,8 +139,21 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
                 <div className="flex flex-1 flex-col justify-between">
                   <div className="px-4 sm:px-6">
                     {formData ? (
-                      Object.keys(formData).map((key) =>
-                        key !== "id" ? (
+                      (() => {
+                        const forbiddenFields = ["id", "created_at", "updated_at", "dealer_id", "Bike"];
+                        const visibleKeys = Object.keys(formData).filter((key) => {
+                          // Exclude forbidden keys and nested objects/arrays (relations)
+                          if (forbiddenFields.includes(key)) return false;
+                          const value = formData[key];
+                          if (value && typeof value === 'object') return false;
+                          return true;
+                        });
+
+                        if (visibleKeys.length === 0) {
+                          return <p>No editable fields available</p>;
+                        }
+
+                        return visibleKeys.map((key) => (
                           <div key={key} className="relative mt-6 flex-1">
                             <label
                               htmlFor={key}
@@ -104,18 +162,41 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
                               {key}
                             </label>
                             <div className="mt-1">
-                              <input
-                                type="text"
-                                name={key}
-                                id={key}
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                value={formData[key] || ""}
-                                onChange={handleChange}
-                              />
+                              {key === "lock" ? (
+                                <Switch
+                                  name={key}
+                                  checked={Boolean(formData[key])}
+                                  onChange={handleChange}
+                                  color="blue"
+                                />
+                              ) : key === "park_id" ? (
+                                <select
+                                  name={key}
+                                  value={formData[key] || ""}
+                                  onChange={handleChange}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                >
+                                  <option value="">Select a park</option>
+                                  {parks.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                      {p.name} {p.location ? ` - ${p.location}` : ""}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <input
+                                  type={key.endsWith("id") ? "number" : "text"}
+                                  name={key}
+                                  id={key}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                  value={formData[key] || ""}
+                                  onChange={handleChange}
+                                />
+                              )}
                             </div>
                           </div>
-                        ) : null
-                      )
+                        ));
+                      })()
                     ) : (
                       <p>Loading...</p>
                     )}

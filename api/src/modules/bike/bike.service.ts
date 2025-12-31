@@ -2,21 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { Park, Bike, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
-
+type BikeWithPark = Prisma.BikeGetPayload<{
+  include: { Park: true };
+}>;
 @Injectable()
 export class BikeService {
   constructor(private prisma: PrismaService) { }
 
-  async findOne(
-    bikeWhereUniqueInput: Prisma.BikeWhereUniqueInput,
-  ): Promise<Bike | null> {
-    return this.prisma.bike.findUnique({
-      where: bikeWhereUniqueInput,
-      include: {
-        Park: true,
-      },
-    });
-  }
+async findOne(
+  bikeWhereUniqueInput: Prisma.BikeWhereUniqueInput,
+): Promise<BikeWithPark | null> {
+  return this.prisma.bike.findUnique({
+    where: bikeWhereUniqueInput,
+    include: {
+      Park: true,
+    },
+  });
+}
 
   async findFirst(): Promise<Bike> {
     return this.prisma.bike.findFirst();
@@ -47,6 +49,19 @@ export class BikeService {
       },
     });
   }
+
+  async findByDealer(dealerId: number) {
+  return this.prisma.bike.findMany({
+    where: {
+      Park: {
+        dealer_id: dealerId,
+      },
+    },
+    include: {
+      Park: true,
+    },
+  });
+}
 
   async findAll(params: {
     skip?: number;
