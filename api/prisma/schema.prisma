@@ -85,6 +85,7 @@ model BookingRequest {
   id              Int      @id @default(autoincrement())
   user_id         Int?
   name            String
+  email           String
   contact_method  String
   contact_details String
   pickup_location String

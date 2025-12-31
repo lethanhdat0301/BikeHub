@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsNumber, IsIn } from 'class-validator';
 
 export class CreateBookingRequestDto {
   @IsNumber()
@@ -8,6 +8,10 @@ export class CreateBookingRequestDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
   @IsString()
   @IsNotEmpty()

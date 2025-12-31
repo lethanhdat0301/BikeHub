@@ -24,7 +24,7 @@ export class UserController {
 
   @Get()
   @Roles(ROLES_ENUM.ADMIN)
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async getAll(): Promise<User[]> {
     return this.userService.users({});
   }

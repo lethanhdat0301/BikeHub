@@ -97,39 +97,13 @@ const BikeList: React.FC = () => {
             try {
                 setLoading(true);
                 console.log("🚴 Đang lấy xe từ database...");
-                console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_PROD);
+                // console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_PROD);
+                console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_LOCAL);
 
-                // Thử lấy tất cả bikes trước
-                let data = await bikeService.getAllBikes();
-                console.log("✅ Tất cả xe từ database:", data);
-                console.log(`📊 Tổng số xe: ${data.length}`);
+                let data = await bikeService.getBikesByStatus('available', 6);
 
-                // Kiểm tra status của xe đầu tiên
-                if (data && data.length > 0) {
-                    console.log("🔍 Status của xe đầu tiên:", data[0].status);
-                    console.log("🔍 Xe đầu tiên:", data[0]);
-
-                    // Lấy danh sách các status khác nhau
-                    const statuses = [...new Set(data.map(bike => bike.status))];
-                    console.log("🔍 Các status có trong database:", statuses);
-                }
-
-                // Nếu có dữ liệu, lọc theo status (case-insensitive) và giới hạn 6
-                if (data && data.length > 0) {
-                    const availableBikes = data.filter(bike =>
-                        bike.status && bike.status.toLowerCase() === "available"
-                    );
-                    console.log(`✅ Xe available: ${availableBikes.length}`);
-
-                    if (availableBikes.length > 0) {
-                        data = availableBikes.slice(0, 6);
-                    } else {
-                        // Nếu không có xe available, lấy 6 xe bất kỳ
-                        console.log("⚠️ Không có xe available, lấy 6 xe đầu tiên");
-                        data = data.slice(0, 6);
-                    }
-                } else {
-                    console.log("⚠️ Database trống, sử dụng mock data");
+                if (!data || (Array.isArray(data) && data.length === 0)) {
+                    console.warn("⚠️ API trả về rỗng, sử dụng Mock Data");
                     data = mockBikes;
                 }
 

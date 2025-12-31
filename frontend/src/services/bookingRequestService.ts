@@ -4,6 +4,7 @@ export interface BookingRequest {
   id?: number;
   user_id?: number;
   name: string;
+  email?: string;
   contact_method: string;
   contact_details: string;
   pickup_location: string;
@@ -18,6 +19,7 @@ class BookingRequestService {
   async createBookingRequest(data: {
     user_id?: number;
     name: string;
+    email: string;
     contact_method: string;
     contact_details: string;
     pickup_location: string;
@@ -34,7 +36,7 @@ class BookingRequestService {
   // Admin - Lấy tất cả booking requests
   async getAllBookingRequests(status?: string): Promise<BookingRequest[]> {
     try {
-      const url = status 
+      const url = status
         ? `/booking-requests/?status=${status}`
         : '/booking-requests/';
       const response = await axios.get(url);

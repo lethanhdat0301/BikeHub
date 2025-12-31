@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Park, Bike, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { equal } from 'assert';
 type BikeWithPark = Prisma.BikeGetPayload<{
   include: { Park: true };
 }>;
@@ -9,29 +10,36 @@ type BikeWithPark = Prisma.BikeGetPayload<{
 export class BikeService {
   constructor(private prisma: PrismaService) { }
 
-async findOne(
-  bikeWhereUniqueInput: Prisma.BikeWhereUniqueInput,
-): Promise<BikeWithPark | null> {
-  return this.prisma.bike.findUnique({
-    where: bikeWhereUniqueInput,
-    include: {
-      Park: true,
-    },
-  });
-}
+  async findOne(
+    bikeWhereUniqueInput: Prisma.BikeWhereUniqueInput,
+  ): Promise<BikeWithPark | null> {
+    return this.prisma.bike.findUnique({
+      where: bikeWhereUniqueInput,
+      include: {
+        Park: true,
+      },
+    });
+  }
 
   async findFirst(): Promise<Bike> {
     return this.prisma.bike.findFirst();
   }
+
   async findByStatus(status: string, limit?: number): Promise<Bike[]> {
     return this.prisma.bike.findMany({
       where: {
-        status: status,
+        status: {
+          equals: status,
+          mode: 'insensitive'
+        }
       },
-      take: limit || undefined,
+      take: limit ? Number(limit) : undefined,
       include: {
         Park: true,
       },
+      orderBy: {
+        created_at: 'desc'
+      }
     });
   }
 
@@ -51,17 +59,17 @@ async findOne(
   }
 
   async findByDealer(dealerId: number) {
-  return this.prisma.bike.findMany({
-    where: {
-      Park: {
-        dealer_id: dealerId,
+    return this.prisma.bike.findMany({
+      where: {
+        Park: {
+          dealer_id: dealerId,
+        },
       },
-    },
-    include: {
-      Park: true,
-    },
-  });
-}
+      include: {
+        Park: true,
+      },
+    });
+  }
 
   async findAll(params: {
     skip?: number;

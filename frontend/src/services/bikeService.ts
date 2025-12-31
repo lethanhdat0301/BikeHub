@@ -34,7 +34,7 @@ class BikeService {
 
   async getBikesByStatus(status: string, limit?: number): Promise<Bike[]> {
     try {
-      const endpoint = limit 
+      const endpoint = limit
         ? `/bikes/status/${status}/${limit}`
         : `/bikes/status/${status}`;
       const response = await axios.get(endpoint);

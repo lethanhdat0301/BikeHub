@@ -136,18 +136,19 @@ const RequestBookingPage: React.FC = () => {
         }
       }
 
-      console.log("📤 Gửi booking request đến admin...");
+      console.log("Gửi booking request đến admin...");
 
       // Call API to create booking request
       const response = await bookingRequestService.createBookingRequest({
         user_id: userId,
         name: formData.name,
+        email: formData.email,
         contact_method: formData.contactMethod,
         contact_details: formData.contactDetails,
         pickup_location: formData.pickupLocation,
       });
 
-      console.log("✅ Booking request đã được tạo:", response);
+      console.log("Booking request đã được tạo:", response);
 
       setRequestSent(true);
 
@@ -176,6 +177,8 @@ const RequestBookingPage: React.FC = () => {
       // Reset requestSent after 5 seconds
       setTimeout(() => setRequestSent(false), 5000);
     } catch (error: any) {
+      console.log("🔥 LỖI CHI TIẾT TỪ SERVER:", error.response?.data);
+
       console.error("❌ Error submitting booking request:", error);
       toast({
         title: "Error",
