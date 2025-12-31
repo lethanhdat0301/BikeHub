@@ -50,11 +50,15 @@ const Tables = () => {
       console.log("-data------------")
       console.log(data)
       console.log("-------------")
-      setTableData(data);
-      // normalize response: accept array or { data: [...] }
-      // if (Array.isArray(data)) setTableData(data);
-      // else if (data && Array.isArray((data as any).data)) setTableData((data as any).data);
-      // else setTableData([]);
+      // Normalize response: accept array or { data: [...] } or error objects
+      if (Array.isArray(data)) {
+        setTableData(data);
+      } else if (data && Array.isArray((data as any).data)) {
+        setTableData((data as any).data);
+      } else {
+        // Not an array — avoid passing non-array to the table
+        setTableData([]);
+      }
     };
     fetchData();
   }, []);

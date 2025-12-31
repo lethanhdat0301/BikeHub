@@ -81,7 +81,7 @@ export class UserService {
 
   async deleteUser(
     where: Prisma.UserWhereUniqueInput,
-    password: string,
+    // password: string,
   ): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where,
@@ -91,11 +91,11 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    const isMatch = await AuthHelpers.verify(password, user.password);
+    // const isMatch = await AuthHelpers.verify(password, user.password);
 
-    if (!isMatch) {
-      throw new UnauthorizedException('Incorrect password');
-    }
+    // if (!isMatch) {
+    //   throw new UnauthorizedException('Incorrect password');
+    // }
 
     const deleteduser = await this.prisma.user.delete({
       where,

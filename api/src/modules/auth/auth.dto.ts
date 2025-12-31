@@ -9,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 import { INVALID_EMAIL } from '../../shared/constants/strings';
 
@@ -56,8 +57,11 @@ export class RegisterUserDTO {
   @ApiProperty()
   password: string;
 
-  //@IsDate() temporarly disabling this validation
-  @ApiProperty()
+  @IsDate()
+  // Ensure string inputs are transformed to Date objects by class-transformer
+  // (ValidationPipe has transform: true in main.ts)
+  @Type(() => Date)
+  @ApiProperty({ type: String, format: 'date-time' })
   birthdate: Date;
 
   @IsString()

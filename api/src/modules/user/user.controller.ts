@@ -65,16 +65,16 @@ export class UserController {
     });
   }
 
-  @Delete('delete/:id')
+  @Delete('user/:id')
   @Roles(ROLES_ENUM.ADMIN)
   @UseGuards(JwtAuthGuard)
   async deleteUser(
     @Param('id') id: string,
-    @Body('password') password: string,
+    // @Body('password') password: string,
   ): Promise<{ message: string }> {
     const deletedUser = await this.userService.deleteUser(
       { id: Number(id) },
-      password,
+      // password,
     );
 
     return { message: 'User deleted' };
