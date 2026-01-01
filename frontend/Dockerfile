@@ -12,9 +12,14 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Set API URL for production build
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
+# Set environment variables for production build
+ARG VITE_MODE=prod
+ARG VITE_BACK_END_PROD
+ARG VITE_RECAPTCHA_SITE_KEY
+
+ENV VITE_MODE=$VITE_MODE
+ENV VITE_BACK_END_PROD=$VITE_BACK_END_PROD
+ENV VITE_RECAPTCHA_SITE_KEY=$VITE_RECAPTCHA_SITE_KEY
 
 # Build application
 RUN yarn build

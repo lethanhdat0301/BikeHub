@@ -4,9 +4,11 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'VITE_API_URL=https://api-289273895966.asia-southeast1.run.app/api/v1/'
+      - 'VITE_MODE=prod'
       - '--build-arg'
-      - 'VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+      - 'VITE_BACK_END_PROD=https://api-289273895966.asia-southeast1.run.app/api/v1/'
+      - '--build-arg'
+      - 'VITE_RECAPTCHA_SITE_KEY=6LceFD0sAAAAAIxmN2Fi2olrcqqlF8jU7hX0KgQv'
       - '-t'
       - 'gcr.io/$PROJECT_ID/frontend'
       - '.'
