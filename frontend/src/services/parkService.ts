@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3300/api/v1/";
+import axios from "../apis/axios";
 
 export interface Park {
   id: number;
@@ -14,7 +12,7 @@ export interface Park {
 // Lấy tất cả parks
 export const getAllParks = async (): Promise<Park[]> => {
   try {
-    const response = await axios.get(`${API_URL}parks/`);
+    const response = await axios.get("parks/");
     console.log("✅ Parks loaded from API:", response.data);
     return response.data;
   } catch (error) {
@@ -26,7 +24,7 @@ export const getAllParks = async (): Promise<Park[]> => {
 // Lấy park theo ID
 export const getParkById = async (id: number): Promise<Park> => {
   try {
-    const response = await axios.get(`${API_URL}parks/park/${id}`);
+    const response = await axios.get(`parks/park/${id}`);
     return response.data;
   } catch (error) {
     console.error(`❌ Error fetching park ${id}:`, error);

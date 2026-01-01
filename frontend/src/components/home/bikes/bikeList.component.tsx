@@ -100,8 +100,6 @@ const BikeList: React.FC = () => {
             try {
                 setLoading(true);
                 console.log("🚴 Đang lấy xe từ database...");
-                // console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_PROD);
-                console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_LOCAL);
 
                 let data = await bikeService.getBikesByStatus('available', 20); // Lấy nhiều xe hơn để phân trang
 
