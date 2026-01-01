@@ -6,9 +6,9 @@ steps:
       - '--build-arg'
       - 'VITE_MODE=prod'
       - '--build-arg'
-      - 'VITE_BACK_END_PROD=https://api-289273895966.asia-southeast1.run.app/api/v1/'
+      - 'VITE_BACK_END_PROD=${_VITE_BACK_END_PROD}'
       - '--build-arg'
-      - 'VITE_RECAPTCHA_SITE_KEY=6LceFD0sAAAAAIxmN2Fi2olrcqqlF8jU7hX0KgQv'
+      - 'VITE_RECAPTCHA_SITE_KEY=${_VITE_RECAPTCHA_SITE_KEY}'
       - '-t'
       - 'gcr.io/$PROJECT_ID/frontend'
       - '.'
@@ -19,3 +19,8 @@ steps:
 
 images:
   - 'gcr.io/$PROJECT_ID/frontend'
+
+# Default values (can be overridden)
+substitutions:
+  _VITE_BACK_END_PROD: 'https://api-289273895966.asia-southeast1.run.app/api/v1/'
+  _VITE_RECAPTCHA_SITE_KEY: ''  # Set this when running build
