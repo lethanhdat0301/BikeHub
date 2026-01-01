@@ -1,5 +1,5 @@
 # Multi-stage build for NestJS API
-FROM node:18-slim AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN npx prisma generate
 RUN yarn build
 
 # Production stage
-FROM node:18-slim AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
