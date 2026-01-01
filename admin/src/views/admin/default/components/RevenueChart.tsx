@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "services/api";
 import Card from "components/card";
 import { BarChartOptionsTopCustomers } from "variables/charts-config";
 import { MdBarChart } from "react-icons/md";
@@ -18,20 +18,24 @@ const RevenueChart = () => {
     { name: string; data: number[] }[]
   >([]);
   const [dates, setDates] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}rentals/list`,
-          {
-            withCredentials: true,
-          }
-        );
+        const response = await apiClient.get("rentals/list");
         console.log("-response------------")
         console.log(response)
         console.log("-------------")
-        const rentals: Rental[] = response.data;
+        
+        // Handle both array and object responses
+        let rentals: Rental[] = [];
+        if (Array.isArray(response.data)) {
+          rentals = response.data;
+        } else if (response.data && Array.isArray(response.data.data)) {
+          rentals = response.data.data;
+        }
 
         // Filter rentals from the last 30 days
         const oneMonthAgo = new Date();
@@ -62,6 +66,11 @@ const RevenueChart = () => {
         setDates(sortedDates);
       } catch (error) {
         console.error(error);
+        // Set empty data to prevent chart errors
+        setChartData([{ name: "Revenue", data: [] }]);
+        setDates([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -81,13 +90,23 @@ const RevenueChart = () => {
 
       <div className="flex h-full w-full flex-row justify-between sm:flex-wrap lg:flex-nowrap 2xl:overflow-hidden">
         <div className="h-full w-full">
-          <Chart
-            options={BarChartOptionsTopCustomers(dates)}
-            series={chartData}
-            type="bar"
-            width="100%"
-            height="100%"
-          />
+          {loading ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-gray-500">Loading...</p>
+            </div>
+          ) : chartData.length === 0 || chartData[0]?.data.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-gray-500">No revenue data available</p>
+            </div>
+          ) : (
+            <Chart
+              options={BarChartOptionsTopCustomers(dates)}
+              series={chartData}
+              type="bar"
+              width="100%"
+              height="100%"
+            />
+          )}
         </div>
       </div>
     </Card>

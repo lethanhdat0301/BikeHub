@@ -32,7 +32,7 @@
     "reflect-metadata": "0.1.14"
   },
   "prisma": {
-    "schema": "api/prisma/client/schema.prisma",
+    "schema": "api/prisma/schema.prisma",
     "seed": "ts-node api/prisma/seeds/index.ts"
   },
   "devDependencies": {

@@ -18,6 +18,7 @@ import SearchPage from "../pages/search/search.tsx";
 import RequestBookingPage from "../pages/booking/booking.page.tsx";
 import ReturnPage from "../pages/return/return.page.tsx";
 import TrackOrderPage from "../pages/order/trackOrder.page.tsx";
+import BikeDetailsPage from "../pages/bikeDetails/bikeDetails.page.tsx";
 
 
 
@@ -79,6 +80,7 @@ const Routes: React.FC = () => {
       <Route path="*" element={<NotFoundPage />} />
       <Route path="/" element={<HomePage />} />
       <Route path="/search" element={<SearchPage />} />
+      <Route path="/motorcycles/:id" element={<BikeDetailsPage />} />
       <Route path="/request-booking" element={<RequestBookingPage />} />
       <Route path="/return" element={<ReturnPage />} />
       <Route path="/tracking" element={<TrackOrderPage />} />

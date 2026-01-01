@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "services/api";
 import Card from "components/card";
 import { BarChartOptionsTopCustomers } from "variables/charts-config";
 import { MdBarChart } from "react-icons/md";
@@ -20,17 +20,24 @@ const TopCustomers = () => {
   const [chartData, setChartData] = useState<
     { name: string; data: number[] }[]
   >([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const rentalsResponse = await axios.get(`${process.env.REACT_APP_API_URL}rentals/list`, {
-          withCredentials: true,
-        });
+        const rentalsResponse = await apiClient.get("rentals/list");
         console.log("-response rentalsResponse------------")
         console.log(rentalsResponse.data)
         console.log("-------------")
-        const rentals: Rental[] = rentalsResponse.data;
+        
+        // Handle both array and object responses
+        let rentals: Rental[] = [];
+        if (Array.isArray(rentalsResponse.data)) {
+          rentals = rentalsResponse.data;
+        } else if (rentalsResponse.data && Array.isArray(rentalsResponse.data.data)) {
+          rentals = rentalsResponse.data.data;
+        }
 
         // Count rentals by user
         const rentalCounts: { [userId: string]: number } = {};
@@ -63,6 +70,11 @@ const TopCustomers = () => {
         setCustomerNames(customerNames);
       } catch (error) {
         console.error(error);
+        // Set empty data to prevent chart errors
+        setChartData([{ name: "Rents Count", data: [] }]);
+        setCustomerNames([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -82,13 +94,23 @@ const TopCustomers = () => {
 
       <div className="flex h-full w-full flex-row justify-between sm:flex-wrap lg:flex-nowrap 2xl:overflow-hidden">
         <div className="h-full w-full">
-          <Chart
-            options={BarChartOptionsTopCustomers(customerNames)}
-            series={chartData}
-            type="bar"
-            width="100%"
-            height="100%"
-          />
+          {loading ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-gray-500">Loading...</p>
+            </div>
+          ) : chartData.length === 0 || chartData[0]?.data.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-gray-500">No customer data available</p>
+            </div>
+          ) : (
+            <Chart
+              options={BarChartOptionsTopCustomers(customerNames)}
+              series={chartData}
+              type="bar"
+              width="100%"
+              height="100%"
+            />
+          )}
         </div>
       </div>
     </Card>

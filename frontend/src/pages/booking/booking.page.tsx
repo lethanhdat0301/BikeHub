@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -17,17 +17,17 @@ import {
   InputGroup,
   InputLeftAddon,
   Badge,
-  Select,
   FormHelperText,
+  Checkbox,
+  Link,
 } from "@chakra-ui/react";
 import { FaPhone, FaWhatsapp, FaTelegram, FaCheckCircle, FaEnvelope } from "react-icons/fa";
-import ReCAPTCHA from "react-google-recaptcha";
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import bookingRequestService from "../../services/bookingRequestService";
-import { getAllParks, Park } from "../../services/parkService";
 
 const RequestBookingPage: React.FC = () => {
   const toast = useToast();
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -37,31 +37,7 @@ const RequestBookingPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
-  const [parks, setParks] = useState<Park[]>([]);
-  const [loadingParks, setLoadingParks] = useState(true);
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-
-  // Fetch parks
-  useEffect(() => {
-    const fetchParks = async () => {
-      try {
-        const data = await getAllParks();
-        setParks(data);
-      } catch (error) {
-        console.error("Error loading parks:", error);
-        toast({
-          title: "Error",
-          description: "Could not load pickup locations",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      } finally {
-        setLoadingParks(false);
-      }
-    };
-    fetchParks();
-  }, []);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Auto-fill name if user is logged in
   useEffect(() => {
@@ -109,11 +85,11 @@ const RequestBookingPage: React.FC = () => {
       return;
     }
 
-    // Validate reCAPTCHA
-    if (!recaptchaToken) {
+    // Validate terms agreement
+    if (!agreedToTerms) {
       toast({
-        title: "reCAPTCHA Required",
-        description: "Please complete the reCAPTCHA verification",
+        title: "Terms Required",
+        description: "Please read and agree to the Terms & Conditions and Rental Guidelines",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -122,6 +98,36 @@ const RequestBookingPage: React.FC = () => {
     }
 
     setIsSubmitting(true);
+
+    // Execute reCAPTCHA v3
+    if (!executeRecaptcha) {
+      console.log('Execute recaptcha not yet available');
+      toast({
+        title: "reCAPTCHA Error",
+        description: "reCAPTCHA verification is not ready. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    let recaptchaToken: string;
+    try {
+      recaptchaToken = await executeRecaptcha('booking_request');
+    } catch (error) {
+      console.error('reCAPTCHA error:', error);
+      toast({
+        title: "reCAPTCHA Error",
+        description: "Failed to verify reCAPTCHA. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       // Get user_id if logged in
@@ -170,9 +176,8 @@ const RequestBookingPage: React.FC = () => {
         pickupLocation: "",
       }));
 
-      // Reset reCAPTCHA
-      setRecaptchaToken(null);
-      recaptchaRef.current?.reset();
+      // Reset terms agreement
+      setAgreedToTerms(false);
 
       // Reset requestSent after 5 seconds
       setTimeout(() => setRequestSent(false), 5000);
@@ -378,10 +383,11 @@ const RequestBookingPage: React.FC = () => {
               {/* Pickup Location */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Pickup Location (Park)
+                  Pickup Location
                 </FormLabel>
-                <Select
-                  placeholder="Select a park to pick up"
+                <Input
+                  type="text"
+                  placeholder="Enter your preferred pickup location (e.g., Downtown, Beach Area, etc.)"
                   value={formData.pickupLocation}
                   onChange={(e) =>
                     setFormData({
@@ -393,46 +399,50 @@ const RequestBookingPage: React.FC = () => {
                   borderColor="teal.300"
                   _hover={{ borderColor: "teal.500" }}
                   focusBorderColor="teal.500"
-                  isDisabled={loadingParks}
-                >
-                  {parks.map((park) => (
-                    <option key={park.id} value={park.name}>
-                      {park.name} - {park.location}
-                    </option>
-                  ))}
-                </Select>
-                {loadingParks && (
-                  <Text fontSize="xs" color="gray.500" mt={1}>
-                    Loading parks...
-                  </Text>
-                )}
+                />
+                <FormHelperText fontSize="xs" color="gray.500">
+                  Please specify where you'd like to pick up the motorcycle
+                </FormHelperText>
               </FormControl>
 
-              {/* Google reCAPTCHA */}
+              {/* Terms and Conditions Agreement */}
               <FormControl isRequired>
-                <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Verification
-                </FormLabel>
-                <Box
-                  display="flex"
-                  justifyContent={{ base: "center", md: "flex-start" }}
-                  transform={{ base: "scale(0.85)", sm: "scale(0.95)", md: "scale(1)" }}
-                  transformOrigin={{ base: "center", md: "left" }}
+                <Checkbox
+                  colorScheme="teal"
+                  isChecked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  size={{ base: "sm", md: "md" }}
                 >
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ""}
-                    onChange={(token) => setRecaptchaToken(token)}
-                    onExpired={() => setRecaptchaToken(null)}
-                    onErrored={() => setRecaptchaToken(null)}
-                  />
-                </Box>
-                <FormHelperText fontSize="xs" color="gray.500">
-                  Please verify you're not a robot to prevent spam
+                  <Text fontSize={{ base: "xs", md: "sm" }} color="gray.700">
+                    I have read and agree to the{" "}
+                    <Link
+                      href="/terms"
+                      color="teal.600"
+                      fontWeight="semibold"
+                      isExternal
+                      _hover={{ textDecoration: "underline" }}
+                    >
+                      Terms & Conditions
+                    </Link>
+                    {" "}and{" "}
+                    <Link
+                      href="/rental-guide"
+                      color="teal.600"
+                      fontWeight="semibold"
+                      isExternal
+                      _hover={{ textDecoration: "underline" }}
+                    >
+                      Rental Guidelines
+                    </Link>
+                  </Text>
+                </Checkbox>
+                <FormHelperText fontSize="xs" color="gray.500" ml={6}>
+                  Required before submitting your booking request
                 </FormHelperText>
               </FormControl>
 
               {/* Submit Button */}
+              {/* reCAPTCHA v3 runs automatically in the background */}
               <Button
                 type="submit"
                 colorScheme="teal"
@@ -441,6 +451,7 @@ const RequestBookingPage: React.FC = () => {
                 fontWeight="bold"
                 isLoading={isSubmitting}
                 loadingText="Sending..."
+                isDisabled={!agreedToTerms}
                 _hover={{
                   transform: "translateY(-2px)",
                   boxShadow: "xl",

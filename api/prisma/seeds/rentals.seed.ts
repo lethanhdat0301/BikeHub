@@ -1,58 +1,36 @@
-import { Prisma, PrismaClient, Rental, User, Bike } from '@prisma/client';
+import { PrismaClient, User, Bike } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
-const prisma = new PrismaClient();
+export async function seedRentals(prisma: PrismaClient, users: User[], bikes: Bike[]) {
+  if (users.length === 0 || bikes.length === 0) return;
 
-export async function seedRentals(users, bikes) {
-  if (users.length === 0 || bikes.length === 0) {
-    console.log('No users or bikes available for seeding rentals');
-    return [];
-  }
+  const rentals = [];
 
-  const createdRentals = [];
+  // Chỉ lấy users đóng vai trò khách hàng (không lấy admin/dealer)
+  const customers = users.filter(u => u.role === 'user');
 
-  for (const user of users) {
-    if (user.id === 1) {
-      continue;
-    }
-
-    // Generate a random number between 10 and 30
-    const numRentals = faker.number.int({ min: 10, max: 30 });
+  for (const user of customers) {
+    // Mỗi khách thuê 1-3 lần
+    const numRentals = faker.number.int({ min: 1, max: 3 });
 
     for (let i = 0; i < numRentals; i++) {
-      const rental = createRandomRental(user, bikes);
-      if (!rental) {
-        console.log('Skipping undefined rental');
-        continue;
-      }
-      const createdRental = await prisma.rental.create({
-        data: rental as Prisma.RentalCreateInput,
+      const bike = faker.helpers.arrayElement(bikes);
+      const startTime = faker.date.past();
+      const endTime = new Date(startTime.getTime() + (2 * 24 * 60 * 60 * 1000)); // Thuê 2 ngày
+
+      const rental = await prisma.rental.create({
+        data: {
+          user_id: user.id,
+          bike_id: bike.id,
+          start_time: startTime,
+          end_time: endTime,
+          status: faker.helpers.arrayElement(['completed', 'ongoing', 'cancelled']),
+          price: bike.price * 2, // Giá 2 ngày
+          qrcode: '',
+        }
       });
-      createdRentals.push(createdRental);
-      console.log(`Created rental with ID: ${createdRental.id}`);
+      rentals.push(rental);
     }
   }
-
-  return createdRentals;
-}
-
-function createRandomRental(
-  user: User,
-  bikes: Bike[],
-): Partial<Rental> | null {
-  const bike = faker.helpers.arrayElement(bikes);
-
-  if (!bike) {
-    console.log('Undefined bike:', { bike });
-    return null;
-  }
-
-  return {
-    user_id: user.id,
-    bike_id: bike.id,
-    start_time: faker.date.past(),
-    end_time: faker.date.future(),
-    status: faker.helpers.arrayElement(['ongoing', 'completed', 'lost']),
-    price: faker.number.int({ min: 5, max: 500 }),
-  };
+  console.log(`✅ Seeded ${rentals.length} Rentals`);
 }

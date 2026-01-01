@@ -11,6 +11,7 @@ import {
   VStack,
   Divider,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import { Reveal } from "../../motion/reveal.component";
 import bikeImage from "../../../assets/images/bikes/bike1.jpg";
 import { FaStar, FaHeart, FaGasPump, FaBolt, FaUsers } from "react-icons/fa";
@@ -25,6 +26,9 @@ export type Bike = {
   location: string;
   price: number;
   image: string;
+  code?: string;
+  description?: string;
+  images?: string[];
   // Extended fields from database
   rating?: number;
   review_count?: number;
@@ -43,6 +47,7 @@ export type Bike = {
 const CardBike = ({ bike }: { bike: Bike }) => {
   const [liked, setLiked] = useState(false);
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const navigate = useNavigate();
 
   // Use real data from database with fallbacks
   const bikeData = {
@@ -104,13 +109,18 @@ const CardBike = ({ bike }: { bike: Bike }) => {
           <Heading as="h3" size={{ base: "xs", md: "md" }} fontWeight={600} className="capitalize" noOfLines={1}>
             {bike.model}
           </Heading>
+          {bike.code && (
+            <Text fontSize="xs" color="gray.500" mt={1}>
+              Code: {bike.code}
+            </Text>
+          )}
         </Reveal>
 
         {/* Price & Rating */}
         <Reveal>
           <Flex justifyContent="space-between" alignItems="center" gap={2}>
             <Heading as="h4" size={{ base: "sm", md: "md" }} color="teal.600" fontWeight={700}>
-              ${bike.price}
+              {bike.price.toLocaleString('vi-VN')} VNĐ
               <Text as="span" fontSize={{ base: "xs", md: "sm" }} fontWeight={400} color="gray.600">
                 /day
               </Text>
@@ -210,7 +220,7 @@ const CardBike = ({ bike }: { bike: Bike }) => {
             colorScheme="teal"
             size={{ base: "sm", md: "md" }}
             width="full"
-            onClick={onOpen}
+            onClick={() => navigate(`/motorcycles/${bike.id}`)}
             mt={{ base: 1, md: 2 }}
             _hover={{
               transform: "translateY(-2px)",
@@ -222,8 +232,6 @@ const CardBike = ({ bike }: { bike: Bike }) => {
           </Button>
         </Reveal>
       </VStack>
-
-      <BikeDetails isOpen={isOpen} onClose={onClose} bike={bike} />
     </Flex>
   );
 };

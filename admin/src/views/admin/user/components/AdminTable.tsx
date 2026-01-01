@@ -27,13 +27,15 @@ const AdminTable: React.FC<Props> = ({
 }) => {
   // Ensure data is always an array (API may return an object or { data: [...] })
   const data = React.useMemo(() => {
+    if (!tableContent) return [];
     if (Array.isArray(tableContent)) return tableContent;
     if (tableContent && Array.isArray((tableContent as any).data)) return (tableContent as any).data;
     return [];
   }, [tableContent]);
+
   const columns = React.useMemo(
     () =>
-      tableHeader.map((header) => ({
+      (tableHeader || []).map((header) => ({
         Header: header.title,
         accessor: header.id,
         Cell:
@@ -82,6 +84,17 @@ const AdminTable: React.FC<Props> = ({
   const handleClose = () => {
     setEditData(null);
   };
+
+  // If no data or headers, show loading state
+  if (!tableHeader || tableHeader.length === 0) {
+    return (
+      <div className="h-full w-full px-6 pb-6">
+        <div className="flex h-64 items-center justify-center">
+          <p className="text-lg text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleDelete = async (row: any) => {
     const confirmDelete = window.confirm(

@@ -25,6 +25,41 @@ import { CreateRentalDto, UpdateRentalDto } from './rental.dto';
 export class RentalController {
   constructor(private rentalService: RentalService) { }
 
+  // Public endpoint for creating rental from frontend
+  @Post('/')
+  async createRentalRequest(
+    @Body() body: {
+      user_id?: number;
+      bike_id: number;
+      start_date: string;
+      end_date: string;
+      price: number;
+      referrer_phone?: string;
+      contact_name?: string;
+      contact_email?: string;
+      contact_phone?: string;
+      pickup_location?: string;
+      recaptcha_token: string;
+    },
+  ): Promise<RentalModel> {
+    const { user_id, bike_id, start_date, end_date, price, referrer_phone, contact_name, contact_email, contact_phone, pickup_location } = body;
+
+    // Create rental with pending status
+    return this.rentalService.create({
+      start_time: new Date(start_date),
+      end_time: new Date(end_date),
+      status: 'pending',
+      price: price,
+      qrcode: referrer_phone || '',
+      contact_name: contact_name || '',
+      contact_email: contact_email || '',
+      contact_phone: contact_phone || '',
+      pickup_location: pickup_location || '',
+      ...(user_id ? { User: { connect: { id: user_id } } } : {}),
+      Bike: { connect: { id: bike_id } },
+    });
+  }
+
   @Get('/')
   @Roles(ROLES_ENUM.ADMIN)
   @UseGuards(JwtAuthGuard)

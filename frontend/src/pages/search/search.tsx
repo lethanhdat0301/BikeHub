@@ -37,7 +37,7 @@ const SearchPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     // Filter states
-    const [priceRange, setPriceRange] = useState<number[]>([0, 100]);
+    const [priceRange, setPriceRange] = useState<number[]>([0, 1000000]);
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
     const [selectedTransmission, setSelectedTransmission] = useState<string[]>([]);
 
@@ -152,15 +152,15 @@ const SearchPage: React.FC = () => {
                         {/* Price Range Filter */}
                         <Box>
                             <Text fontWeight="semibold" mb={3}>
-                                Price Range ($/day)
+                                Price Range (VNĐ/day)
                             </Text>
                             <RangeSlider
                                 aria-label={["min", "max"]}
                                 value={priceRange}
                                 onChange={setPriceRange}
                                 min={0}
-                                max={100}
-                                step={5}
+                                max={1000000}
+                                step={50000}
                             >
                                 <RangeSliderTrack bg="teal.100">
                                     <RangeSliderFilledTrack bg="teal.500" />
@@ -170,10 +170,10 @@ const SearchPage: React.FC = () => {
                             </RangeSlider>
                             <HStack justify="space-between" mt={2}>
                                 <Text fontSize="sm" color="gray.600">
-                                    ${priceRange[0]}
+                                    {priceRange[0].toLocaleString()} đ
                                 </Text>
                                 <Text fontSize="sm" color="gray.600">
-                                    ${priceRange[1]}
+                                    {priceRange[1].toLocaleString()} đ
                                 </Text>
                             </HStack>
                         </Box>

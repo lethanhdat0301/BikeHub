@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 import App from "./App.tsx";
 import { BrowserRouter } from "react-router-dom";
@@ -24,12 +25,14 @@ const theme = extendTheme({ breakpoints, fonts });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <ChakraProvider theme={theme}>
-          <App />
-        </ChakraProvider>
-      </BrowserRouter>
-    </AuthProvider>
+    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ""}>
+      <AuthProvider>
+        <BrowserRouter>
+          <ChakraProvider theme={theme}>
+            <App />
+          </ChakraProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </GoogleReCaptchaProvider>
   </React.StrictMode>
 );

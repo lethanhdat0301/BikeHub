@@ -1,7 +1,7 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "windows", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -18,6 +18,7 @@ model Bike {
   Park            Park     @relation(fields: [park_id], references: [id])
   Rental          Rental[]
   image           String?
+  description     String?  // Mô tả chi tiết về xe
   
   rating          Float?   @default(0)
   review_count    Int?     @default(0)
@@ -62,20 +63,26 @@ model User {
 }
 
 model Rental {
-  id         Int       @id @default(autoincrement())
-  user_id    Int
-  bike_id    Int
-  start_time DateTime
-  end_time   DateTime?
-  status     String
-  price      Float
-  User       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  Bike       Bike      @relation(fields: [bike_id], references: [id], onDelete: Cascade)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  qrcode     String?
-  payment_id String?
-  order_id   String?
+  id              Int       @id @default(autoincrement())
+  user_id         Int?
+  bike_id         Int
+  start_time      DateTime
+  end_time        DateTime?
+  status          String
+  price           Float
+  User            User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Bike            Bike      @relation(fields: [bike_id], references: [id], onDelete: Cascade)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  qrcode          String?
+  payment_id      String?
+  order_id        String?
+  
+  // Contact info for guests who don't login
+  contact_name    String?
+  contact_email   String?
+  contact_phone   String?
+  pickup_location String? // Địa điểm khách muốn nhận xe (địa chỉ cụ thể)
 }
 
 model BookingRequest {
