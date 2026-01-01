@@ -1,11 +1,17 @@
 /*
   Warnings:
 
-  - Added the required column `email` to the `BookingRequest` table without a default value. This is not possible if the table is not empty.
+  - Added the optional column `email` to the `BookingRequest` table.
 
 */
 -- AlterTable
-ALTER TABLE "BookingRequest" ADD COLUMN     "email" TEXT NOT NULL;
+ALTER TABLE "BookingRequest" ADD COLUMN     "email" TEXT;
+
+-- Update existing rows with a default email
+UPDATE "BookingRequest" SET "email" = 'noreply@bikehub.com' WHERE "email" IS NULL;
+
+-- Make email NOT NULL after setting defaults
+ALTER TABLE "BookingRequest" ALTER COLUMN "email" SET NOT NULL;
 
 -- AlterTable
 ALTER TABLE "Rental" ADD COLUMN     "contact_email" TEXT,
