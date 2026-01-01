@@ -9,28 +9,25 @@ datasource db {
 
 model Bike {
   id              Int      @id @default(autoincrement())
-  model           String   // Tên xe
-  status          String   // Tình trạng xe: "available", "rented", "maintenance"
+  model           String   
+  status          String   
   lock            Boolean
   location        String   // Vị trí đỗ
   price           Float    // Giá xe trên 1 ngày
   park_id         Int
   Park            Park     @relation(fields: [park_id], references: [id])
   Rental          Rental[]
-  image           String?  // Hình ảnh về xe
+  image           String?
   
-  // Thông tin đánh giá
-  rating          Float?   @default(0)  // Số sao trung bình (0-5)
-  review_count    Int?     @default(0)  // Số lượt đánh giá
+  rating          Float?   @default(0)
+  review_count    Int?     @default(0)
   
-  // Thông tin cung cấp
-  dealer_name     String?  // Tên đại lý/dealer cung cấp
-  dealer_contact  String?  // Thông tin liên hệ dealer
+  dealer_name     String?
+  dealer_contact  String?
   
-  // Thông tin kỹ thuật
-  seats           Int?     // Số chỗ ngồi
-  fuel_type       String?  // "electric" hoặc "gasoline"
-  transmission    String?  // "automatic" hoặc "manual"
+  seats           Int?
+  fuel_type       String?
+  transmission    String?
   
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt

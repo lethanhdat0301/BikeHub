@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Box, Center, Heading, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
+import { Box, Center, Heading, SimpleGrid, Spinner, Text, Button, HStack, IconButton } from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import CardBike from "./cardBike.component";
 import { Reveal } from "../../motion/reveal.component";
 import bikeService from "../../../services/bikeService";
@@ -91,6 +92,8 @@ const BikeList: React.FC = () => {
     const [bikes, setBikes] = useState<Bike[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const itemsPerPage = 6; // 6 xe mỗi trang (2x3 grid trên desktop, 2x3 trên mobile)
 
     useEffect(() => {
         const fetchBikes = async () => {
@@ -100,7 +103,7 @@ const BikeList: React.FC = () => {
                 // console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_PROD);
                 console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_LOCAL);
 
-                let data = await bikeService.getBikesByStatus('available', 6);
+                let data = await bikeService.getBikesByStatus('available', 20); // Lấy nhiều xe hơn để phân trang
 
                 if (!data || (Array.isArray(data) && data.length === 0)) {
                     console.warn("⚠️ API trả về rỗng, sử dụng Mock Data");
@@ -129,6 +132,18 @@ const BikeList: React.FC = () => {
 
         fetchBikes();
     }, []);
+
+    // Tính toán pagination
+    const totalPages = Math.ceil(bikes.length / itemsPerPage);
+    const indexOfLastBike = currentPage * itemsPerPage;
+    const indexOfFirstBike = indexOfLastBike - itemsPerPage;
+    const currentBikes = bikes.slice(indexOfFirstBike, indexOfLastBike);
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+        // Scroll to top of bike list
+        document.getElementById("weOffer")?.scrollIntoView({ behavior: "smooth" });
+    };
 
     return (
         <Box
@@ -165,12 +180,12 @@ const BikeList: React.FC = () => {
             </Center>
 
             <SimpleGrid
-                columns={{ base: 1, md: 2, lg: 3 }}
-                spacing={{ base: 4, md: 6, lg: 8 }}
-                gap={{ base: 4, md: 6, lg: 8 }}
+                columns={{ base: 2, md: 2, lg: 3 }}
+                spacing={{ base: 2, md: 6, lg: 8 }}
+                gap={{ base: 2, md: 6, lg: 8 }}
                 mt={5}
-                className="w-4/5"
-                px={{ base: 4, md: 0 }}
+                className="w-full md:w-4/5"
+                px={{ base: 2, md: 0 }}
             >
                 {loading ? (
                     <Center gridColumn="1 / -1" py={10}>
@@ -187,11 +202,59 @@ const BikeList: React.FC = () => {
                         </Text>
                     </Center>
                 ) : (
-                    bikes.map((bike) => (
+                    currentBikes.map((bike) => (
                         <CardBike key={bike.id} bike={bike} />
                     ))
                 )}
             </SimpleGrid>
+
+            {/* Pagination Controls */}
+            {!loading && !error && bikes.length > 0 && totalPages > 1 && (
+                <Box mt={8} mb={4}>
+                    <HStack spacing={2} justifyContent="center" flexWrap="wrap">
+                        {/* Previous Button */}
+                        <IconButton
+                            aria-label="Previous page"
+                            icon={<ChevronLeftIcon />}
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            isDisabled={currentPage === 1}
+                            colorScheme="teal"
+                            variant="outline"
+                            size={{ base: "sm", md: "md" }}
+                        />
+
+                        {/* Page Numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                            <Button
+                                key={pageNum}
+                                onClick={() => handlePageChange(pageNum)}
+                                colorScheme={currentPage === pageNum ? "orange" : "gray"}
+                                variant={currentPage === pageNum ? "solid" : "outline"}
+                                size={{ base: "sm", md: "md" }}
+                                minW={{ base: "40px", md: "44px" }}
+                            >
+                                {pageNum}
+                            </Button>
+                        ))}
+
+                        {/* Next Button */}
+                        <IconButton
+                            aria-label="Next page"
+                            icon={<ChevronRightIcon />}
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            isDisabled={currentPage === totalPages}
+                            colorScheme="teal"
+                            variant="outline"
+                            size={{ base: "sm", md: "md" }}
+                        />
+                    </HStack>
+
+                    {/* Page Info */}
+                    <Text textAlign="center" mt={3} fontSize={{ base: "xs", md: "sm" }} color="gray.600">
+                        Trang {currentPage} / {totalPages} • Tổng {bikes.length} xe
+                    </Text>
+                </Box>
+            )}
         </Box>
     );
 };

@@ -25,13 +25,14 @@ import {
   // DrawerHeader,
   DrawerCloseButton,
   // useColorMode,
+  Divider,
 } from "@chakra-ui/react";
 import { TbLogout } from "react-icons/tb";
-import { FaTelegram, FaWhatsapp, FaFacebookMessenger, FaPhone } from "react-icons/fa";
+import { FaTelegram, FaWhatsapp, FaFacebookMessenger, FaPhone, FaGlobeAsia } from "react-icons/fa";
 import LogoutButton from "../logoutButton.component";
 import { useAuth } from "../../hooks/useAuth";
 import logoImage from "../../assets/images/logoofficial.png";
-import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
+import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useLocation } from 'react-router-dom';
 /**
  * Header: A functional component representing a header in React with Tailwind CSS.
@@ -414,132 +415,147 @@ const Header: React.FC = () => {
         display={{ base: "block", md: "none" }}
       />
       <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerBody>
-            <VStack as="nav" spacing="6">
+        <DrawerOverlay backdropFilter="blur(5px)" />
+        <DrawerContent bg="white">
+          <DrawerCloseButton size="lg" mt={2} />
+
+          <DrawerBody display="flex" flexDirection="column" h="100%" py={8}>
+
+            {/* PHẦN 1: MENU CHÍNH */}
+            {/* align="center" để mọi thứ căn giữa trục dọc */}
+            <VStack as="nav" spacing={5} flex="1" justify="center" w="full">
               <Link to="/">
                 <Button
-                  paddingStart={0}
-                  paddingEnd={0}
-                  className="group hover:text-teal-500 focus:text-teal-500"
-                  variant="nav"
-                  _hover={{ transition: "all 0.3s ease-in-out" }}
-                  pos={"relative"}
+                  variant="ghost"
+                  fontSize="lg"        // Giảm size chút cho tinh tế (từ xl -> lg)
+                  fontWeight="medium"  // 👇 SỬA Ở ĐÂY: medium thay vì bold
+                  color="gray.700"
+                  _hover={{ color: "teal.600", bg: "teal.50" }}
                   onClick={onClose}
+                  w="full"
                 >
                   Home
-                  <Box
-                    position={"absolute"}
-                    className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                    _groupFocus={{ width: "100%" }}
-                    _groupHover={{
-                      width: "100%",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  />
                 </Button>
               </Link>
+
               {headerItems.map((item, i) => (
                 <Button
                   key={i}
-                  paddingStart={0}
-                  paddingEnd={0}
-                  className="group hover:text-teal-500 focus:text-teal-500"
-                  variant="nav"
-                  _hover={{ transition: "all 0.3s ease-in-out" }}
-                  pos={"relative"}
+                  variant="ghost"
+                  fontSize="lg"        // Giảm size chút
+                  fontWeight="medium"  // 👇 SỬA Ở ĐÂY: medium thay vì bold
+                  color="gray.700"
+                  _hover={{ color: "teal.600", bg: "teal.50" }}
                   onClick={() => {
                     handleNavigation(item);
                     onClose();
                   }}
+                  w="full"
                 >
                   {item.label}
-                  <Box
-                    position={"absolute"}
-                    className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-                    _groupFocus={{ width: "100%" }}
-                    _groupHover={{
-                      width: "100%",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  />
                 </Button>
               ))}
+            </VStack>
 
-              {/* Mobile: Language selector */}
-              <Box w="100%">
-                <Select
-                  value={language}
-                  onChange={handleLanguageChange}
-                  size="md"
-                  width="100%"
-                  borderColor="teal.300"
-                  _hover={{ borderColor: "teal.500" }}
-                  focusBorderColor="teal.500"
-                  mt={2}
+            <Divider my={6} borderColor="gray.100" />
+
+            {/* PHẦN 2: TIỆN ÍCH */}
+            <VStack spacing={6} pb={6} w="full"> {/* Thêm w="full" vào đây */}
+
+              {/* Language Selector */}
+              <Menu autoSelect={false}>
+                <MenuButton
+                  as={Button}
+                  rightIcon={<ChevronDownIcon />}
+                  leftIcon={<FaGlobeAsia />}
+                  variant="outline"
+                  size="sm"
+                  borderColor="teal.200"
+                  color="teal.600"
+                  rounded="full"
+                  fontWeight="medium"
+                  _hover={{ bg: "teal.50", borderColor: "teal.500" }}
+                  _active={{ bg: "teal.100" }}
                 >
-                  <option value="en">English</option>
-                  <option value="vi">Tiếng Việt</option>
-                </Select>
-              </Box>
+                  {language === 'en' ? 'English' : 'Tiếng Việt'}
+                </MenuButton>
+                <MenuList minW="150px" fontSize="sm" zIndex={1500}>
+                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'en' } })}>
+                    🇺🇸 English
+                  </MenuItem>
+                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'vi' } })}>
+                    🇻🇳 Tiếng Việt
+                  </MenuItem>
+                </MenuList>
+              </Menu>
 
-              {/* Mobile: Social icons */}
-              <HStack spacing={4} w="100%" justify="center" mt={2}>
+              {/* Social Icons */}
+              {/* 👇 SỬA Ở ĐÂY: Thêm w="full" và justify="center" để icon luôn ở giữa */}
+              <HStack spacing={8} w="full" justify="center">
                 <IconButton
                   as="a"
                   href={socialLinks.telegram}
                   target="_blank"
-                  rel="noopener noreferrer"
                   aria-label="Telegram"
-                  icon={<FaTelegram />}
-                  size="md"
-                  variant="ghost"
-                  colorScheme="telegram"
-                  _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+                  icon={<FaTelegram size={22} />}
+                  variant="unstyled"
+                  color="gray.400"
+                  _hover={{ color: "#0088cc", transform: "scale(1.2)" }}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
                   transition="all 0.2s"
                 />
                 <IconButton
                   as="a"
                   href={socialLinks.whatsapp}
                   target="_blank"
-                  rel="noopener noreferrer"
                   aria-label="WhatsApp"
-                  icon={<FaWhatsapp />}
-                  size="md"
-                  variant="ghost"
-                  colorScheme="whatsapp"
-                  _hover={{ bg: "green.50", transform: "scale(1.1)" }}
+                  icon={<FaWhatsapp size={22} />}
+                  variant="unstyled"
+                  color="gray.400"
+                  _hover={{ color: "#25D366", transform: "scale(1.2)" }}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
                   transition="all 0.2s"
                 />
                 <IconButton
                   as="a"
                   href={socialLinks.messenger}
                   target="_blank"
-                  rel="noopener noreferrer"
                   aria-label="Messenger"
-                  icon={<FaFacebookMessenger />}
-                  size="md"
-                  variant="ghost"
-                  colorScheme="messenger"
-                  _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+                  icon={<FaFacebookMessenger size={22} />}
+                  variant="unstyled"
+                  color="gray.400"
+                  _hover={{ color: "#006AFF", transform: "scale(1.2)" }}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
                   transition="all 0.2s"
                 />
               </HStack>
 
-              {/* Mobile: Phone numbers */}
-              <VStack spacing={1} align="center" w="100%" mt={2}>
+              {/* Phone Numbers */}
+              <VStack spacing={2}>
                 {phoneNumbers.map((phone, index) => (
-                  <HStack key={index} spacing={1}>
-                    <FaPhone size={14} color="#319795" />
-                    <Text fontSize="sm" fontWeight="medium" color="teal.600">
-                      <a href={`tel:${phone.number}`}>{phone.display}</a>
-                    </Text>
-                  </HStack>
+                  <Button
+                    key={index}
+                    as="a"
+                    href={`tel:${phone.number}`}
+                    leftIcon={<FaPhone size={12} />}
+                    variant="link"
+                    color="teal.600"
+                    fontWeight="medium"
+                    fontSize="sm"
+                    _hover={{ textDecoration: 'none', color: 'teal.700' }}
+                  >
+                    {phone.display}
+                  </Button>
                 ))}
               </VStack>
             </VStack>
+
           </DrawerBody>
         </DrawerContent>
       </Drawer>

@@ -64,12 +64,13 @@ const CardBike = ({ bike }: { bike: Bike }) => {
       bg={"white"}
       direction="column"
       justifyContent="space-between"
-      className="border rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
+      className="border rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
       overflow="hidden"
     >
       {/* Image Section */}
       <Box
-        className="w-full h-52 relative"
+        className="w-full relative"
+        h={{ base: "120px", sm: "180px", md: "200px" }}
         bgImage={bike.image ? bike.image : bikeImage}
         bgPosition={"center"}
         bgRepeat={"no-repeat"}
@@ -77,7 +78,7 @@ const CardBike = ({ bike }: { bike: Bike }) => {
       >
         <FaHeart
           onClick={() => setLiked(!liked)}
-          className={`absolute top-3 right-3 w-6 h-6 cursor-pointer transition-all ${liked
+          className={`absolute top-2 right-2 w-5 h-5 cursor-pointer transition-all ${liked
             ? "text-red-500 drop-shadow-lg scale-110"
             : "text-white drop-shadow-md hover:scale-110"
             }`}
@@ -85,22 +86,22 @@ const CardBike = ({ bike }: { bike: Bike }) => {
         {bikeData.features.includes("New-model") && (
           <Badge
             position="absolute"
-            top="3"
-            left="3"
+            top="2"
+            left="2"
             colorScheme="green"
-            fontSize="xs"
-            px={2}
-            py={1}
+            fontSize="2xs"
+            px={1}
+            py={0.5}
           >
             New Model
           </Badge>
         )}
       </Box>
 
-      <VStack p={{ base: 3, md: 4 }} spacing={{ base: 2, md: 3 }} align="stretch">
+      <VStack p={{ base: 2, md: 4 }} spacing={{ base: 1, md: 3 }} align="stretch">
         {/* Bike Name */}
         <Reveal>
-          <Heading as="h3" size={{ base: "sm", md: "md" }} fontWeight={600} className="capitalize" noOfLines={1}>
+          <Heading as="h3" size={{ base: "xs", md: "md" }} fontWeight={600} className="capitalize" noOfLines={1}>
             {bike.model}
           </Heading>
         </Reveal>
