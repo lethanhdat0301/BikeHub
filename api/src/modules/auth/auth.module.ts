@@ -10,8 +10,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { GoogleStrategy } from './auth.google.strategy';
 import { EmailService } from '../email/email.service';
+import { GoogleAvailableGuard } from './google-available.guard';
 
-const authProviders: Provider[] = [UserService, AuthService, JwtStrategy, PrismaService, EmailService];
+const authProviders: Provider[] = [UserService, AuthService, JwtStrategy, PrismaService, EmailService, GoogleAvailableGuard];
 if (process.env.CLIENT_ID && process.env.CLIENT_SECRET) {
   authProviders.push(GoogleStrategy);
 } else {

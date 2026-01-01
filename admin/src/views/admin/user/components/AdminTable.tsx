@@ -25,7 +25,12 @@ const AdminTable: React.FC<Props> = ({
   tableContent,
   moduleName,
 }) => {
-  const data = React.useMemo(() => tableContent, [tableContent]);
+  // Ensure data is always an array (API may return an object or { data: [...] })
+  const data = React.useMemo(() => {
+    if (Array.isArray(tableContent)) return tableContent;
+    if (tableContent && Array.isArray((tableContent as any).data)) return (tableContent as any).data;
+    return [];
+  }, [tableContent]);
   const columns = React.useMemo(
     () =>
       tableHeader.map((header) => ({

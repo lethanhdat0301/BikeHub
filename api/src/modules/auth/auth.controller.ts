@@ -8,6 +8,7 @@ import { AuthService } from './auth.service';
 import { AuthResponseDTO, LoginUserDTO, RegisterUserDTO } from './auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
+import { GoogleAvailableGuard } from './google-available.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -57,13 +58,13 @@ export class AuthController {
   }
 
   @Get('google')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleAvailableGuard)
   async googleAuth() {
 
   }
 
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleAvailableGuard)
   async googleAuthCallback(@Req() req, @Res() res) {
     res.cookie('accessToken', req.user.accessToken, {
       expires: new Date(new Date().getTime() + JWT_EXPIRY_SECONDS),
