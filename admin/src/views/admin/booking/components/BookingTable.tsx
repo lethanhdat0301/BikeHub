@@ -190,8 +190,8 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading }) => {
                         key={status}
                         onClick={() => setStatusFilter(status)}
                         className={`rounded-lg px-4 py-2 text-sm font-medium ${statusFilter === status
-                                ? "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white"
-                                : "bg-gray-50 text-gray-700 hover:bg-gray-100 dark:bg-navy-700 dark:text-gray-300"
+                            ? "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white"
+                            : "bg-gray-50 text-gray-700 hover:bg-gray-100 dark:bg-navy-700 dark:text-gray-300"
                             }`}
                     >
                         {status}
@@ -238,7 +238,7 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading }) => {
                                     >
                                         {row.cells.map((cell) => (
                                             <td {...cell.getCellProps()} className="px-4 py-4">
-                                                {cell.render("Cell")}
+                                                <>{cell.render("Cell")}</>
                                             </td>
                                         ))}
                                     </tr>

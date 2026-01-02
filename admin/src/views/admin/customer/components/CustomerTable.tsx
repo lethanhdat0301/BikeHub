@@ -205,7 +205,7 @@ const CustomerTable: React.FC<Props> = ({ tableContent, loading }) => {
                                     >
                                         {row.cells.map((cell) => (
                                             <td {...cell.getCellProps()} className="px-4 py-4">
-                                                {cell.render("Cell")}
+                                                <>{cell.render("Cell")}</>
                                             </td>
                                         ))}
                                     </tr>
