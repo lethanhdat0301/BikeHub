@@ -9,6 +9,8 @@ import { RentalModule } from '../rental/rental.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PaypalModule } from '../payment/paypal.module';
 import { BookingRequestModule } from '../booking-request/booking-request.module';
+import { DealerModule } from '../dealer/dealer.module';
+import { ReferrerModule } from '../referrer/referrer.module';
 import { GLOBAL_CONFIG } from '../../configs/global.config';
 
 import { AppService } from './app.service';
@@ -23,6 +25,8 @@ import { AppController } from './app.controller';
     BikeModule,
     RentalModule,
     BookingRequestModule,
+    DealerModule,
+    ReferrerModule,
     // ConfigModule.forRoot({ isGlobal: true, load: [() => GLOBAL_CONFIG] }),
     // ConfigModule.forRoot({ 
     //   isGlobal: true, 

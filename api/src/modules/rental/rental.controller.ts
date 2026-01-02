@@ -26,7 +26,7 @@ export class RentalController {
   constructor(private rentalService: RentalService) { }
 
   // Public endpoint for creating rental from frontend
-  @Post('/')
+  @Post()
   async createRentalRequest(
     @Body() body: {
       user_id?: number;
@@ -60,7 +60,7 @@ export class RentalController {
     });
   }
 
-  @Get('/')
+  @Get()
   @Roles(ROLES_ENUM.ADMIN)
   @UseGuards(JwtAuthGuard)
   async getAllRentals(): Promise<RentalModel[]> {
@@ -154,5 +154,10 @@ export class RentalController {
   @UseGuards(JwtAuthGuard)
   async deleteRental(@Param('id') id: string): Promise<RentalModel> {
     return this.rentalService.delete({ id: Number(id) });
+  }
+
+  @Get('bookings')
+  async getBookings() {
+    return this.rentalService.getBookingsWithDetails();
   }
 }

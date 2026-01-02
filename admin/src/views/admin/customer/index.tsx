@@ -1,32 +1,26 @@
-import BikeTable from "./components/BikeTable";
+import CustomerTable from "./components/CustomerTable";
 import { useEffect, useState } from "react";
 
-const Bikes = () => {
+const Customers = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}bikes`,
+          `${process.env.REACT_APP_API_URL}users/customers`,
           { credentials: "include" }
         );
         const data = await response.json();
-        
-        if (Array.isArray(data)) {
-          setTableData(data);
-        } else if (data && Array.isArray((data as any).data)) {
-          setTableData((data as any).data);
-        } else {
-          setTableData([]);
-        }
+        setTableData(data);
       } catch (error) {
-        console.error("Error fetching bikes:", error);
+        console.error("Error fetching customers:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
@@ -34,15 +28,15 @@ const Bikes = () => {
     <div className="mt-5">
       <div className="mb-5">
         <h3 className="text-3xl font-bold text-navy-700 dark:text-white">
-          Bikes Management
+          Customer List
         </h3>
         <p className="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Manage all vehicles in the system.
+          A list of all customers who have rented from you.
         </p>
       </div>
-      <BikeTable tableContent={tableData} loading={loading} />
+      <CustomerTable tableContent={tableData} loading={loading} />
     </div>
   );
 };
 
-export default Bikes;
+export default Customers;

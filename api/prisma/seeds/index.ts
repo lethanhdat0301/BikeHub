@@ -3,6 +3,8 @@ import { seedUsers } from './users.seed';
 import { seedParks } from './parks.seed';
 import { seedBikes } from './bikes.seed';
 import { seedRentals } from './rentals.seed';
+import { seedDealers } from './dealers.seed';
+import { seedReferrers } from './referrers.seed';
 
 const prisma = new PrismaClient();
 
@@ -22,6 +24,12 @@ async function main() {
   if (bikes) {
     await seedRentals(prisma, users, bikes);
   }
+
+  // 5. Dealers
+  await seedDealers(prisma);
+
+  // 6. Referrers
+  await seedReferrers(prisma);
 
   console.log('🏁 Seeding finished.');
 }

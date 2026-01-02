@@ -105,4 +105,38 @@ export class UserService {
     return deleteduser;
   }
 
+  async getCustomersWithStats() {
+    const users = await this.prisma.user.findMany({
+      where: { role: 'user' },
+      include: {
+        Rental: {
+          select: {
+            price: true,
+            created_at: true,
+          },
+        },
+      },
+    });
+
+    return users.map(user => {
+      const totalRentals = user.Rental.length;
+      const totalSpent = user.Rental.reduce((sum, rental) => sum + rental.price, 0);
+      const lastRental = user.Rental.length > 0
+        ? user.Rental.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
+        : null;
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        image: user.image,
+        total_rentals: totalRentals,
+        total_spent: totalSpent,
+        average_rating: 4, // Mock data - you can add real ratings later
+        last_rental_date: lastRental?.created_at || null,
+      };
+    });
+  }
+
 }

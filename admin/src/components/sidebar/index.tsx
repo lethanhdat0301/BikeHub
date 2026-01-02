@@ -14,13 +14,14 @@ const Sidebar = (props: {
   const { open, onClose } = props;
   const { user } = useAuth();
 
-  // Filter routes based on role: admin sees all; dealer sees only bikes and rentals
+  // Filter routes based on role: admin sees all; dealer sees limited pages
   const filteredRoutes = (() => {
     if (!user || !user.role) return routes;
     if (user.role === "admin") return routes;
     if (user.role === "dealer") {
+      // Dealers can only see: Dashboard, Bookings, Bikes, Referrals, and Logout
       return routes.filter((r) =>
-        ["default", "bikes", "rentals", "parks", "sign-in"].includes(r.path)
+        ["default", "bookings", "bikes", "referrals", "sign-in"].includes(r.path)
       );
     }
     // default: hide admin pages for regular users
@@ -29,9 +30,8 @@ const Sidebar = (props: {
 
   return (
     <div
-      className={`sm:none duration-175 linear fixed !z-50 flex min-h-full flex-col bg-white pb-10 shadow-2xl shadow-white/5 transition-all dark:!bg-navy-800 dark:text-white md:!z-50 lg:!z-50 xl:!z-0 ${
-        open ? "translate-x-0" : "-translate-x-96"
-      }`}
+      className={`sm:none duration-175 linear fixed !z-50 flex min-h-full flex-col bg-white pb-10 shadow-2xl shadow-white/5 transition-all dark:!bg-navy-800 dark:text-white md:!z-50 lg:!z-50 xl:!z-0 ${open ? "translate-x-0" : "-translate-x-96"
+        }`}
     >
       <span
         className="absolute right-4 top-4 block cursor-pointer xl:hidden"

@@ -79,4 +79,9 @@ export class UserController {
 
     return { message: 'User deleted' };
   }
+
+  @Get('customers')
+  async getCustomers() {
+    return this.userService.getCustomersWithStats();
+  }
 }

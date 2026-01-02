@@ -82,9 +82,20 @@ export class AuthService {
     if (userData) {
       throw new UnauthorizedException("This email already exists");
     }
-    const newUser = { ...user, role: ROLES_ENUM.USER }; // default role
+    
+    // Allow role to be specified (for dealer creation), otherwise default to USER
+    const newUser = { 
+      ...user, 
+      role: user.role || ROLES_ENUM.USER 
+    };
+    
     const Res = await this.userService.createUser(newUser);
-    await this.emailService.sendEmail(user.email, object, content);
+    
+    // Only send welcome email for regular users, not dealers
+    if (newUser.role === ROLES_ENUM.USER) {
+      await this.emailService.sendEmail(user.email, object, content);
+    }
+    
     delete Res.password;
     return Res;
   }

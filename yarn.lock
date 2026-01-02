@@ -14829,6 +14829,11 @@ schema-utils@^4.0.0, schema-utils@^4.2.0, schema-utils@^4.3.0, schema-utils@^4.3
     ajv-formats "^2.1.1"
     ajv-keywords "^5.1.0"
 
+scrypt-kdf@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/scrypt-kdf/-/scrypt-kdf-4.0.0.tgz#7d17ff7cb053a8bb6e1ec3ecbf57095878606f65"
+  integrity sha512-Gw7nImFqHQhxCANNnmQFiQIiRVDa/gOpGW6rpD18w+bNjG7x41RvfAcJOdjXiOoI5lPaEWoYZhY7h6qorGdBQw==
+
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/select-hose/-/select-hose-2.0.0.tgz"

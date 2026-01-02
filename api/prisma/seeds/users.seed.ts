@@ -13,6 +13,7 @@ async function hashPassword(password: string): Promise<string> {
 
 export async function seedUsers(prisma: PrismaClient) {
   const password = await hashPassword('123456');
+  const adminPassword = await hashPassword('admin123');
 
   // 1. Tạo Super Admin
   await prisma.user.upsert({
@@ -21,7 +22,7 @@ export async function seedUsers(prisma: PrismaClient) {
     create: {
       name: 'Super Admin',
       email: 'admin@rentnride.com',
-      password,
+      password: adminPassword,
       role: 'admin',
       phone: '0900000000',
       birthdate: new Date('1990-01-01'),

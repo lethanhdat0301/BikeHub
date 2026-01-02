@@ -4,6 +4,7 @@ import {
   IsDate,
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -68,6 +69,11 @@ export class RegisterUserDTO {
   @MinLength(9)
   @ApiProperty()
   phone: string | null;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false })
+  role?: string; // Optional role field for dealer creation
 }
 
 export class LoginUserDTO {

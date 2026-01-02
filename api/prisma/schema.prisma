@@ -99,3 +99,34 @@ model BookingRequest {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
+
+model Dealer {
+  id                Int      @id @default(autoincrement())
+  name              String
+  email             String   @unique
+  phone             String?
+  telegram          String?
+  location          String?
+  status            String   @default("Active") // Active or Inactive
+  total_revenue     Float    @default(0)
+  platform_fee      Float    @default(0)
+  current_debt      Float    @default(0)
+  last_payment_date DateTime?
+  vehicle_count     Int      @default(0)
+  image             String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+}
+
+model Referrer {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  phone              String?
+  email              String?
+  total_earnings     Float    @default(0)
+  referral_count     Int      @default(0)
+  last_referral_date DateTime?
+  image              String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+}

@@ -84,4 +84,35 @@ export class RentalService {
       where,
     });
   }
+
+  async getBookingsWithDetails() {
+    const rentals = await this.prisma.rental.findMany({
+      include: {
+        User: true,
+        Bike: {
+          include: {
+            Park: {
+              include: {
+                Dealer: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    return rentals.map(rental => ({
+      id: rental.id,
+      customer_name: rental.User ? rental.User.name : rental.contact_name || 'Guest',
+      customer_phone: rental.User ? rental.User.phone : rental.contact_phone || 'N/A',
+      vehicle_model: rental.Bike?.model || 'N/A',
+      dealer_name: rental.Bike?.Park?.Dealer?.name || rental.Bike?.dealer_name || 'N/A',
+      start_time: rental.start_time,
+      end_time: rental.end_time,
+      location: rental.Bike?.Park?.location || rental.pickup_location || 'N/A',
+      status: rental.status.charAt(0).toUpperCase() + rental.status.slice(1),
+      price: rental.price,
+    }));
+  }
 }

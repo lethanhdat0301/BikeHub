@@ -2,10 +2,13 @@ import React from "react";
 
 // Admin Imports
 import MainDashboard from "views/admin/default";
-import DataTables from "views/admin/user";
 import ManageBikes from "views/admin/bike";
 import ManageParks from "views/admin/park";
 import ManageRentals from "views/admin/rental";
+import Dealers from "views/admin/dealer";
+import Customers from "views/admin/customer";
+import Bookings from "views/admin/booking";
+import Referrers from "views/admin/referrer";
 
 // Auth Imports
 import SignIn from "views/auth/SignIn";
@@ -16,7 +19,10 @@ import {
   MdLock,
   MdElectricBike,
   MdLocalParking,
-  MdFace,
+  MdPeople,
+  MdStore,
+  MdCardGiftcard,
+  MdEventNote,
 } from "react-icons/md";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 
@@ -29,28 +35,49 @@ const routes = [
     component: <MainDashboard />,
   },
   {
-    name: "Manage Users",
+    name: "Dealers",
     layout: "/admin",
-    icon: <MdFace className="h-6 w-6" />,
-    path: "users",
-    component: <DataTables />,
+    icon: <MdStore className="h-6 w-6" />,
+    path: "dealers",
+    component: <Dealers />,
   },
   {
-    name: "Manage Bikes",
+    name: "Customers",
     layout: "/admin",
-    icon: <MdElectricBike className="h-6 w-6" />,
-    path: "bikes",
-    component: <ManageBikes />,
+    icon: <MdPeople className="h-6 w-6" />,
+    path: "customers",
+    component: <Customers />,
   },
   {
-    name: "Manage Parks",
+    name: "Bookings",
+    layout: "/admin",
+    icon: <MdEventNote className="h-6 w-6" />,
+    path: "bookings",
+    component: <Bookings />,
+  },
+  {
+    name: "Referrals",
+    layout: "/admin",
+    icon: <MdCardGiftcard className="h-6 w-6" />,
+    path: "referrals",
+    component: <Referrers />,
+  },
+  {
+    name: "Parks",
     layout: "/admin",
     icon: <MdLocalParking className="h-6 w-6" />,
     path: "parks",
     component: <ManageParks />,
   },
   {
-    name: "Manage Rentals",
+    name: "Bikes",
+    layout: "/admin",
+    icon: <MdElectricBike className="h-6 w-6" />,
+    path: "bikes",
+    component: <ManageBikes />,
+  },
+  {
+    name: "Rentals",
     layout: "/admin",
     icon: <FaFileInvoiceDollar className="h-6 w-6" />,
     path: "rentals",
