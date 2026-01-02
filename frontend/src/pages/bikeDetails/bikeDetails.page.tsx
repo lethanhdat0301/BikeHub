@@ -22,7 +22,7 @@ import { FaArrowLeft, FaCheckCircle, FaUsers, FaGasPump, FaBolt } from "react-ic
 import { GiGearStickPattern } from "react-icons/gi";
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import bikeService from "../../services/bikeService";
-import axios from "axios";
+import api from "../../apis/axios";
 
 const BikeDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -189,8 +189,8 @@ const BikeDetailsPage: React.FC = () => {
             const totalPrice = days * bike.price;
 
             // Create rental request
-            await axios.post(
-                `${import.meta.env.VITE_BACK_END_LOCAL}rentals`,
+            await api.post(
+                'rentals',
                 {
                     user_id: userId,
                     bike_id: bike.id,
