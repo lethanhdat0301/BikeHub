@@ -33,12 +33,8 @@ const Tables = () => {
       );
       const data = await response.json();
 
-      // If token-based auth didn't propagate user to backend, also apply client-side filter
-      let list = Array.isArray(data) ? data : [];
-      if (user && user.role === "dealer") {
-        list = list.filter((p: any) => p.dealer_id === user.id);
-      }
-
+      // Accept returned parks array as-is (backend now returns all parks)
+      const list = Array.isArray(data) ? data : [];
       setTableData(list);
     };
 

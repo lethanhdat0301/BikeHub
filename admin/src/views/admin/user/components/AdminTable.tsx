@@ -8,6 +8,7 @@ import {
 import { AiFillEdit, AiFillDelete, AiOutlinePlus } from "react-icons/ai";
 import DrawerEdit from "./DrawerEdit";
 import ModalCreate from "./ModelCreate";
+import useAuth from "utils/auth/AuthHook";
 
 type ColumnHeader = {
   id: string;
@@ -36,21 +37,88 @@ const AdminTable: React.FC<Props> = ({
       tableHeader.map((header) => ({
         Header: header.title,
         accessor: header.id,
-        Cell:
-          header.id === "created_at"
-            ? (cellInfo: { value: string }) => {
-              const date = new Date(cellInfo.value);
-              return (
-                <p className="text-sm font-bold text-navy-700 dark:text-white">
-                  {date.toLocaleDateString()}
-                </p>
-              );
-            }
-            : (cellInfo: { value: string }) => (
+        Cell: (cellInfo: { value: any; row?: any }) => {
+          const value = cellInfo.value;
+          // Custom renderers
+          if (header.id === "created_at" || header.id === "updated_at" || header.id === "last_rental_date") {
+            const date = value ? new Date(value) : null;
+            return (
               <p className="text-sm font-bold text-navy-700 dark:text-white">
-                {cellInfo.value}
+                {date ? date.toLocaleDateString() : "-"}
               </p>
-            ),
+            );
+          }
+
+          if (header.id === "image") {
+            return (
+              <img
+                src={value || ""}
+                alt="img"
+                className="h-12 w-12 rounded object-cover"
+              />
+            );
+          }
+
+          if (header.id === "status") {
+            const s = value || "-";
+            const normalized = String(s).toLowerCase();
+            const statusMap: Record<string, string> = {
+              // Rentals statuses
+              confirmed: "bg-blue-100 text-blue-800",
+              delivering: "bg-yellow-100 text-yellow-800",
+              delivered: "bg-green-100 text-green-800",
+              returned: "bg-gray-100 text-gray-800",
+              // Fallbacks / other entities
+              available: "bg-green-100 text-green-800",
+              active: "bg-green-100 text-green-800",
+              rented: "bg-yellow-100 text-yellow-800",
+              maintenance: "bg-red-100 text-red-800",
+              out_of_stock: "bg-red-100 text-red-800",
+            };
+
+            const bgClass = statusMap[normalized] ?? "bg-gray-100 text-gray-800";
+            return (
+              <span
+                className={`inline-block ${bgClass} rounded px-2 py-1 text-sm font-semibold`}
+              >
+                {s}
+              </span>
+            );
+          }
+
+          if (header.id === "vehicles" || header.id === "total_rentals") {
+            return (
+              <p className="text-sm font-bold text-navy-700 dark:text-white">{Number(value) || 0}</p>
+            );
+          }
+
+          if (["total_revenue", "platform_fee_est", "current_debt", "total_spent"].includes(header.id)) {
+            if (value === undefined || value === null || value === "-") return <p className="text-sm font-bold text-navy-700 dark:text-white">-</p>;
+            const num = Number(value);
+            if (isNaN(num)) return <p className="text-sm font-bold text-navy-700 dark:text-white">{String(value)}</p>;
+            return <p className="text-sm font-bold text-navy-700 dark:text-white">${num.toFixed(2)}</p>;
+          }
+
+          if (header.id === "price") {
+            const num = Number(value);
+            return (
+              <p className="text-sm font-bold text-navy-700 dark:text-white">{isNaN(num) ? '-' : `$${num.toFixed(2)}`}</p>
+            );
+          }
+
+          if (header.id === "average_rating") {
+            const num = Number(value);
+            return (
+              <p className="text-sm font-bold text-navy-700 dark:text-white">{isNaN(num) ? '-' : num.toFixed(1)}</p>
+            );
+          }
+
+          return (
+            <p className="text-sm font-bold text-navy-700 dark:text-white">
+              {value}
+            </p>
+          );
+        },
       })),
     [tableHeader]
   );
@@ -75,6 +143,8 @@ const AdminTable: React.FC<Props> = ({
   );
   // eslint-disable-next-line
   const [editData, setEditData] = useState(null);
+  const { user } = useAuth();
+
   const handleEdit = (row: any) => {
     setEditData({ module: moduleName, id: row.id });
   };
@@ -84,6 +154,12 @@ const AdminTable: React.FC<Props> = ({
   };
 
   const handleDelete = async (row: any) => {
+    // prevent non-admin from deleting rentals
+    if (moduleName === 'rental' && user?.role !== 'admin') {
+      alert('Only admins can delete bookings');
+      return;
+    }
+
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${moduleName} with ID: ${row.id} ?`
     );
@@ -114,12 +190,14 @@ const AdminTable: React.FC<Props> = ({
         <div className="text-xl font-bold text-navy-700 dark:text-white">
           {moduleName.charAt(0).toUpperCase() + moduleName.slice(1)}s Table
         </div>
-        <ModalCreate module={moduleName}>
-          <button className="flex items-center gap-1 rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-400">
-            <AiOutlinePlus />
-            Create
-          </button>
-        </ModalCreate>
+        {!(moduleName === 'rental' && user?.role !== 'admin') && (
+          <ModalCreate module={moduleName}>
+            <button className="flex items-center gap-1 rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-400">
+              <AiOutlinePlus />
+              Create
+            </button>
+          </ModalCreate>
+        )}
       </div>
 
       <div className="mt-8 overflow-x-scroll xl:overflow-x-hidden">
@@ -135,9 +213,8 @@ const AdminTable: React.FC<Props> = ({
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     className="cursor-pointer border-b-[1px] border-gray-200 pb-2 pr-4 pt-4 text-start"
                   >
-                    <div className="text-md items-center justify-between dark:text-white">
-                      {column.render("Header")}
-                      {/* Add a sort direction indicator */}
+                    <div className="flex items-center justify-between text-md dark:text-white">
+                      <span>{column.render("Header") as any}</span>
                       <span>
                         {column.isSorted
                           ? column.isSortedDesc
@@ -162,7 +239,7 @@ const AdminTable: React.FC<Props> = ({
                       {...cell.getCellProps()}
                       className="min-w-[150px] border-white/0 py-3 pr-4 dark:text-red-500"
                     >
-                      {cell.render("Cell")}
+                      {cell.render("Cell") as any}
                     </td>
                   ))}
                   <td className="flex items-center gap-2">
@@ -173,13 +250,15 @@ const AdminTable: React.FC<Props> = ({
                       <AiFillEdit />
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(row.original)}
-                      className="flex items-center gap-1 rounded bg-red-500 px-2 py-1 text-white hover:bg-red-400 disabled:cursor-not-allowed"
-                    >
-                      <AiFillDelete />
-                      Delete
-                    </button>
+                    {!(moduleName === 'rental' && user?.role !== 'admin') && (
+                      <button
+                        onClick={() => handleDelete(row.original)}
+                        className="flex items-center gap-1 rounded bg-red-500 px-2 py-1 text-white hover:bg-red-400 disabled:cursor-not-allowed"
+                      >
+                        <AiFillDelete />
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

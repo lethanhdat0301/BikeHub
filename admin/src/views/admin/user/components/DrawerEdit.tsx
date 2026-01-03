@@ -38,10 +38,7 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
             credentials: "include",
           });
           const list = await response.json();
-          let filtered = Array.isArray(list) ? list : [];
-          if (user && user.role === "dealer") {
-            filtered = filtered.filter((p: any) => p.dealer_id === user.id);
-          }
+          const filtered = Array.isArray(list) ? list : [];
           setParks(filtered);
         } catch (err) {
           console.error("Error fetching parks:", err);
@@ -55,7 +52,7 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
 
   const handleSave = () => {
     if (formData) {
-      const forbiddenFields = ["id", "created_at", "updated_at", "dealer_id", "Bike"];
+      const forbiddenFields = ["id", "created_at", "updated_at", "dealer_id", "Bike", "password", "rating", "review_count", "dealer_name", "dealer_contact"];
       const filteredData = Object.keys(formData)
         .filter((key) => !forbiddenFields.includes(key))
         .reduce((obj, key) => {
@@ -140,7 +137,7 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
                   <div className="px-4 sm:px-6">
                     {formData ? (
                       (() => {
-                        const forbiddenFields = ["id", "created_at", "updated_at", "dealer_id", "Bike"];
+                        const forbiddenFields = ["id", "created_at", "updated_at", "dealer_id", "Bike", "birthdate", "password", "rating", "review_count", "dealer_name", "dealer_contact"];
                         const visibleKeys = Object.keys(formData).filter((key) => {
                           // Exclude forbidden keys and nested objects/arrays (relations)
                           if (forbiddenFields.includes(key)) return false;
@@ -182,6 +179,40 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
                                       {p.name} {p.location ? ` - ${p.location}` : ""}
                                     </option>
                                   ))}
+                                </select>
+                              ) : key === "role" ? (
+                                <select
+                                  name={key}
+                                  value={formData[key] || "user"}
+                                  onChange={handleChange}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                >
+                                  <option value="admin">admin</option>
+                                  <option value="dealer">dealer</option>
+                                  <option value="user">user</option>
+                                </select>
+                              ) : key === "status" && data?.module === "bike" ? (
+                                <select
+                                  name={key}
+                                  value={formData[key] || "available"}
+                                  onChange={handleChange}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                >
+                                  <option value="available">Available</option>
+                                  <option value="out_of_stock">Out of stock</option>
+                                  <option value="locked">Locked</option>
+                                </select>
+                              ) : key === "status" && data?.module === "rental" ? (
+                                <select
+                                  name={key}
+                                  value={formData[key] || "confirmed"}
+                                  onChange={handleChange}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                >
+                                  <option value="confirmed">Confirmed</option>
+                                  <option value="delivering">Delivering</option>
+                                  <option value="delivered">Delivered</option>
+                                  <option value="returned">Returned</option>
                                 </select>
                               ) : (
                                 <input

@@ -52,7 +52,7 @@ function createRandomRental(
     bike_id: bike.id,
     start_time: faker.date.past(),
     end_time: faker.date.future(),
-    status: faker.helpers.arrayElement(['ongoing', 'completed', 'lost']),
+    status: faker.helpers.arrayElement(['Confirmed', 'Delivering', 'Delivered', 'Returned']),
     price: faker.number.int({ min: 5, max: 500 }),
   };
 }

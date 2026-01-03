@@ -58,6 +58,7 @@ const Routes: React.FC = () => {
           <PaymentSuccessPage />
         </Protected>
       } />
+      {/* Temporarily disabled login/signup routes */}
       <Route
         path="login"
         element={

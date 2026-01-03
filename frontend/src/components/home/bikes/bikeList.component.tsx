@@ -1,44 +1,134 @@
-import React from "react";
-import { Box, Center, Heading, SimpleGrid } from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Box, Center, Heading, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
 import CardBike from "./cardBike.component";
 import { Reveal } from "../../motion/reveal.component";
+import bikeService from "../../../services/bikeService";
 import bike1 from "../../../assets/images/bikes/bike1.jpg";
 import bike2 from "../../../assets/images/bikes/bike2.webp";
 import bike3 from "../../../assets/images/bikes/bike3.webp";
 
+interface Bike {
+    id: number;
+    model: string;
+    status: string;
+    lock: boolean;
+    location: string;
+    price: number;
+    park_id: number;
+    image?: string;
+}
+
+// Default images nếu xe không có ảnh
+const defaultImages = [bike1, bike2, bike3];
+
+// Mock data để hiển thị khi database trống
+const mockBikes: Bike[] = [
+    {
+        id: 1,
+        model: "Mountain Bike Pro",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Downtown",
+        price: 50,
+        park_id: 1,
+        image: bike1
+    },
+    {
+        id: 2,
+        model: "City Cruiser",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Beach Area",
+        price: 30,
+        park_id: 2,
+        image: bike2
+    },
+    {
+        id: 3,
+        model: "Sport Racing",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Mountain Trail",
+        price: 70,
+        park_id: 3,
+        image: bike3
+    },
+    {
+        id: 4,
+        model: "Urban Commuter",
+        status: "AVAILABLE",
+        lock: false,
+        location: "City Center",
+        price: 40,
+        park_id: 1,
+        image: bike1
+    },
+    {
+        id: 5,
+        model: "Electric Bike",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Riverside",
+        price: 80,
+        park_id: 2,
+        image: bike2
+    },
+    {
+        id: 6,
+        model: "Folding Bike",
+        status: "AVAILABLE",
+        lock: false,
+        location: "Station",
+        price: 35,
+        park_id: 3,
+        image: bike3
+    }
+];
+
 const BikeList: React.FC = () => {
-    const bikes = [
-        {
-            id: 1,
-            model: "Mountain Bike Pro",
-            status: "AVAILABLE",
-            lock: false,
-            location: "Downtown",
-            price: 50,
-            park_id: 1,
-            image: bike1
-        },
-        {
-            id: 2,
-            model: "City Cruiser",
-            status: "AVAILABLE",
-            lock: false,
-            location: "Beach Area",
-            price: 30,
-            park_id: 2,
-            image: bike2
-        },
-        {
-            id: 3,
-            model: "Sport Racing",
-            status: "AVAILABLE",
-            lock: false,
-            location: "Mountain Trail",
-            price: 70,
-            park_id: 3,
-            image: bike3
-        }
-    ];
+    console.log("🔵 BikeList component rendered!");
+
+    const [bikes, setBikes] = useState<Bike[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchBikes = async () => {
+            try {
+                setLoading(true);
+                console.log("🚴 Đang lấy xe từ database...");
+                // console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_PROD);
+                console.log("🔗 API URL:", import.meta.env.VITE_BACK_END_LOCAL);
+
+                let data = await bikeService.getBikesByStatus('available', 6);
+
+                if (!data || (Array.isArray(data) && data.length === 0)) {
+                    console.warn("⚠️ API trả về rỗng, sử dụng Mock Data");
+                    data = mockBikes;
+                }
+
+                // Thêm ảnh mặc định nếu cần
+                const bikesWithImages = data.map((bike, index) => ({
+                    ...bike,
+                    image: bike.image || defaultImages[index % defaultImages.length]
+                }));
+
+                setBikes(bikesWithImages);
+                setError(null);
+            } catch (err: any) {
+                console.error("❌ Error loading bikes:", err);
+                console.error("❌ Error details:", err.response?.data || err.message);
+                console.log("⚠️ Lỗi khi tải từ API, sử dụng mock data");
+                // Nếu có lỗi, dùng mock data
+                setBikes(mockBikes);
+                setError(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBikes();
+    }, []);
 
     return (
         <Box
@@ -76,13 +166,31 @@ const BikeList: React.FC = () => {
 
             <SimpleGrid
                 columns={{ base: 1, md: 2, lg: 3 }}
-                spacing={6}
+                spacing={{ base: 4, md: 6, lg: 8 }}
+                gap={{ base: 4, md: 6, lg: 8 }}
                 mt={5}
                 className="w-4/5"
+                px={{ base: 4, md: 0 }}
             >
-                {bikes.map((bike) => (
-                    <CardBike key={bike.id} bike={bike} />
-                ))}
+                {loading ? (
+                    <Center gridColumn="1 / -1" py={10}>
+                        <Spinner size="xl" color="orange.500" thickness="4px" />
+                    </Center>
+                ) : error ? (
+                    <Center gridColumn="1 / -1" py={10}>
+                        <Text color="red.500" fontSize="lg">{error}</Text>
+                    </Center>
+                ) : bikes.length === 0 ? (
+                    <Center gridColumn="1 / -1" py={10}>
+                        <Text fontSize="lg" color="gray.500">
+                            Hiện tại chưa có xe nào. Vui lòng quay lại sau.
+                        </Text>
+                    </Center>
+                ) : (
+                    bikes.map((bike) => (
+                        <CardBike key={bike.id} bike={bike} />
+                    ))
+                )}
             </SimpleGrid>
         </Box>
     );

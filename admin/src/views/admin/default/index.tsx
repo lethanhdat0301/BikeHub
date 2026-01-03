@@ -7,7 +7,6 @@ import { FaFileInvoiceDollar } from "react-icons/fa";
 
 import Widget from "components/widget/Widget";
 
-import { User, Park, Bike, Rental } from "@prisma/client";
 import TopCustomers from "./components/TopCustomers";
 import HistoryTable from "./components/HistoryTable";
 import RevenueChart from "./components/RevenueChart";
@@ -49,16 +48,7 @@ const Dashboard = () => {
         let bikes = data[2];
         let rentals = data[3];
 
-        if (user && user.role === 'dealer') {
-          parks = Array.isArray(parks) ? parks.filter((p: any) => p.dealer_id === user.id) : parks;
-          bikes = Array.isArray(bikes)
-            ? bikes.filter((b: any) => {
-                if (b.Park && typeof b.Park === 'object') return b.Park.dealer_id === user.id;
-                return parks.some((p: any) => p.id === b.park_id);
-              })
-            : bikes;
-          // rentals/list already returns dealer-scoped rentals when a dealer token is present
-        }
+
 
         setStats({
           users,

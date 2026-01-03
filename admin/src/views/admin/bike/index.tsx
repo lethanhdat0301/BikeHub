@@ -3,30 +3,13 @@ import { useEffect, useState } from "react";
 // import useAuth from "../../../utils/auth/AuthHook";
 
 const columnHeaders = [
-  {
-    id: "id",
-    title: "ID",
-  },
-  {
-    id: "model",
-    title: "Model",
-  },
-  {
-    id: "status",
-    title: "Status",
-  },
-  {
-    id: "price",
-    title: "Price Tier",
-  },
-  {
-    id: "park_id",
-    title: "Park ID",
-  },
-  {
-    id: "created_at",
-    title: "Joined At",
-  },
+  { id: "image", title: "Image" },
+  { id: "id", title: "Vehicle ID" },
+  { id: "model", title: "Model" },
+  { id: "status", title: "Status" },
+  { id: "seats", title: "Seats" },
+  { id: "location", title: "Location" },
+  { id: "price", title: "Price" },
 ];
 
 const Tables = () => {
@@ -52,9 +35,16 @@ const Tables = () => {
       console.log("-------------")
       // Normalize response: accept array or { data: [...] } or error objects
       if (Array.isArray(data)) {
-        setTableData(data);
+        // Normalize bikes to include explicit location property (Park.location preferred)
+        setTableData(data.map((b: any) => ({
+          ...b,
+          location: b.Park?.location || b.location || "-",
+        })));
       } else if (data && Array.isArray((data as any).data)) {
-        setTableData((data as any).data);
+        setTableData((data as any).data.map((b: any) => ({
+          ...b,
+          location: b.Park?.location || b.location || "-",
+        })));
       } else {
         // Not an array — avoid passing non-array to the table
         setTableData([]);

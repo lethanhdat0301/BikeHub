@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Container,
@@ -11,14 +11,18 @@ import {
     FormLabel,
     Input,
     useColorModeValue,
+    Spinner,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
+import { getAllParks, Park } from "../../../services/parkService";
 
 const SearchBike: React.FC = () => {
-    const [location, setLocation] = useState<string>("");
+    const [parkId, setParkId] = useState<string>("");
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
+    const [parks, setParks] = useState<Park[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
     const bgGradient = useColorModeValue(
@@ -26,19 +30,40 @@ const SearchBike: React.FC = () => {
         "linear(to-r, teal.600, teal.800)"
     );
 
+    // Lấy danh sách parks khi component mount
+    useEffect(() => {
+        const fetchParks = async () => {
+            try {
+                setLoading(true);
+                const data = await getAllParks();
+                setParks(data);
+                console.log("🏞️ Parks loaded:", data);
+            } catch (error) {
+                console.error("❌ Error loading parks:", error);
+                // Nếu API lỗi, có thể dùng mock data
+                setParks([
+                    { id: 1, name: "Phu Quoc Park", location: "Phu Quoc", created_at: new Date(), updated_at: new Date() },
+                    { id: 2, name: "Nha Trang Park", location: "Nha Trang", created_at: new Date(), updated_at: new Date() }
+                ]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchParks();
+    }, []);
+
     const handleSearch = () => {
-        if (!location) {
+        if (!parkId) {
             alert("Please select a location");
             return;
         }
 
-        // TODO: Implement search logic
-        console.log("Searching for bikes:", { location, startDate, endDate });
+        console.log("Searching for bikes:", { parkId, startDate, endDate });
 
-        // Navigate to search results or filter bikes
-        // You can use navigate from react-router-dom
+        // Navigate to search results with parkId
         const params = new URLSearchParams();
-        if (location) params.append("location", location);
+        if (parkId) params.append("parkId", parkId);
         if (startDate) params.append("startDate", startDate);
         if (endDate) params.append("endDate", endDate);
 
@@ -53,6 +78,9 @@ const SearchBike: React.FC = () => {
             minH="500px"
             display="flex"
             alignItems="center"
+            width="100%"
+            maxW="100vw"
+            overflowX="hidden"
         >
             <Container maxW="container.lg">
                 <VStack spacing={8} align="center">
@@ -95,19 +123,24 @@ const SearchBike: React.FC = () => {
                             >
                                 <FormControl isRequired>
                                     <FormLabel fontWeight="semibold" color="gray.700">
-                                        Location
+                                        Park
                                     </FormLabel>
                                     <Select
-                                        placeholder="Select location"
-                                        value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
+                                        placeholder={loading ? "Loading parks..." : "Select a park"}
+                                        value={parkId}
+                                        onChange={(e) => setParkId(e.target.value)}
                                         size="lg"
                                         borderColor="teal.300"
                                         _hover={{ borderColor: "teal.500" }}
                                         focusBorderColor="teal.500"
+                                        isDisabled={loading}
+                                        icon={loading ? <Spinner size="sm" /> : undefined}
                                     >
-                                        <option value="phu-quoc">Phu Quoc</option>
-                                        <option value="nha-trang">Nha Trang</option>
+                                        {parks.map((park) => (
+                                            <option key={park.id} value={park.id.toString()}>
+                                                {park.name} - {park.location}
+                                            </option>
+                                        ))}
                                     </Select>
                                 </FormControl>
 

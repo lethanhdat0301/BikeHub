@@ -1,0 +1,19 @@
+steps:
+  # Build the container image with build args
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'VITE_API_URL=https://api-289273895966.asia-southeast1.run.app/api/v1/'
+      - '--build-arg'
+      - 'VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/frontend'
+      - '.'
+  
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/frontend']
+
+images:
+  - 'gcr.io/$PROJECT_ID/frontend'

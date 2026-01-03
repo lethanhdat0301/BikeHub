@@ -38,10 +38,24 @@ export class BikeController {
   @Get('/')
   @UseGuards(JwtAuthGuard)
   async getAllBikes(@CurrentUser() user: any): Promise<BikeModel[]> {
-    if (user.role === ROLES_ENUM.DEALER) {
-      return this.bikeService.findByDealer(user.id);
+    // Debugging: log current user and return counts in non-production for traceability
+    if (process.env.NODE_ENV !== 'production') {
+      try {
+        console.log('GET /bikes requested by user:', user ? { id: user.id, role: user.role } : null);
+      } catch (e) {
+        // ignore
+      }
     }
-    return this.bikeService.findAll({});
+
+    if (user && user.role === ROLES_ENUM.DEALER) {
+      const bikes = await this.bikeService.findByDealer(user.id);
+      if (process.env.NODE_ENV !== 'production') console.log('Returning bikes for dealer:', bikes.length);
+      return bikes;
+    }
+
+    const all = await this.bikeService.findAll({});
+    if (process.env.NODE_ENV !== 'production') console.log('Returning all bikes:', all.length);
+    return all;
   }
 
   @Get('bike/check')
@@ -88,12 +102,25 @@ export class BikeController {
       location: string;
       price: number;
       park_id: number;
+      dealer_id?: number; // optional when admin creates for another dealer
       image?: string;
+      // Thông tin đánh giá
+      rating?: number;
+      review_count?: number;
+      // Thông tin cung cấp
+      dealer_name?: string;
+      dealer_contact?: string;
+      // Thông tin kỹ thuật
+      seats?: number;
+      fuel_type?: string;
+      transmission?: string;
     },
+    @CurrentUser() user: any,
   ): Promise<BikeModel> {
-    const { model, status, lock, location, price, park_id, image } = bikeData;
+    const { model, status, lock, location, price, park_id, dealer_id, image,
+      rating, review_count, dealer_name, dealer_contact,
+      seats, fuel_type, transmission } = bikeData;
 
-    // Basic server-side validation with descriptive messages
     if (!model) {
       throw new UnprocessableEntityException({ message: "Argument `model` is missing." });
     }
@@ -107,17 +134,33 @@ export class BikeController {
       throw new UnprocessableEntityException({ message: "Argument `park_id` is missing." });
     }
 
-    return this.bikeService.create({
+    const data: any = {
       model,
       status,
       lock: Boolean(lock),
       location,
       price,
       image,
+      rating,
+      review_count,
+      dealer_name,
+      dealer_contact,
+      seats,
+      fuel_type,
+      transmission,
       Park: {
         connect: { id: park_id },
       },
-    });
+    };
+
+    // If a dealer creates a bike, assign Dealer to them. Admin can set dealer_id explicitly.
+    if (user && user.role === ROLES_ENUM.DEALER) {
+      data.Dealer = { connect: { id: user.id } };
+    } else if (dealer_id) {
+      data.Dealer = { connect: { id: dealer_id } };
+    }
+
+    return this.bikeService.create(data);
   }
 
   @Put('bike/:id')
@@ -132,18 +175,15 @@ export class BikeController {
     const bike = await this.bikeService.findOne({
       id: Number(id)
     });
-    const park = await this.parkService.findOne({
-      id: Number(bike.Park.id)
-    });
 
     if (!bike) {
       throw new ForbiddenException('Bike not found');
     }
 
-    // DEALER chỉ được sửa bike trong park của mình
+    // DEALER only allowed to edit bikes they own (bike.dealer_id)
     if (
       user.role !== ROLES_ENUM.ADMIN &&
-      park.dealer_id !== user.id
+      (bike as any).dealer_id !== user.id
     ) {
       throw new ForbiddenException('You do not own this bike');
     }
@@ -183,14 +223,10 @@ export class BikeController {
       throw new ForbiddenException('Bike not found');
     }
 
-    const park = await this.parkService.findOne({
-      id: Number(bike.Park.id),
-    });
-
-    // DEALER chỉ được xóa bike trong park của mình
+    // DEALER only allowed to delete bikes they own
     if (
       user.role !== ROLES_ENUM.ADMIN &&
-      park.dealer_id !== user.id
+      (bike as any).dealer_id !== user.id
     ) {
       throw new ForbiddenException('You do not own this bike');
     }

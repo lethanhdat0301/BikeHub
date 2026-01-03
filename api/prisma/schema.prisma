@@ -8,18 +8,33 @@ datasource db {
 }
 
 model Bike {
-  id         Int      @id @default(autoincrement())
-  model      String
-  status     String
-  lock       Boolean
-  location   String
-  price      Float
-  park_id    Int
-  Park       Park     @relation(fields: [park_id], references: [id])
-  Rental     Rental[]
-  image      String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  model           String   // Tên xe
+  status          String   // Tình trạng xe: "available", "rented", "maintenance"
+  lock            Boolean
+  location        String   // Vị trí đỗ
+  price           Float    // Giá xe trên 1 ngày
+  park_id         Int
+  Park            Park     @relation(fields: [park_id], references: [id])
+  // New: link bike to a dealer (User)
+  dealer_id       Int?
+  Dealer          User?    @relation("DealerBikes", fields: [dealer_id], references: [id])
+  Rental          Rental[]
+  image           String?  // Hình ảnh về xe
+  
+  // Thông tin đánh giá
+  rating          Float?   @default(0)  // Số sao trung bình (0-5)
+  review_count    Int?     @default(0)  // Số lượt đánh giá
+  
+  // Thông tin cung cấp
+  
+  // Thông tin kỹ thuật
+  seats           Int?     // Số chỗ ngồi
+  fuel_type       String?  // "electric" hoặc "gasoline"
+  transmission    String?  // "automatic" hoặc "manual"
+  
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }
 
 model Park {
@@ -30,23 +45,25 @@ model Park {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   image      String?
-  dealer_id  Int?
-  Dealer     User?    @relation("DealerParks", fields: [dealer_id], references: [id])
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
-  role       String   @default("user")
-  Rental     Rental[]
-  Parks      Park[]   @relation("DealerParks")
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  birthdate  DateTime
-  phone      String?
-  image      String?
+  id             Int              @id @default(autoincrement())
+  name           String
+  email          String           @unique
+  password       String
+  role           String           @default("user")
+  status         String           @default("active")
+  Rental         Rental[]
+  // Parks          Park[]           @relation("DealerParks")
+  BookingRequest BookingRequest[]
+  // Bikes relation for dealers
+  Bikes          Bike[]           @relation("DealerBikes")
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+  birthdate      DateTime
+  phone          String?
+  image          String?
 }
 
 model Rental {
@@ -64,4 +81,19 @@ model Rental {
   qrcode     String?
   payment_id String?
   order_id   String?
+}
+
+model BookingRequest {
+  id              Int      @id @default(autoincrement())
+  user_id         Int?
+  name            String
+  email           String
+  contact_method  String
+  contact_details String
+  pickup_location String
+  status          String   @default("PENDING")
+  admin_notes     String?
+  User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }

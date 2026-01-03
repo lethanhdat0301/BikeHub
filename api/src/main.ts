@@ -21,9 +21,13 @@ async function bootstrap() {
 
   app.setGlobalPrefix(API_PREFIX);
 
+  const allowedOrigins = process.env.CORS_ALLOW_URL 
+    ? process.env.CORS_ALLOW_URL.split(',') 
+    : ['http://localhost:3000', 'http://localhost:5173'];
+
   app.use(
     cors({
-      origin: process.env.CORS_ALLOW_URL.split(','),
+      origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       credentials: true,
     }),

@@ -1,5 +1,5 @@
 import { Prisma, User } from '@prisma/client';
-import { Injectable, UnauthorizedException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException, BadRequestException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { AuthHelpers } from '../../shared/helpers/auth.helpers';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUser } from './../auth/auth.dto';
@@ -37,10 +37,75 @@ export class UserService {
     });
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data,
+  // Return users enriched with aggregated rental statistics used by the admin UI
+  async usersWithStats(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.UserWhereUniqueInput;
+    where?: Prisma.UserWhereInput;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+  }): Promise<any[]> {
+    const { skip, take, cursor, where, orderBy } = params;
+
+    const users = await this.prisma.user.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+      include: {
+        Rental: {
+          select: {
+            price: true,
+            created_at: true,
+            end_time: true,
+          },
+        },
+      },
     });
+
+    return users.map((u: any) => {
+      const { password, Rental, ...rest } = u as any;
+      const rentals = Rental ?? [];
+      const totalRentals = rentals.length;
+      const totalSpent = rentals.reduce((sum: number, r: any) => sum + (r.price ?? 0), 0);
+      const lastRental = rentals.reduce((latest: string | null, r: any) => {
+        const candidate = r.end_time ?? r.created_at;
+        if (!candidate) return latest;
+        if (!latest) return candidate;
+        return new Date(candidate) > new Date(latest) ? candidate : latest;
+      }, null);
+
+      return {
+        ...rest,
+        totalRentals,
+        totalSpent,
+        avgRating: 5, // default to 5 when no per-user rating exists
+        lastRentalDate: lastRental,
+      };
+    });
+  }
+
+  async createUser(data: Prisma.UserCreateInput): Promise<User> {
+    // Hash password before saving
+    const payload: any = { ...data };
+    if (payload.password) {
+      payload.password = await AuthHelpers.hash(payload.password as string);
+    }
+
+    try {
+      const user = await this.prisma.user.create({ data: payload });
+      // don't return password
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...rest } = user as any;
+      return rest as User;
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate email)
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('User with this email already exists');
+      }
+      throw new InternalServerErrorException('Failed to create user');
+    }
   }
 
   async updateUser(params: {
@@ -63,7 +128,8 @@ export class UserService {
         console.log("old password doesn't match")
         throw new BadRequestException("Old password doesn't match");
       }
-      data.password = data.newPassword;
+      // Hash the new password before saving
+      data.password = await AuthHelpers.hash(data.newPassword as string);
       delete data.oldPassword;
       delete data.newPassword;
     } else {

@@ -26,24 +26,20 @@ export async function seedParks(
     const createdPark = await prisma.park.create({
       data: {
         ...parkData,
-
-        Dealer: {
-          connect: { id: dealer.id }, // ✅ BẮT BUỘC
-        },
       },
     });
 
     createdParks.push(createdPark);
-    console.log(`✅ Created park ${createdPark.id} (dealer ${dealer.id})`);
+    console.log(`✅ Created park ${createdPark.id}`);
   }
 
   return createdParks;
 }
 
-function createRandomPark(city: string): Omit<Park, 'id' | 'dealer_id' | 'created_at' | 'updated_at'> {
-  return {
-    name: `${city} Park`,
-    location: faker.location.streetAddress(),
-    image: faker.image.urlLoremFlickr({ category: 'city' }),
-  };
-}
+function createRandomPark(city: string): Omit<Park, 'id' | 'created_at' | 'updated_at' | 'dealer_id'> {
+    return {
+      name: `${city} Park`,
+      location: faker.location.streetAddress(),
+      image: faker.image.urlLoremFlickr({ category: 'city' }),
+    };
+  }

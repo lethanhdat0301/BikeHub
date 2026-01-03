@@ -12,20 +12,24 @@ export async function seedBikes(
     const park = parks[Math.floor(Math.random() * parks.length)];
     const owner = users[Math.floor(Math.random() * users.length)];
 
-    const bike = await prisma.bike.create({
-      data: {
-        model: faker.vehicle.model(),
-        status: 'available',
-        lock: false,
-        location: faker.location.streetAddress(),
-        price: faker.number.float({ min: 10, max: 50 }),
-        image: faker.image.url(),
-        Park: {
-          connect: { id: park.id },
-        },
-      }
+    const bikeData: any = {
+      model: faker.vehicle.model(),
+      status: 'available',
+      seats: faker.number.int({ min: 1, max: 5 }),
+      lock: false,
+      location: faker.location.streetAddress(),
+      price: Number(faker.number.float({ min: 10, max: 50 }).toFixed(2)),
+      image: faker.image.url(),
+      Park: {
+        connect: { id: park.id },
+      },
+      // Assign a dealer (owner) to the bike (use relation connect)
+      Dealer: {
+        connect: { id: owner.id },
+      },
+    };
 
-    });
+    const bike = await prisma.bike.create({ data: bikeData });
 
     bikes.push(bike);
   }

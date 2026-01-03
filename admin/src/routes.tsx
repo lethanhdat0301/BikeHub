@@ -1,11 +1,12 @@
-import React from "react";
-
 // Admin Imports
+import React from "react";
 import MainDashboard from "views/admin/default";
 import DataTables from "views/admin/user";
 import ManageBikes from "views/admin/bike";
 import ManageParks from "views/admin/park";
 import ManageRentals from "views/admin/rental";
+import InboxPage from "views/admin/inbox";
+import ReferralsPage from "views/admin/referrals";
 
 // Auth Imports
 import SignIn from "views/auth/SignIn";
@@ -13,54 +14,77 @@ import SignIn from "views/auth/SignIn";
 // Icon Imports
 import {
   MdHome,
-  MdLock,
+  MdMail,
+  MdPeople,
   MdElectricBike,
   MdLocalParking,
   MdFace,
+  MdAccountCircle,
 } from "react-icons/md";
-import { FaFileInvoiceDollar } from "react-icons/fa";
+import { FaFileInvoiceDollar, FaShareAlt } from "react-icons/fa";
 
 const routes = [
   {
-    name: "Main Dashboard",
+    name: "Dashboard",
     layout: "/admin",
     path: "default",
     icon: <MdHome className="h-6 w-6" />,
     component: <MainDashboard />,
   },
   {
-    name: "Manage Users",
+    name: "Inbox",
     layout: "/admin",
-    icon: <MdFace className="h-6 w-6" />,
-    path: "users",
-    component: <DataTables />,
+    path: "inbox",
+    icon: <MdMail className="h-6 w-6" />,
+    component: <React.Suspense fallback={<div/>}><InboxPage /></React.Suspense>,
   },
   {
-    name: "Manage Bikes",
+    name: "Bookings",
+    layout: "/admin",
+    path: "bookings",
+    icon: <FaFileInvoiceDollar className="h-6 w-6" />,
+    component: <ManageRentals />,
+  },
+  {
+    name: "Dealers",
+    layout: "/admin",
+    icon: <MdPeople className="h-6 w-6" />,
+    path: "dealers",
+    component: <DataTables initialTab="dealers" />,
+  },
+  {
+    name: "All Vehicles",
     layout: "/admin",
     icon: <MdElectricBike className="h-6 w-6" />,
-    path: "bikes",
+    path: "vehicles",
     component: <ManageBikes />,
   },
   {
-    name: "Manage Parks",
+    name: "Customers",
     layout: "/admin",
-    icon: <MdLocalParking className="h-6 w-6" />,
-    path: "parks",
-    component: <ManageParks />,
+    icon: <MdFace className="h-6 w-6" />,
+    path: "customers",
+    component: <DataTables initialTab="customers" />,
   },
   {
-    name: "Manage Rentals",
+    name: "Accounts",
     layout: "/admin",
-    icon: <FaFileInvoiceDollar className="h-6 w-6" />,
-    path: "rentals",
-    component: <ManageRentals />,
+    icon: <MdAccountCircle className="h-6 w-6" />,
+    path: "accounts",
+    component: <DataTables initialTab="accounts" />,
+  },
+  {
+    name: "Referrals",
+    layout: "/admin",
+    path: "referrals",
+    icon: <FaShareAlt className="h-6 w-6" />,
+    component: <React.Suspense fallback={<div/>}><ReferralsPage /></React.Suspense>,
   },
   {
     name: "Log Out",
     layout: "/auth",
     path: "sign-in",
-    icon: <MdLock className="h-6 w-6" />,
+    icon: <MdLocalParking className="h-6 w-6" />,
     component: <SignIn />,
   },
 ];

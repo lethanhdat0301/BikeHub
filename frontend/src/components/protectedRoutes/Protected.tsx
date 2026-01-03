@@ -5,14 +5,18 @@ type Props = {
   children: JSX.Element;
 };
 const Protected: React.FC<Props> = ({ children }) => {
-  const { user } = useAuth();
-  const location = useLocation().pathname;
+  // const { user } = useAuth();
+  // const location = useLocation().pathname;
 
-  return user ? (
-    children
-  ) : (
-    <Navigate to={"/login"} state={{ from: location }} replace />
-  );
+  // Temporarily disabled authentication - allow all access
+  return children;
+
+  // Original code (commented out):
+  // return user ? (
+  //   children
+  // ) : (
+  //   <Navigate to={"/login"} state={{ from: location }} replace />
+  // );
 };
 
 export default Protected;

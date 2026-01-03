@@ -22,9 +22,13 @@ import {
 } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
 import CardBike from "../../components/home/bikes/cardBike.component";
+import bikeService from "../../services/bikeService";
 import bike1 from "../../assets/images/bikes/bike1.jpg";
 import bike2 from "../../assets/images/bikes/bike2.webp";
 import bike3 from "../../assets/images/bikes/bike3.webp";
+
+// Default images
+const defaultImages = [bike1, bike2, bike3];
 
 const SearchPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -37,102 +41,41 @@ const SearchPage: React.FC = () => {
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
     const [selectedTransmission, setSelectedTransmission] = useState<string[]>([]);
 
-    const location = searchParams.get("location");
+    const parkId = searchParams.get("parkId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-
-    // Mock data for bikes
-    const mockBikes = [
-        {
-            id: 1,
-            model: "Honda SH 150i",
-            status: "AVAILABLE",
-            lock: false,
-            location: "phu-quoc",
-            price: 50,
-            park_id: 1,
-            image: bike1,
-            type: "Scooter",
-            transmission: "automatic"
-        },
-        {
-            id: 2,
-            model: "Yamaha Exciter 155",
-            status: "AVAILABLE",
-            lock: false,
-            location: "phu-quoc",
-            price: 35,
-            park_id: 2,
-            image: bike2,
-            type: "Standard",
-            transmission: "manual"
-        },
-        {
-            id: 3,
-            model: "Honda Wave Alpha",
-            status: "AVAILABLE",
-            lock: false,
-            location: "nha-trang",
-            price: 25,
-            park_id: 3,
-            image: bike3,
-            type: "Standard",
-            transmission: "manual"
-        },
-        {
-            id: 4,
-            model: "Honda Winner X",
-            status: "AVAILABLE",
-            lock: false,
-            location: "phu-quoc",
-            price: 45,
-            park_id: 1,
-            image: bike1,
-            type: "Standard",
-            transmission: "manual"
-        },
-        {
-            id: 5,
-            model: "Yamaha NVX 155",
-            status: "AVAILABLE",
-            lock: false,
-            location: "nha-trang",
-            price: 40,
-            park_id: 2,
-            image: bike2,
-            type: "Scooter",
-            transmission: "automatic"
-        },
-        {
-            id: 6,
-            model: "Honda Air Blade",
-            status: "AVAILABLE",
-            lock: false,
-            location: "phu-quoc",
-            price: 55,
-            park_id: 3,
-            image: bike3,
-            type: "Scooter",
-            transmission: "automatic"
-        },
-    ];
 
     useEffect(() => {
         const fetchBikes = async () => {
             setLoading(true);
             try {
-                // Use mock data instead of API call
-                let filteredData = mockBikes;
+                console.log("🔍 Đang tải xe từ database cho trang search...");
 
-                // Filter by location if provided
-                if (location && location !== "") {
-                    filteredData = filteredData.filter(bike => bike.location === location);
+                let data;
+                // Nếu có parkId, lọc theo park, nếu không lấy tất cả
+                if (parkId) {
+                    console.log(`🔍 Lọc xe theo park ID: ${parkId}`);
+                    data = await bikeService.getBikesByPark(Number(parkId), 'available');
+                    console.log(`✅ Đã tải ${data.length} xe từ park ${parkId}`);
+                } else {
+                    // Lấy tất cả xe có status available
+                    data = await bikeService.getBikesByStatus('available');
+                    console.log(`✅ Đã tải ${data.length} xe available`);
                 }
 
-                setBikes(filteredData);
-                setFilteredBikes(filteredData);
+                // Chỉ lấy 12 xe đầu tiên
+                const limitedData = data.slice(0, 12).map((bike, index) => ({
+                    ...bike,
+                    image: bike.image || defaultImages[index % defaultImages.length],
+                    type: bike.type || "Standard",
+                    transmission: bike.transmission || "manual"
+                }));
+
+                console.log(`📊 Hiển thị ${limitedData.length} xe`);
+                setBikes(limitedData);
+                setFilteredBikes(limitedData);
             } catch (error) {
-                console.error("Error fetching bikes:", error);
+                console.error("❌ Error fetching bikes:", error);
                 setBikes([]);
                 setFilteredBikes([]);
             } finally {
@@ -141,7 +84,7 @@ const SearchPage: React.FC = () => {
         };
 
         fetchBikes();
-    }, [location, startDate, endDate]);
+    }, [parkId, startDate, endDate]);
 
     // Apply filters
     useEffect(() => {
@@ -178,7 +121,7 @@ const SearchPage: React.FC = () => {
                     Search Results
                 </Heading>
                 <Text color="gray.600">
-                    {location && `Location: ${location}`}
+                    {parkId && `Park ID: ${parkId}`}
                     {startDate && ` | From: ${startDate}`}
                     {endDate && ` | To: ${endDate}`}
                 </Text>
@@ -299,7 +242,12 @@ const SearchPage: React.FC = () => {
                             </VStack>
                         </Center>
                     ) : (
-                        <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={6}>
+                        <SimpleGrid
+                            columns={{ base: 1, md: 2, xl: 3 }}
+                            spacing={{ base: 6, md: 8, xl: 10 }}
+                            spacingX={{ base: 6, md: 8, xl: 12 }}
+                            spacingY={{ base: 6, md: 8, xl: 10 }}
+                        >
                             {filteredBikes.map((bike: any) => (
                                 <CardBike key={bike.id} bike={bike} />
                             ))}

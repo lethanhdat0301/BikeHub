@@ -7,6 +7,8 @@ import {
   Put,
   Delete,
   UseGuards,
+  ForbiddenException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Rental as RentalModel } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
@@ -25,66 +27,134 @@ import { CreateRentalDto, UpdateRentalDto } from './rental.dto';
 export class RentalController {
   constructor(private rentalService: RentalService) { }
 
-  @Get('/')
-  @Roles(ROLES_ENUM.ADMIN)
-  @UseGuards(JwtAuthGuard)
-  async getAllRentals(): Promise<RentalModel[]> {
-    return this.rentalService.findAll({});
-  }
+  // ================= HELPER =================
+  private async checkDealerOwnRental(
+    rentalId: number,
+    user: any,
+  ): Promise<RentalModel> {
+    const rental = await this.rentalService.findOne({ id: rentalId });
+    console.log(user)
 
-  // Public listing that returns dealer-scoped rentals when a dealer token is present,
-  // admin gets all rentals, anonymous callers get an empty list.
-  @Get('/list')
-  @UseGuards(OptionalJwtAuthGuard)
-  async listRentals(@CurrentUser() user: any): Promise<RentalModel[]> {
-    if (user && user.role === ROLES_ENUM.DEALER) {
-      return this.rentalService.findAll({ where: { Bike: { Park: { dealer_id: user.id } } }, orderBy: { created_at: 'desc' } });
+    if (!rental) {
+      throw new ForbiddenException('Rental not found');
     }
 
-    if (user && user.role === ROLES_ENUM.ADMIN) {
-      return this.rentalService.findAll({ orderBy: { created_at: 'desc' } });
+    if (
+      user.role !== ROLES_ENUM.ADMIN &&
+      rental.user_id !== user.id
+    ) {
+      throw new ForbiddenException('You do not own this rental');
+    }
+
+    return rental;
+  }
+
+  // ================= GET ALL =================
+  @Get('/')
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @UseGuards(JwtAuthGuard)
+  async getAllRentals(
+    @CurrentUser() user: any,
+  ): Promise<RentalModel[]> {
+    if (user.role === ROLES_ENUM.DEALER) {
+      // Dealers should see rentals for bikes they own
+      return this.rentalService.findAll({
+        where: ({ Bike: { dealer_id: user.id } } as any),
+        orderBy: { created_at: 'desc' },
+      } as any);
+    }
+
+    return this.rentalService.findAll({
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  @Get('rental/check')
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @UseGuards(JwtAuthGuard)
+  async getFirstRental(@CurrentUser() user: any): Promise<RentalModel> {
+    if (user && user.role === ROLES_ENUM.DEALER) {
+      const parks = await this.rentalService.findAll({ where: { user_id: user.id }, take: 1 });
+      return parks[0];
+    }
+    // return this.rentalService.findFirst();
+  }
+
+  // ================= PUBLIC LIST =================
+  @Get('/list')
+  @UseGuards(OptionalJwtAuthGuard)
+  async listRentals(
+    @CurrentUser() user: any,
+  ): Promise<RentalModel[]> {
+    if (user?.role === ROLES_ENUM.DEALER) {
+      return this.rentalService.findAll({
+        where: ({ Bike: { dealer_id: user.id } } as any),
+        orderBy: { created_at: 'desc' },
+      } as any);
+    }
+
+    if (user?.role === ROLES_ENUM.ADMIN) {
+      return this.rentalService.findAll({
+        orderBy: { created_at: 'desc' },
+      });
     }
 
     return [];
   }
 
-  @Get('rental/check')
-  @Roles(ROLES_ENUM.ADMIN)
-  @UseGuards(JwtAuthGuard)
-  async getFirstUser(): Promise<RentalModel> {
-    console.log("----- check")
-    return this.rentalService.findFirst();
-  }
-
+  // ================= GET BY ID =================
   @Get('rental/:id')
-  @Roles(ROLES_ENUM.ADMIN)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
   @UseGuards(JwtAuthGuard)
-  async getRentalById(@Param('id') id: string): Promise<RentalModel> {
-    console.log("----- check12")
-    return this.rentalService.findOne({ id: Number(id) });
+  async getRentalById(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: any,
+  ): Promise<RentalModel> {
+    return this.checkDealerOwnRental(id, user);
   }
 
+  // ================= GET BY USER =================
   @Get('user/:id')
-  @Roles(ROLES_ENUM.ADMIN)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
   @UseGuards(JwtAuthGuard)
   async getRentalsByUser(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: any,
   ): Promise<RentalModel[]> {
+    if (user.role === ROLES_ENUM.ADMIN) {
+      return this.rentalService.findAll({
+        where: { user_id: id },
+        orderBy: { created_at: 'desc' },
+      });
+    }
+
+    if (id !== user.id) {
+      throw new ForbiddenException('You can only view your own rentals');
+    }
+
     return this.rentalService.findAll({
-      where: { user_id: Number(id) },
-      orderBy: { created_at: 'desc' }
+      where: { user_id: user.id },
+      orderBy: { created_at: 'desc' },
     });
   }
 
-
-
+  // ================= CREATE =================
   @Post('rental')
-  @Roles(ROLES_ENUM.ADMIN)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
   @UseGuards(JwtAuthGuard)
   async createRental(
-    @Body() createRentalDto: CreateRentalDto,
+    @Body() dto: CreateRentalDto,
+    @CurrentUser() user: any,
   ): Promise<RentalModel> {
-    const { user_id, bike_id, ...rest } = createRentalDto;
+    const { user_id, bike_id, ...rest } = dto;
+
+    if (
+      user.role !== ROLES_ENUM.ADMIN &&
+      user_id !== user.id
+    ) {
+      throw new ForbiddenException('You can only create rentals for yourself');
+    }
+
     return this.rentalService.create({
       ...rest,
       User: {
@@ -96,28 +166,47 @@ export class RentalController {
     });
   }
 
+  // ================= UPDATE =================
   @Put('rental/:id')
-  @Roles(ROLES_ENUM.ADMIN)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
   @UseGuards(JwtAuthGuard)
   async updateRental(
-    @Param('id') id: string,
-    @Body() updateRentalDto: UpdateRentalDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateRentalDto,
+    @CurrentUser() user: any,
   ): Promise<RentalModel> {
-    const { user_id, bike_id, ...rest } = updateRentalDto;
+    await this.checkDealerOwnRental(id, user);
+
+    const { user_id, bike_id, ...rest } = dto;
+
+    if (
+      user.role !== ROLES_ENUM.ADMIN &&
+      user_id &&
+      user_id !== user.id
+    ) {
+      throw new ForbiddenException('You cannot change rental owner');
+    }
+
     return this.rentalService.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
         ...rest,
-        ...(user_id ? { User: { connect: { id: user_id } } } : {}),
-        ...(bike_id ? { Bike: { connect: { id: bike_id } } } : {}),
+        ...(user_id && { User: { connect: { id: user_id } } }),
+        ...(bike_id && { Bike: { connect: { id: bike_id } } }),
       },
     });
   }
 
+  // ================= DELETE =================
   @Delete('rental/:id')
-  @Roles(ROLES_ENUM.ADMIN)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
   @UseGuards(JwtAuthGuard)
-  async deleteRental(@Param('id') id: string): Promise<RentalModel> {
-    return this.rentalService.delete({ id: Number(id) });
+  async deleteRental(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: any,
+  ): Promise<RentalModel> {
+    await this.checkDealerOwnRental(id, user);
+
+    return this.rentalService.delete({ id });
   }
 }
