@@ -18,10 +18,21 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
   const [errorTitle, setErrorTitle] = useState<string | null>(null);
   const [errorBody, setErrorBody] = useState<string | null>(null);
 
+  // prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const previous = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = previous;
+      };
+    }
+  }, [isOpen]);
+
 
   useEffect(() => {
     const getFields = async (module: string): Promise<string[]> => {
-      // console.log("getFields")
+      console.log("getFields",module)
       try {
         // console.log(`${process.env.REACT_APP_API_URL}${module}s${module === "user" ? "" : "/" + module
         //   }/2`)
@@ -45,8 +56,9 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
 
         const defaultFieldsMap: { [key: string]: string[] } = {
           park: ["name", "location", "image"],
-          bike: ["model", "status", "lock", "location", "price", "park_id", "image"],
-          user: ["name", "email", "password", "role", "birthdate", "phone", "image"],
+          bike: ["model", "seats", "status", "lock", "location", "price", "park_id", "image"],
+          // expose birthdate and password on create form for users
+          user: ["name", "email", "password", "role", "phone", "birthdate", "image"],
           rental: ["user_id", "bike_id", "start_time", "end_time", "status", "price"],
         };
 
@@ -55,11 +67,25 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
             ? Object.keys(sample)
             : defaultFieldsMap[module] || [];
 
-        // Exclude internal/relation fields by default (always exclude dealer_id from the create form)
-        const excludedFields = ["created_at", "updated_at", "id", "Bike", "bike", "dealer_id"];
+        // Exclude internal/relation fields by default (always exclude dealer_id and internal bike fields from the create form)
+        const excludedFields = ["created_at", "updated_at", "id", "Bike", "bike", "dealer_id", "rating", "review_count", "dealer_name", "dealer_contact"];
         fields = fields.filter((field) => !excludedFields.includes(field));
 
         // console.log("fields", fields);
+        if (module === "rental") {
+          return [
+            "user_id",
+            "bike_id",
+            "start_time",
+            "end_time",
+            "status",
+            "price",
+            "qrcode",
+            "payment_id",
+            "order_id",
+          ];
+        }
+        console.log("fields", fields);
         return fields;
       } catch (error) {
         console.error(error);
@@ -169,7 +195,7 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
     };
     try {
       // Loại bỏ các trường không hợp lệ trước khi gửi lên server (always exclude dealer_id)
-      const forbiddenFields = ["id", "created_at", "updated_at", "Bike", "bike", "dealer_id"];
+      const forbiddenFields = ["id", "created_at", "updated_at", "Bike", "bike", "dealer_id", "rating", "review_count", "dealer_name", "dealer_contact"];
 
       const filteredData = Object.keys(data)
         .filter((key) => !forbiddenFields.includes(key))
@@ -178,9 +204,41 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
           return obj;
         }, {} as any);
 
+      // Module-specific sanitization and validation
+      let payloadToSend: any = filteredData;
+      if (module === 'user') {
+        // Whitelist only fields the backend expects for user creation to avoid 400 errors
+        const allowedUserFields = ['name','email','password','role','phone','birthdate'];
+        payloadToSend = Object.keys(filteredData).filter(k => allowedUserFields.includes(k)).reduce((obj, k) => {
+          obj[k] = (filteredData as any)[k];
+          return obj;
+        }, {} as any);
+
+        // Password validation
+        if (payloadToSend.password && (typeof payloadToSend.password !== 'string' || payloadToSend.password.length < 8)) {
+          setErrorTitle('Create failed (validation)');
+          setErrorBody('Password must be a string and at least 8 characters long.');
+          setErrorOpen(true);
+          return;
+        }
+
+        // Birthdate validation -> ensure valid date
+        if (payloadToSend.birthdate) {
+          const d = new Date(payloadToSend.birthdate);
+          if (Number.isNaN(d.getTime())) {
+            setErrorTitle('Create failed (validation)');
+            setErrorBody('Birthdate must be a valid date.');
+            setErrorOpen(true);
+            return;
+          }
+          // Send ISO string for consistency
+          payloadToSend.birthdate = d.toISOString();
+        }
+      }
+
       // Client-side validation to avoid sending invalid park payloads
       if (module === "park") {
-        if (!filteredData.name || !filteredData.location) {
+        if (!payloadToSend.name || !payloadToSend.location) {
           setErrorTitle('Create failed (validation)');
           setErrorBody('Both name and location are required to create a park.');
           setErrorOpen(true);
@@ -188,7 +246,7 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
         }
       }
 
-      await createItem(module, filteredData);
+      await createItem(module, payloadToSend);
       setIsOpen(false);
     } catch (err: any) {
       console.error("Error creating item:", err);
@@ -234,14 +292,14 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
       {isOpen &&
         ReactDOM.createPortal(
           <div
-            className="fixed inset-0 z-10 overflow-y-auto"
+            className="fixed inset-0 z-[9999] overflow-y-auto"
             aria-labelledby="modal-title"
             role="dialog"
             aria-modal="true"
           >
             <div className="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
               <div
-                className="fixed inset-0 bg-gray-800 bg-opacity-75 transition-opacity"
+                className="fixed inset-0 bg-black bg-opacity-80 transition-opacity"
                 aria-hidden="true"
                 onClick={() => setIsOpen(false)}
               ></div>
@@ -253,7 +311,7 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
                 &#8203;
               </span>
 
-              <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+              <div className="relative z-[10000] inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
                 <div className="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                   <h3
                     className="text-lg font-medium leading-6 text-gray-900"
@@ -291,14 +349,36 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
                           />
-                        ) : field === "birthdate" ? (
-                          <input
-                            type="date"
+                        ) : field === "role" ? (
+                          <select
                             name={field}
-                            value={formValues[field]}
+                            value={formValues[field] || "user"}
+                            onChange={handleChange}
+                            className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
+                          >
+                            <option value="admin">admin</option>
+                            <option value="dealer">dealer</option>
+                            <option value="user">user</option>
+                          </select>
+                        ) : field === "seats" ? (
+                          <input
+                            type="number"
+                            name={field}
+                            value={formValues[field] || ''}
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
                           />
+                        ) : field === "status" && module === "bike" ? (
+                          <select
+                            name={field}
+                            value={formValues[field] || "available"}
+                            onChange={handleChange}
+                            className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
+                          >
+                            <option value="available">Available</option>
+                            <option value="out_of_stock">Out of stock</option>
+                            <option value="locked">Locked</option>
+                          </select>
                         ) : field === "park_id" ? (
                           <select
                             name={field}
@@ -313,9 +393,17 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
                               </option>
                             ))}
                           </select>
+                        ) : field === "birthdate" ? (
+                          <input
+                            type="date"
+                            name={field}
+                            value={formValues[field] || ''}
+                            onChange={handleChange}
+                            className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
+                          />
                         ) : (
                           <input
-                            type={field.endsWith("id") ? "number" : "text"}
+                            type={field === 'password' ? 'password' : (field.endsWith("id") ? "number" : "text")}
                             name={field}
                             value={formValues[field] || ''}
                             onChange={handleChange}
@@ -348,25 +436,25 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
           document.body
         )}
 
-        {errorOpen &&
-          ReactDOM.createPortal(
-            <div className="fixed inset-0 z-30 flex items-center justify-center">
-              <div className="absolute inset-0 bg-black opacity-30" onClick={() => setErrorOpen(false)}></div>
-              <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-                <h4 className="mb-2 text-lg font-semibold">{errorTitle}</h4>
-                <pre className="mb-4 max-h-64 overflow-auto whitespace-pre-wrap text-sm">{errorBody}</pre>
-                <div className="text-right">
-                  <button
-                    className="inline-flex items-center gap-2 rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
-                    onClick={() => setErrorOpen(false)}
-                  >
-                    OK
-                  </button>
-                </div>
+      {errorOpen &&
+        ReactDOM.createPortal(
+          <div className="fixed inset-0 z-[10001] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black opacity-70" onClick={() => setErrorOpen(false)}></div>
+            <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+              <h4 className="mb-2 text-lg font-semibold">{errorTitle}</h4>
+              <pre className="mb-4 max-h-64 overflow-auto whitespace-pre-wrap text-sm">{errorBody}</pre>
+              <div className="text-right">
+                <button
+                  className="inline-flex items-center gap-2 rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
+                  onClick={() => setErrorOpen(false)}
+                >
+                  OK
+                </button>
               </div>
-            </div>,
-            document.body
-          )}
+            </div>
+          </div>,
+          document.body
+        )}
     </>
   );
 };

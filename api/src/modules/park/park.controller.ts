@@ -29,37 +29,13 @@ import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 export class ParkController {
   constructor(private parkService: ParkService) { }
 
-  // ================= HELPER =================
-  private async checkDealerOwnPark(
-    parkId: number,
-    user: any,
-  ): Promise<ParkModel> {
-    const park = await this.parkService.findOne({ id: parkId });
 
-    if (!park) {
-      throw new ForbiddenException('Park not found');
-    }
-
-    // DEALER chỉ được thao tác park của mình
-    if (
-      user.role !== ROLES_ENUM.ADMIN &&
-      park.dealer_id !== user.id
-    ) {
-      throw new ForbiddenException('You do not own this park');
-    }
-
-    return park;
-  }
 
   // ================= GET =================
   @Get('/')
   @UseGuards(OptionalJwtAuthGuard)
   async getAllParks(@CurrentUser() user: any): Promise<ParkModel[]> {
-    // Nếu là dealer thì chỉ trả về parks của dealer đó
-    if (user && user.role === ROLES_ENUM.DEALER) {
-      return this.parkService.findAll({ where: { dealer_id: user.id } });
-    }
-
+    // Return all parks — both admins and dealers can view all parks, but dealers will still only be allowed to modify their own parks (enforced in update/delete)
     return this.parkService.findAll({});
   }
 
@@ -67,12 +43,7 @@ export class ParkController {
   @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
   @UseGuards(JwtAuthGuard)
   async getFirstPark(@CurrentUser() user: any): Promise<ParkModel> {
-    // Nếu là dealer thì lấy park đầu tiên của dealer
-    if (user && user.role === ROLES_ENUM.DEALER) {
-      const parks = await this.parkService.findAll({ where: { dealer_id: user.id }, take: 1 });
-      return parks[0];
-    }
-
+    // Return first park for anyone (dealer can view other parks as well)
     return this.parkService.findFirst();
   }
 
@@ -82,11 +53,7 @@ export class ParkController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: any,
   ): Promise<ParkModel> {
-    // Nếu là dealer thì kiểm tra quyền sở hữu
-    if (user && user.role === ROLES_ENUM.DEALER) {
-      return await this.checkDealerOwnPark(id, user);
-    }
-
+    // Dealers can view any park by id; ownership checks are enforced only for update/delete
     return this.parkService.findOne({ id });
   }
 
@@ -101,10 +68,7 @@ export class ParkController {
       },
     };
 
-    if (user && user.role === ROLES_ENUM.DEALER) {
-      where.dealer_id = user.id;
-    }
-
+    // Dealers may view open parks across the system; do not restrict by dealer
     return this.parkService.findAll({ where });
   }
 
@@ -128,32 +92,23 @@ export class ParkController {
       ],
     };
 
-    if (user && user.role === ROLES_ENUM.DEALER) {
-      where.dealer_id = user.id;
-    }
-
+    // Dealers may view closed parks across the system; do not restrict by dealer
     return this.parkService.findAll({ where });
   }
 
   // ================= CREATE =================
   @Post('park')
-  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @Roles(ROLES_ENUM.ADMIN)
   @UseGuards(JwtAuthGuard)
   async createPark(
     @Body() createParkDto: CreateParkDto,
     @CurrentUser() user: any,
   ): Promise<ParkModel> {
-    // Server-controlled: always assign the current authenticated user as the Dealer
+    // Sanitize payload: parks are no longer owned by dealers — ignore any attempted dealer assignment
     const data: any = { ...createParkDto };
-    // Remove any attempted dealer assignment from client
     delete data.dealer;
     delete data.dealer_id;
     delete data.Dealer;
-
-    // Assign Dealer relation to the current authenticated user (must exist)
-    if (user) {
-      data.Dealer = { connect: { id: user.id } };
-    }
 
     try {
       return await this.parkService.create(data);
@@ -185,16 +140,14 @@ export class ParkController {
 
   // ================= UPDATE =================
   @Put('park/:id')
-  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @Roles(ROLES_ENUM.ADMIN)
   @UseGuards(JwtAuthGuard)
   async updatePark(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateParkDto,
     @CurrentUser() user: any,
   ): Promise<ParkModel> {
-    await this.checkDealerOwnPark(id, user);
-
-    // Sanitize incoming payload: do not allow clients to change the dealer
+    // Sanitize incoming payload: parks are not owned by dealers — ignore any attempted dealer assignment
     const dataToUpdate: any = { ...dto };
     delete dataToUpdate.dealer;
     delete dataToUpdate.dealer_id;
@@ -208,15 +161,14 @@ export class ParkController {
 
   // ================= DELETE =================
   @Delete('park/:id')
-  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @Roles(ROLES_ENUM.ADMIN)
   @UseGuards(JwtAuthGuard)
   async deletePark(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: any,
   ): Promise<ParkModel> {
 
-    await this.checkDealerOwnPark(id, user);
-
+    // Parks are not owned by dealers. Proceed to delete (admins only).
     return this.parkService.delete({ id });
   }
 }

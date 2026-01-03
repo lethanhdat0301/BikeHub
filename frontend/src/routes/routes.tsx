@@ -60,7 +60,7 @@ const Routes: React.FC = () => {
         </Protected>
       } />
       {/* Temporarily disabled login/signup routes */}
-      {/* <Route
+      <Route
         path="login"
         element={
           <UnAuthorized>
@@ -75,7 +75,7 @@ const Routes: React.FC = () => {
             <SignupPage />
           </UnAuthorized>
         }
-      /> */}
+      />
       <Route path="/paypal" element={<PaymentPage />} />
       <Route path="*" element={<NotFoundPage />} />
       <Route path="/" element={<HomePage />} />

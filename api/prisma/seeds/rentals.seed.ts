@@ -32,5 +32,7 @@ export async function seedRentals(prisma: PrismaClient, users: User[], bikes: Bi
       rentals.push(rental);
     }
   }
+
   console.log(`✅ Seeded ${rentals.length} Rentals`);
+  return rentals;
 }

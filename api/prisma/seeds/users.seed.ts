@@ -1,19 +1,10 @@
 import { PrismaClient, User } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(8).toString('hex');
-  const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-  return salt + ':' + derivedKey.toString('hex');
-}
+import { AuthHelpers } from '../../src/shared/helpers/auth.helpers';
 
 export async function seedUsers(prisma: PrismaClient) {
-  const password = await hashPassword('123456');
-  const adminPassword = await hashPassword('admin123');
+  const password = await AuthHelpers.hash('123456');
+  const adminPassword = await AuthHelpers.hash('admin123');
 
   // 1. Tạo Super Admin
   await prisma.user.upsert({

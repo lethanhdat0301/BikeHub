@@ -49,6 +49,7 @@ export class AuthService {
       birthdate: userData.birthdate,
       phone: userData.phone,
       image: userData.image,
+      status: userData.status,
     };
 
     const accessToken = this.jwtService.sign(payload, {

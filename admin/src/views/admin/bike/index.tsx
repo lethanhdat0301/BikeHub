@@ -13,16 +13,25 @@ const Bikes = () => {
           { credentials: "include" }
         );
         const data = await response.json();
-        
+
+        // Normalize response: accept array or { data: [...] } or error objects
         if (Array.isArray(data)) {
-          setTableData(data);
+          // Normalize bikes to include explicit location property (Park.location preferred)
+          setTableData(data.map((b: any) => ({
+            ...b,
+            location: b.Park?.location || b.location || "-",
+          })));
         } else if (data && Array.isArray((data as any).data)) {
-          setTableData((data as any).data);
+          setTableData((data as any).data.map((b: any) => ({
+            ...b,
+            location: b.Park?.location || b.location || "-",
+          })));
         } else {
           setTableData([]);
         }
       } catch (error) {
         console.error("Error fetching bikes:", error);
+        setTableData([]);
       } finally {
         setLoading(false);
       }

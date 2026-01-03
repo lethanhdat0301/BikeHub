@@ -79,10 +79,8 @@ export class ParkService {
 
   async create(data: Prisma.ParkCreateInput): Promise<Park> {
     const safeData: any = { ...(data as any) };
-    // Normalize/sanitize incoming payloads: remove any lowercase `dealer` or `dealer_id` fields
     if (safeData.dealer) delete safeData.dealer;
     if ('dealer_id' in safeData) delete safeData.dealer_id;
-    // `Dealer` relation should be provided server-side (controller)
     return this.prisma.park.create({
       data: safeData,
     });
@@ -94,7 +92,6 @@ export class ParkService {
   }): Promise<Park> {
     const { where, data } = params;
     const safeData: any = { ...(data as any) };
-    // Prevent changing dealer via update payload
     if (safeData.dealer) delete safeData.dealer;
     if ('dealer_id' in safeData) delete safeData.dealer_id;
     return this.prisma.park.update({ where, data: safeData });

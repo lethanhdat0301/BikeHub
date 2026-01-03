@@ -1,6 +1,5 @@
-import React from "react";
-
 // Admin Imports
+import React from "react";
 import MainDashboard from "views/admin/default";
 import ManageBikes from "views/admin/bike";
 import ManageParks from "views/admin/park";
@@ -9,6 +8,8 @@ import Dealers from "views/admin/dealer";
 import Customers from "views/admin/customer";
 import Bookings from "views/admin/booking";
 import Referrers from "views/admin/referrer";
+import InboxPage from "views/admin/inbox";
+import ReferralsPage from "views/admin/referrals";
 
 // Auth Imports
 import SignIn from "views/auth/SignIn";
@@ -16,19 +17,21 @@ import SignIn from "views/auth/SignIn";
 // Icon Imports
 import {
   MdHome,
-  MdLock,
+  MdMail,
+  MdPeople,
   MdElectricBike,
   MdLocalParking,
-  MdPeople,
   MdStore,
   MdCardGiftcard,
   MdEventNote,
+  MdFace,
+  MdAccountCircle,
 } from "react-icons/md";
-import { FaFileInvoiceDollar } from "react-icons/fa";
+import { FaFileInvoiceDollar, FaShareAlt } from "react-icons/fa";
 
 const routes = [
   {
-    name: "Main Dashboard",
+    name: "Dashboard",
     layout: "/admin",
     path: "default",
     icon: <MdHome className="h-6 w-6" />,
@@ -63,11 +66,18 @@ const routes = [
     component: <Referrers />,
   },
   {
-    name: "Parks",
+    name: "Inbox",
     layout: "/admin",
-    icon: <MdLocalParking className="h-6 w-6" />,
-    path: "parks",
-    component: <ManageParks />,
+    path: "inbox",
+    icon: <MdMail className="h-6 w-6" />,
+    component: <React.Suspense fallback={<div />}><InboxPage /></React.Suspense>,
+  },
+  {
+    name: "Rental",
+    layout: "/admin",
+    path: "rentals",
+    icon: <FaFileInvoiceDollar className="h-6 w-6" />,
+    component: <ManageRentals />,
   },
   {
     name: "Bikes",
@@ -77,17 +87,17 @@ const routes = [
     component: <ManageBikes />,
   },
   {
-    name: "Rentals",
+    name: "Accounts",
     layout: "/admin",
-    icon: <FaFileInvoiceDollar className="h-6 w-6" />,
-    path: "rentals",
-    component: <ManageRentals />,
+    icon: <MdAccountCircle className="h-6 w-6" />,
+    path: "accounts",
+    component: <DataTables initialTab="accounts" />,
   },
   {
     name: "Log Out",
     layout: "/auth",
     path: "sign-in",
-    icon: <MdLock className="h-6 w-6" />,
+    icon: <MdLocalParking className="h-6 w-6" />,
     component: <SignIn />,
   },
 ];

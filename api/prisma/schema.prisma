@@ -16,6 +16,9 @@ model Bike {
   price           Float    // Giá xe trên 1 ngày
   park_id         Int
   Park            Park     @relation(fields: [park_id], references: [id])
+  // New: link bike to a dealer (User)
+  dealer_id       Int?
+  Dealer          User?    @relation("DealerBikes", fields: [dealer_id], references: [id])
   Rental          Rental[]
   image           String?
   description     String?  // Mô tả chi tiết về xe
@@ -42,8 +45,6 @@ model Park {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   image      String?
-  dealer_id  Int?
-  Dealer     User?    @relation("DealerParks", fields: [dealer_id], references: [id])
 }
 
 model User {
@@ -52,9 +53,12 @@ model User {
   email          String           @unique
   password       String
   role           String           @default("user")
+  status         String           @default("active")
   Rental         Rental[]
-  Parks          Park[]           @relation("DealerParks")
+  // Parks          Park[]           @relation("DealerParks")
   BookingRequest BookingRequest[]
+  // Bikes relation for dealers
+  Bikes          Bike[]           @relation("DealerBikes")
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
   birthdate      DateTime
