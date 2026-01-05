@@ -34,6 +34,6 @@ export async function seedBikes(
     bikes.push(bike);
   }
 
-  console.log(`✅ Seeded ${createdBikes.length} Bikes`);
-  return createdBikes;
+  console.log(`✅ Seeded ${bikes.length} Bikes`);
+  return bikes;
 }

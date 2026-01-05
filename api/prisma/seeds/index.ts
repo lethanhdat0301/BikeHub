@@ -18,7 +18,7 @@ async function main() {
   const parks = await seedParks(prisma, dealers);
 
   // 3. Bikes (Gắn với Parks)
-  const bikes = await seedBikes(prisma, parks);
+  const bikes = await seedBikes(prisma, parks, users);
 
   // 4. Rentals (Gắn với Users & Bikes)
   if (bikes) {

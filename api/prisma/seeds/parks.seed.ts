@@ -45,7 +45,6 @@ export async function seedParks(prisma: PrismaClient, dealers: User[]) {
           name: p.name,
           location: p.location,
           image: p.image,
-          Dealer: { connect: { id: p.dealer_id } }
         }
       });
       createdParks.push(newPark);

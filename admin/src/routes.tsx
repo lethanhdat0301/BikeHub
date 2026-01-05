@@ -10,6 +10,7 @@ import Bookings from "views/admin/booking";
 import Referrers from "views/admin/referrer";
 import InboxPage from "views/admin/inbox";
 import ReferralsPage from "views/admin/referrals";
+import Tables from "views/admin/user";
 
 // Auth Imports
 import SignIn from "views/auth/SignIn";
@@ -91,7 +92,7 @@ const routes = [
     layout: "/admin",
     icon: <MdAccountCircle className="h-6 w-6" />,
     path: "accounts",
-    component: <DataTables initialTab="accounts" />,
+    component: <Tables initialTab="accounts" />,
   },
   {
     name: "Log Out",
