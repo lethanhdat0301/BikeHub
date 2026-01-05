@@ -17,40 +17,57 @@ const columnHeaders = [
 const RentalsTable = () => {
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Fetch rentals (includes User and Bike with Park)
+      const response = await fetch(`${process.env.REACT_APP_API_URL}rentals`, {
+        credentials: "include",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          setError('Please log in to view rentals');
+        } else {
+          setError(`Failed to fetch rentals: ${response.statusText}`);
+        }
+        console.error('Failed to fetch rentals:', response.status, response.statusText);
+        setTableData([]);
+        return;
+      }
+
+      const rData = await response.json();
+      console.log('Rentals data:', rData);
+
+      const rentalsList = Array.isArray(rData) ? rData : [];
+
+      const mapped = rentalsList.map((r: any) => ({
+        id: `BK${String(r.id).padStart(6, '0')}`, // All use same booking_id_seq
+        name: r.User?.name || r.contact_name || 'Guest',
+        vehicle: r.Bike?.model || r.bike_id,
+        rental_period: `${new Date(r.start_time).toLocaleDateString()}${r.end_time ? ` - ${new Date(r.end_time).toLocaleDateString()}` : ' - Ongoing'}`,
+        pickup_location: r.Bike?.Park?.location || r.pickup_location || "-",
+        price: r.price !== undefined && r.price !== null ? `$${r.price}` : '-',
+        status: r.status,
+      }));
+
+      setTableData(mapped);
+    } catch (error) {
+      console.error("Error loading rentals:", error);
+      setError('Failed to load rentals. Please try again.');
+      setTableData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch rentals (includes User and Bike with Park)
-        const [rRes, uRes] = await Promise.all([
-          fetch(`${process.env.REACT_APP_API_URL}rentals`, { credentials: "include" }),
-          fetch(`${process.env.REACT_APP_API_URL}users`, { credentials: "include" }),
-        ]);
-        const rData = await rRes.json();
-        const uData = await uRes.json();
-        const rentalsList = Array.isArray(rData) ? rData : (rData && Array.isArray((rData as any).data) ? (rData as any).data : []);
-        const usersList = Array.isArray(uData) ? uData : (uData && Array.isArray((uData as any).data) ? (uData as any).data : []);
-
-        const mapped = rentalsList.map((r: any) => ({
-          id: r.id,
-          name: r.User?.name || r.user_id,
-          vehicle: r.Bike?.model || r.bike_id,
-          rental_period: `${new Date(r.start_time).toLocaleString()}${r.end_time ? ` - ${new Date(r.end_time).toLocaleString()}` : ''}`,
-          pickup_location: r.Bike?.Park?.location || r.pickup_location || "-",
-          price: r.price !== undefined && r.price !== null ? r.price : '-',
-          status: r.status,
-        }));
-
-        setTableData(mapped);
-      } catch (error) {
-        console.error("Error loading rentals:", error);
-        setTableData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
@@ -59,9 +76,23 @@ const RentalsTable = () => {
       <Heading size="md" mb={4} color="teal.600">
         Rentals
       </Heading>
-
-      {tableData.length === 0 ? (
-        <Text color="gray.500">No rentals found.</Text>
+      {error ? (
+        <Box
+          bg="red.100"
+          border="1px"
+          borderColor="red.400"
+          borderRadius="md"
+          p={4}
+          mb={4}
+        >
+          <Text color="red.700" fontWeight="medium">
+            {error}
+          </Text>
+        </Box>
+      ) : loading ? (
+        <Center h="200px">
+          <Spinner size="xl" color="teal.500" />
+        </Center>
       ) : (
         <AdminTable tableContent={tableData} tableHeader={columnHeaders} moduleName={"rental"} />
       )}

@@ -67,30 +67,31 @@ model User {
 }
 
 model Rental {
-  id              Int       @id @default(autoincrement())
-  user_id         Int?
-  bike_id         Int
-  start_time      DateTime
-  end_time        DateTime?
-  status          String
-  price           Float
-  User            User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  Bike            Bike      @relation(fields: [bike_id], references: [id], onDelete: Cascade)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  qrcode          String?
-  payment_id      String?
-  order_id        String?
+  id                  Int       @id @default(dbgenerated("nextval('booking_id_seq')"))
+  user_id             Int?
+  bike_id             Int
+  booking_request_id  Int?      // Link to original booking request
+  start_time          DateTime
+  end_time            DateTime?
+  status              String
+  price               Float
+  User                User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Bike                Bike      @relation(fields: [bike_id], references: [id], onDelete: Cascade)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  qrcode              String?
+  payment_id          String?
+  order_id            String?
   
   // Contact info for guests who don't login
-  contact_name    String?
-  contact_email   String?
-  contact_phone   String?
-  pickup_location String? // Địa điểm khách muốn nhận xe (địa chỉ cụ thể)
+  contact_name        String?
+  contact_email       String?
+  contact_phone       String?
+  pickup_location     String? // Địa điểm khách muốn nhận xe (địa chỉ cụ thể)
 }
 
 model BookingRequest {
-  id              Int      @id @default(autoincrement())
+  id              Int      @id @default(dbgenerated("nextval('booking_id_seq')"))
   user_id         Int?
   name            String
   email           String
@@ -99,6 +100,11 @@ model BookingRequest {
   pickup_location String
   status          String   @default("PENDING")
   admin_notes     String?
+  dealer_id       Int?
+  bike_id         Int?
+  start_date      DateTime?
+  end_date        DateTime?
+  estimated_price Float?
   User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt

@@ -160,9 +160,9 @@ const RequestBookingPage: React.FC = () => {
 
       toast({
         title: "Request Sent Successfully! 🎉",
-        description: "Your booking request has been sent to admin. We'll contact you soon!",
+        description: `Booking ID: ${response.data?.bookingId || response.bookingId || 'BK' + String(response.data?.id || response.id).padStart(6, '0')}. Your booking request has been sent to admin. We'll contact you soon!`,
         status: "success",
-        duration: 7000,
+        duration: 10000,
         isClosable: true,
         position: "top",
       });

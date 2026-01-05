@@ -1,7 +1,7 @@
-import CustomerTable from "./components/CustomerTable";
+import BookingRequestTable from "./components/BookingRequestTable";
 import { useEffect, useState } from "react";
 
-const Customers = () => {
+const BookingRequests = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -9,14 +9,13 @@ const Customers = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}users/customers`,
+        `${process.env.REACT_APP_API_URL}booking-requests`,
         { credentials: "include" }
       );
       const data = await response.json();
-      console.log('Customers data:', data);
       setTableData(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching booking requests:", error);
       setTableData([]);
     } finally {
       setLoading(false);
@@ -31,15 +30,19 @@ const Customers = () => {
     <div className="mt-5">
       <div className="mb-5">
         <h3 className="text-3xl font-bold text-navy-700 dark:text-white">
-          Customer List
+          Booking Requests
         </h3>
         <p className="mt-2 text-base text-gray-600 dark:text-gray-400">
-          A list of all customers who have rented from you.
+          Manage customer booking requests and convert them to rentals.
         </p>
       </div>
-      <CustomerTable tableContent={tableData} loading={loading} />
+      <BookingRequestTable 
+        tableContent={tableData} 
+        loading={loading} 
+        onRefresh={fetchData}
+      />
     </div>
   );
 };
 
-export default Customers;
+export default BookingRequests;

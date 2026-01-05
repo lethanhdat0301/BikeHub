@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
     Box,
     Container,
@@ -27,6 +27,7 @@ import api from "../../apis/axios";
 const BikeDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const toast = useToast();
     const { executeRecaptcha } = useGoogleReCaptcha();
 
@@ -68,7 +69,19 @@ const BikeDetailsPage: React.FC = () => {
         if (id) {
             fetchBikeDetails();
         }
-    }, [id]);
+
+        // Auto-fill dates from URL search params if available
+        const searchParams = new URLSearchParams(location.search);
+        const urlStartDate = searchParams.get('startDate');
+        const urlEndDate = searchParams.get('endDate');
+
+        if (urlStartDate) {
+            setStartDate(urlStartDate);
+        }
+        if (urlEndDate) {
+            setEndDate(urlEndDate);
+        }
+    }, [id, location.search]);
 
     const handleBookNow = async () => {
         if (!startDate || !endDate) {
@@ -189,7 +202,7 @@ const BikeDetailsPage: React.FC = () => {
             const totalPrice = days * bike.price;
 
             // Create rental request
-            await api.post(
+            const response = await api.post(
                 'rentals',
                 {
                     user_id: userId,
@@ -207,17 +220,21 @@ const BikeDetailsPage: React.FC = () => {
                 { withCredentials: true }
             );
 
+            const bookingData = response.data;
+            console.log('=== Booking response received:', bookingData);
+            console.log('=== Booking ID from response:', bookingData?.bookingId);
+
             toast({
                 title: "Booking Successful! 🎉",
-                description: `Your rental request has been submitted. Total: $${totalPrice} for ${days} day(s)`,
+                description: `Booking ID: ${bookingData?.bookingId || 'N/A'}. Check your email for confirmation details.`,
                 status: "success",
-                duration: 5000,
+                duration: 7000,
                 isClosable: true,
             });
 
             // Navigate to track order page
             setTimeout(() => {
-                navigate("/track-order");
+                navigate("/tracking");
             }, 2000);
 
         } catch (error: any) {

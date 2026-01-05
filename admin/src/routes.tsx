@@ -37,6 +37,7 @@ const routes = [
     path: "default",
     icon: <MdHome className="h-6 w-6" />,
     component: <MainDashboard />,
+    roles: ["admin", "dealer"],
   },
   {
     name: "Dealers",
@@ -44,6 +45,7 @@ const routes = [
     icon: <MdStore className="h-6 w-6" />,
     path: "dealers",
     component: <Dealers />,
+    roles: ["admin"],
   },
   {
     name: "Customers",
@@ -51,6 +53,7 @@ const routes = [
     icon: <MdPeople className="h-6 w-6" />,
     path: "customers",
     component: <Customers />,
+    roles: ["admin"],
   },
   {
     name: "Bookings",
@@ -58,6 +61,7 @@ const routes = [
     icon: <MdEventNote className="h-6 w-6" />,
     path: "bookings",
     component: <Bookings />,
+    roles: ["admin", "dealer"],
   },
   {
     name: "Referrals",
@@ -65,6 +69,7 @@ const routes = [
     icon: <MdCardGiftcard className="h-6 w-6" />,
     path: "referrals",
     component: <Referrers />,
+    roles: ["admin", "dealer"],
   },
   {
     name: "Inbox",
@@ -72,6 +77,7 @@ const routes = [
     path: "inbox",
     icon: <MdMail className="h-6 w-6" />,
     component: <React.Suspense fallback={<div />}><InboxPage /></React.Suspense>,
+    roles: ["admin"],
   },
   {
     name: "Rental",
@@ -79,6 +85,7 @@ const routes = [
     path: "rentals",
     icon: <FaFileInvoiceDollar className="h-6 w-6" />,
     component: <ManageRentals />,
+    roles: ["admin"],
   },
   {
     name: "Bikes",
@@ -86,6 +93,7 @@ const routes = [
     icon: <MdElectricBike className="h-6 w-6" />,
     path: "bikes",
     component: <ManageBikes />,
+    roles: ["admin", "dealer"],
   },
   {
     name: "Accounts",
@@ -93,6 +101,7 @@ const routes = [
     icon: <MdAccountCircle className="h-6 w-6" />,
     path: "accounts",
     component: <Tables initialTab="accounts" />,
+    roles: ["admin"],
   },
   {
     name: "Log Out",

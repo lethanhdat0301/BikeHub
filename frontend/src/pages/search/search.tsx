@@ -67,8 +67,6 @@ const SearchPage: React.FC = () => {
                 const limitedData = data.slice(0, 12).map((bike, index) => ({
                     ...bike,
                     image: bike.image || defaultImages[index % defaultImages.length],
-                    type: bike.type || "Standard",
-                    transmission: bike.transmission || "manual"
                 }));
 
                 console.log(`📊 Hiển thị ${limitedData.length} xe`);
@@ -95,14 +93,25 @@ const SearchPage: React.FC = () => {
             bike => bike.price >= priceRange[0] && bike.price <= priceRange[1]
         );
 
-        // Filter by motorcycle type
+        // Filter by fuel type (using as type proxy)
         if (selectedTypes.length > 0) {
-            filtered = filtered.filter(bike => selectedTypes.includes(bike.type));
+            filtered = filtered.filter(bike => {
+                const bikeType = bike.fuel_type || 'gasoline';
+                return selectedTypes.some(type => {
+                    if (type === 'Electric Scooter') return bikeType === 'electric';
+                    if (type === 'Scooter') return bike.transmission === 'automatic';
+                    if (type === 'Manual Bike') return bike.transmission === 'manual';
+                    return true;
+                });
+            });
         }
 
         // Filter by transmission
         if (selectedTransmission.length > 0) {
-            filtered = filtered.filter(bike => selectedTransmission.includes(bike.transmission));
+            filtered = filtered.filter(bike => {
+                const trans = bike.transmission?.toLowerCase() || 'automatic';
+                return selectedTransmission.some(t => t.toLowerCase() === trans);
+            });
         }
 
         setFilteredBikes(filtered);
@@ -191,10 +200,9 @@ const SearchPage: React.FC = () => {
                                 onChange={(values) => setSelectedTypes(values as string[])}
                             >
                                 <Stack spacing={2}>
-                                    <Checkbox value="Scooter">Scooter</Checkbox>
-                                    <Checkbox value="Dirt Bike">Dirt Bike</Checkbox>
-                                    <Checkbox value="Standard">Standard</Checkbox>
-                                    <Checkbox value="Touring">Touring</Checkbox>
+                                    <Checkbox value="Electric Scooter">Electric Scooter</Checkbox>
+                                    <Checkbox value="Scooter">Automatic Scooter</Checkbox>
+                                    <Checkbox value="Manual Bike">Manual Bike</Checkbox>
                                 </Stack>
                             </CheckboxGroup>
                         </Box>
@@ -249,7 +257,12 @@ const SearchPage: React.FC = () => {
                             spacingY={{ base: 6, md: 8, xl: 10 }}
                         >
                             {filteredBikes.map((bike: any) => (
-                                <CardBike key={bike.id} bike={bike} />
+                                <CardBike
+                                    key={bike.id}
+                                    bike={bike}
+                                    searchStartDate={startDate || undefined}
+                                    searchEndDate={endDate || undefined}
+                                />
                             ))}
                         </SimpleGrid>
                     )}

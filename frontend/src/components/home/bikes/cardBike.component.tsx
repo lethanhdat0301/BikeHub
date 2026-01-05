@@ -44,7 +44,15 @@ export type Bike = {
   };
 };
 
-const CardBike = ({ bike }: { bike: Bike }) => {
+const CardBike = ({
+  bike,
+  searchStartDate,
+  searchEndDate
+}: {
+  bike: Bike;
+  searchStartDate?: string;
+  searchEndDate?: string;
+}) => {
   const [liked, setLiked] = useState(false);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const navigate = useNavigate();
@@ -220,7 +228,13 @@ const CardBike = ({ bike }: { bike: Bike }) => {
             colorScheme="teal"
             size={{ base: "sm", md: "md" }}
             width="full"
-            onClick={() => navigate(`/motorcycles/${bike.id}`)}
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (searchStartDate) params.set('startDate', searchStartDate);
+              if (searchEndDate) params.set('endDate', searchEndDate);
+              const queryString = params.toString();
+              navigate(`/motorcycles/${bike.id}${queryString ? `?${queryString}` : ''}`);
+            }}
             mt={{ base: 1, md: 2 }}
             _hover={{
               transform: "translateY(-2px)",

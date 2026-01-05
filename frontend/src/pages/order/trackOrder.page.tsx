@@ -39,6 +39,7 @@ import {
     FaTruck,
     FaMapMarkerAlt,
 } from "react-icons/fa";
+import api from "../../apis/axios";
 import bike1 from "../../assets/images/bikes/bike1.jpg";
 import bike2 from "../../assets/images/bikes/bike2.webp";
 
@@ -158,19 +159,60 @@ const TrackOrderPage: React.FC = () => {
         setIsSearching(true);
 
         try {
-            // TODO: Replace with actual API call
-            console.log("Searching for:", searchQuery);
+            // Search for rentals using the public list endpoint
+            const response = await api.get('/rentals/list', { withCredentials: true });
+            const allRentals = response.data;
 
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            // Filter mock data (in real app, this would come from API)
-            const foundOrders = mockOrders.filter(
-                (order) =>
-                    order.bookingId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    order.phoneNumber.includes(searchQuery) ||
-                    searchQuery.includes("0123") // Mock search
-            );
+            // Filter rentals by booking ID, contact phone, or contact email
+            const foundOrders = (Array.isArray(allRentals) ? allRentals : [])
+                .filter((rental: any) => {
+                    const bookingId = `BK${String(rental.id).padStart(6, '0')}`;
+                    const query = searchQuery.toLowerCase();
+                    return (
+                        bookingId.toLowerCase().includes(query) ||
+                        rental.id?.toString().includes(searchQuery) ||
+                        rental.contact_phone?.includes(searchQuery) ||
+                        rental.contact_email?.toLowerCase().includes(query) ||
+                        rental.User?.phone?.includes(searchQuery) ||
+                        rental.User?.email?.toLowerCase().includes(query)
+                    );
+                })
+                .map((rental: any) => ({
+                    id: rental.id,
+                    bookingId: `BK${String(rental.id).padStart(6, '0')}`,
+                    bikeName: rental.Bike?.model || 'N/A',
+                    bikeModel: rental.Bike?.transmission || 'N/A',
+                    bikeImage: rental.Bike?.image || bike1,
+                    customerName: rental.User?.name || rental.contact_name || 'Guest',
+                    phoneNumber: rental.User?.phone || rental.contact_phone || 'N/A',
+                    deliveryAddress: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
+                    orderDate: new Date(rental.created_at).toLocaleString(),
+                    expectedDelivery: new Date(rental.start_time).toLocaleString(),
+                    currentStatus: rental.status === 'completed' ? 3 : rental.status === 'active' ? 2 : 1,
+                    totalPrice: rental.price || 0,
+                    trackingSteps: [
+                        {
+                            title: "Order Confirmed",
+                            description: "Your order has been confirmed",
+                            timestamp: new Date(rental.created_at).toLocaleString(),
+                        },
+                        {
+                            title: "Preparing Motorcycle",
+                            description: "We're getting your motorcycle ready",
+                            timestamp: rental.status !== 'pending' ? new Date(rental.start_time).toLocaleString() : undefined,
+                        },
+                        {
+                            title: "Out for Delivery",
+                            description: "Your motorcycle is on the way",
+                            timestamp: rental.status === 'active' || rental.status === 'completed' ? new Date(rental.start_time).toLocaleString() : undefined,
+                        },
+                        {
+                            title: "Delivered",
+                            description: "Motorcycle delivered to your location",
+                            timestamp: rental.status === 'completed' && rental.end_time ? new Date(rental.end_time).toLocaleString() : undefined,
+                        },
+                    ],
+                }));
 
             setOrders(foundOrders);
 

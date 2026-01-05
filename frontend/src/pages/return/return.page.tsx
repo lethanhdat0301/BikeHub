@@ -30,9 +30,11 @@ import {
     ModalBody,
     ModalFooter,
     ModalCloseButton,
+    Textarea,
 } from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
+import { SearchIcon, StarIcon } from "@chakra-ui/icons";
 import { FaMotorcycle, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign } from "react-icons/fa";
+import api from "../../apis/axios";
 import bike1 from "../../assets/images/bikes/bike1.jpg";
 import bike2 from "../../assets/images/bikes/bike2.webp";
 import bike3 from "../../assets/images/bikes/bike3.webp";
@@ -59,6 +61,8 @@ const ReturnPage: React.FC = () => {
     const [rentals, setRentals] = useState<Rental[]>([]);
     const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
     const [isReturning, setIsReturning] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [review, setReview] = useState("");
 
     // Mock data for rentals
     const mockRentals: Rental[] = [
@@ -120,18 +124,45 @@ const ReturnPage: React.FC = () => {
         setIsSearching(true);
 
         try {
-            // TODO: Replace with actual API call
-            console.log("Searching for:", searchQuery);
+            // Search for rentals using the API
+            const response = await api.get('/rentals', { withCredentials: true });
+            const allRentals = response.data;
 
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            // Filter rentals by booking ID, contact phone, or contact email
+            const foundRentals = (Array.isArray(allRentals) ? allRentals : [])
+                .filter((rental: any) => {
+                    const bookingId = `BK${String(rental.id).padStart(6, '0')}`;
+                    const query = searchQuery.toLowerCase();
+                    // Only show active rentals (not completed)
+                    return (
+                        rental.status !== 'completed' &&
+                        (bookingId.toLowerCase().includes(query) ||
+                            rental.contact_phone?.includes(searchQuery) ||
+                            rental.contact_email?.toLowerCase().includes(query) ||
+                            rental.User?.phone?.includes(searchQuery) ||
+                            rental.User?.email?.toLowerCase().includes(query))
+                    );
+                })
+                .map((rental: any) => {
+                    const startDate = new Date(rental.start_time);
+                    const endDate = rental.end_time ? new Date(rental.end_time) : new Date();
+                    const daysRented = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-            // Filter mock data (in real app, this would come from API)
-            const foundRentals = mockRentals.filter(
-                (rental) =>
-                    rental.bookingId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    searchQuery.includes("0123") // Mock phone number search
-            );
+                    return {
+                        id: rental.id,
+                        bookingId: `BK${String(rental.id).padStart(6, '0')}`,
+                        bikeName: rental.Bike?.model || 'N/A',
+                        bikeModel: rental.Bike?.transmission || 'N/A',
+                        bikeImage: rental.Bike?.image || bike1,
+                        startDate: startDate.toLocaleDateString(),
+                        endDate: endDate.toLocaleDateString(),
+                        pickupLocation: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
+                        status: rental.status === 'active' ? 'active' as const :
+                            rental.status === 'completed' ? 'completed' as const : 'active' as const,
+                        totalPrice: rental.price || 0,
+                        daysRented: daysRented,
+                    };
+                });
 
             setRentals(foundRentals);
 
@@ -159,6 +190,8 @@ const ReturnPage: React.FC = () => {
 
     const handleReturnClick = (rental: Rental) => {
         setSelectedRental(rental);
+        setRating(0);
+        setReview("");
         onOpen();
     };
 
@@ -168,15 +201,19 @@ const ReturnPage: React.FC = () => {
         setIsReturning(true);
 
         try {
-            // TODO: Replace with actual API call
-            console.log("Returning bike:", selectedRental.bookingId);
-
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            // Call API to return bike with rating and review
+            await api.put(
+                `rentals/rental/${selectedRental.id}/return`,
+                {
+                    rating: rating > 0 ? rating : undefined,
+                    review: review.trim() || undefined,
+                },
+                { withCredentials: true }
+            );
 
             toast({
                 title: "Motorcycle Returned Successfully!",
-                description: `Booking ${selectedRental.bookingId} has been completed. Thank you!`,
+                description: `Booking ${selectedRental.bookingId} has been completed. ${rating > 0 ? 'Thank you for your rating!' : ''}`,
                 status: "success",
                 duration: 5000,
                 isClosable: true,
@@ -191,10 +228,10 @@ const ReturnPage: React.FC = () => {
 
             onClose();
             setSelectedRental(null);
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 title: "Error",
-                description: "Failed to process return. Please try again.",
+                description: error.response?.data?.message || "Failed to process return. Please try again.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -385,7 +422,7 @@ const ReturnPage: React.FC = () => {
             </Container>
 
             {/* Return Confirmation Modal */}
-            <Modal isOpen={isOpen} onClose={onClose} isCentered>
+            <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Confirm Return</ModalHeader>
@@ -409,6 +446,37 @@ const ReturnPage: React.FC = () => {
                                         </Text>
                                     </VStack>
                                 </Box>
+
+                                {/* Rating Section */}
+                                <Box>
+                                    <FormLabel>Rate your experience (Optional)</FormLabel>
+                                    <HStack spacing={2}>
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <Icon
+                                                key={star}
+                                                as={StarIcon}
+                                                w={8}
+                                                h={8}
+                                                color={star <= rating ? "yellow.400" : "gray.300"}
+                                                cursor="pointer"
+                                                onClick={() => setRating(star)}
+                                                _hover={{ color: "yellow.500" }}
+                                            />
+                                        ))}
+                                    </HStack>
+                                </Box>
+
+                                {/* Review Section */}
+                                <FormControl>
+                                    <FormLabel>Leave a review (Optional)</FormLabel>
+                                    <Textarea
+                                        value={review}
+                                        onChange={(e) => setReview(e.target.value)}
+                                        placeholder="Share your experience with this bike..."
+                                        rows={4}
+                                    />
+                                </FormControl>
+
                                 <Text fontSize="sm" color="gray.600">
                                     Please ensure you've returned the bike to the designated location and removed
                                     all personal belongings.

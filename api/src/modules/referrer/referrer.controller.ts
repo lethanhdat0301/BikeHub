@@ -18,7 +18,9 @@ export class ReferrerController {
     constructor(private readonly referrerService: ReferrerService) { }
 
     @Get()
-    findAll() {
+    @UseGuards(JwtAuthGuard)
+    findAll(@Param() params: any) {
+        // For now, return all referrers. In the future, filter by dealer if needed
         return this.referrerService.findAll();
     }
 

@@ -19,8 +19,9 @@ const Sidebar = (props: {
     if (!user || !user.role) return routes;
     if (user.role === "admin") return routes;
     if (user.role === "dealer") {
+      // Dealers only see: Dashboard, Bikes, Bookings, Referrals
       return routes.filter((r) =>
-        ["default", "dealers", "customers", "bookings", "rentals", "bikes", "refferals", "accounts", "parks", "inbox", "sign-in"].includes(r.path)
+        ["default", "bikes", "bookings", "referrals", "sign-in"].includes(r.path)
       );
     }
     // default: hide admin pages for regular users

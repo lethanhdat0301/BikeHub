@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
 import { AiOutlinePlus } from "react-icons/ai";
-import { MdFilterList } from "react-icons/md";
+import { MdFilterList, MdEdit, MdDelete } from "react-icons/md";
 import CreateDealerModal from "./CreateDealerModal";
+import EditDealerModal from "./EditDealerModal";
 
 type Props = {
     tableContent: any[];
@@ -14,12 +15,45 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [filterTab, setFilterTab] = useState("All");
     const [showDateFilter, setShowDateFilter] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedDealer, setSelectedDealer] = useState<any>(null);
 
     const data = React.useMemo(() => {
         const validData = Array.isArray(tableContent) ? tableContent : [];
         if (filterTab === "All") return validData;
         return validData.filter((item) => item.status === filterTab);
     }, [tableContent, filterTab]);
+
+    const handleEdit = (dealer: any) => {
+        setSelectedDealer(dealer);
+        setIsEditModalOpen(true);
+    };
+
+    const handleDelete = async (dealerId: number) => {
+        if (!window.confirm("Are you sure you want to delete this dealer?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}dealers/${dealerId}`,
+                {
+                    method: "DELETE",
+                    credentials: "include",
+                }
+            );
+
+            if (response.ok) {
+                alert("Dealer deleted successfully!");
+                if (onRefresh) onRefresh();
+            } else {
+                alert("Failed to delete dealer");
+            }
+        } catch (error) {
+            console.error("Error deleting dealer:", error);
+            alert("An error occurred");
+        }
+    };
 
     const columns = React.useMemo(
         () => [
@@ -151,6 +185,28 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                     );
                 },
             },
+            {
+                Header: "Actions",
+                id: "actions",
+                Cell: ({ row }: any) => (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => handleEdit(row.original)}
+                            className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                        >
+                            <MdEdit className="h-4 w-4" />
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+                        >
+                            <MdDelete className="h-4 w-4" />
+                            Delete
+                        </button>
+                    </div>
+                ),
+            },
         ],
         []
     );
@@ -194,6 +250,20 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                     if (onRefresh) onRefresh();
                 }}
             />
+
+            {selectedDealer && (
+                <EditDealerModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedDealer(null);
+                    }}
+                    dealer={selectedDealer}
+                    onSuccess={() => {
+                        if (onRefresh) onRefresh();
+                    }}
+                />
+            )}
 
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">

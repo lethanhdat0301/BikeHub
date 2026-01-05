@@ -58,13 +58,49 @@ export class BookingRequestService {
     data: Prisma.BookingRequestUpdateInput;
   }): Promise<BookingRequest> {
     const { data, where } = params;
-    return this.prisma.bookingRequest.update({
+    
+    // Get current booking request to check status change
+    const currentBooking = await this.prisma.bookingRequest.findUnique({
+      where,
+    });
+
+    const updatedBooking = await this.prisma.bookingRequest.update({
       data,
       where,
       include: {
         User: true,
       },
     });
+
+    // If status changed to APPROVED and all required fields are present, create rental
+    if (
+      currentBooking?.status !== 'APPROVED' &&
+      updatedBooking.status === 'APPROVED' &&
+      updatedBooking.bike_id &&
+      updatedBooking.start_date &&
+      updatedBooking.end_date &&
+      updatedBooking.estimated_price
+    ) {
+      await this.prisma.rental.create({
+        data: {
+          user_id: updatedBooking.user_id,
+          bike_id: updatedBooking.bike_id,
+          booking_request_id: updatedBooking.id, // Link to original booking
+          start_time: updatedBooking.start_date,
+          end_time: updatedBooking.end_date,
+          status: 'ONGOING',
+          price: updatedBooking.estimated_price,
+        },
+      });
+
+      // Update bike status to rented
+      await this.prisma.bike.update({
+        where: { id: updatedBooking.bike_id },
+        data: { status: 'rented' },
+      });
+    }
+
+    return updatedBooking;
   }
 
   async delete(where: Prisma.BookingRequestWhereUniqueInput): Promise<BookingRequest> {

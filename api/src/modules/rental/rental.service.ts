@@ -17,12 +17,13 @@ export class RentalService {
         Bike: {
           include: {
             Park: true,
+            Dealer: true,
           },
         },
       },
     });
     console.log("data", data)
-    if (data) {
+    if (data?.User) {
       delete data.User.password;
     }
     return data;
@@ -51,15 +52,22 @@ export class RentalService {
         Bike: {
           include: {
             Park: true,
+            Dealer: true,
           },
         },
       },
     });
+
     // go through array and delete password from each user
-    data.forEach((rental) => {
-      delete rental.User.password;
-    });
-    return data;
+    if (data && Array.isArray(data)) {
+      data.forEach((rental) => {
+        if (rental?.User) {
+          delete rental.User.password;
+        }
+      });
+    }
+
+    return data || [];
   }
 
   async create(data: Prisma.RentalCreateInput): Promise<Rental> {
@@ -108,8 +116,46 @@ export class RentalService {
       start_time: rental.start_time,
       end_time: rental.end_time,
       location: rental.Bike?.Park?.location || rental.pickup_location || 'N/A',
-      status: rental.status.charAt(0).toUpperCase() + rental.status.slice(1),
+      status: rental.status ? rental.status.charAt(0).toUpperCase() + rental.status.slice(1) : 'Pending',
       price: rental.price,
     }));
+  }
+
+  async returnBike(rentalId: number, rating?: number, review?: string): Promise<Rental> {
+    // Get the rental first
+    const rental = await this.prisma.rental.findUnique({
+      where: { id: rentalId },
+      include: { Bike: true },
+    });
+
+    if (!rental) {
+      throw new Error('Rental not found');
+    }
+
+    // Update rental status to completed and set end_time
+    const updatedRental = await this.prisma.rental.update({
+      where: { id: rentalId },
+      data: {
+        status: 'completed',
+        end_time: new Date(),
+      },
+    });
+
+    // Update bike status back to available
+    await this.prisma.bike.update({
+      where: { id: rental.bike_id },
+      data: {
+        status: 'available',
+        // Update rating if provided
+        ...(rating && {
+          rating: rental.Bike.rating
+            ? (rental.Bike.rating * (rental.Bike.review_count || 0) + rating) / ((rental.Bike.review_count || 0) + 1)
+            : rating,
+          review_count: (rental.Bike.review_count || 0) + 1,
+        }),
+      },
+    });
+
+    return updatedRental;
   }
 }

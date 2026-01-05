@@ -36,4 +36,28 @@ export class UpdateBookingRequestDto {
   @IsString()
   @IsOptional()
   admin_notes?: string;
+
+  @IsNumber()
+  @IsOptional()
+  dealer_id?: number;
+
+  @IsNumber()
+  @IsOptional()
+  bike_id?: number;
+
+  @IsString()
+  @IsOptional()
+  start_date?: string;
+
+  @IsString()
+  @IsOptional()
+  end_date?: string;
+
+  @IsString()
+  @IsOptional()
+  pickup_location?: string;
+
+  @IsNumber()
+  @IsOptional()
+  estimated_price?: number;
 }

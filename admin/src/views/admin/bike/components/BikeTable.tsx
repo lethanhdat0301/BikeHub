@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
 import { MdAdd, MdEdit, MdDelete, MdFilterList } from "react-icons/md";
+import AddBikeModal from "./AddBikeModal";
 
 type Props = {
     tableContent: any[];
     loading: boolean;
+    onRefresh?: () => void;
 };
 
-const BikeTable: React.FC<Props> = ({ tableContent, loading }) => {
+const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [statusFilter, setStatusFilter] = useState("All");
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const data = React.useMemo(() => {
         if (!tableContent) return [];
@@ -172,19 +175,31 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading }) => {
                             key={status}
                             onClick={() => setStatusFilter(status)}
                             className={`rounded-lg px-4 py-2 text-sm font-medium capitalize ${statusFilter === status
-                                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-navy-700 dark:text-gray-300"
+                                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-navy-700 dark:text-gray-300"
                                 }`}
                         >
                             {status}
                         </button>
                     ))}
                 </div>
-                <button className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+                <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                >
                     <MdAdd className="h-5 w-5" />
                     Add Bike
                 </button>
             </div>
+
+            {/* Add Bike Modal */}
+            <AddBikeModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onSuccess={() => {
+                    if (onRefresh) onRefresh();
+                }}
+            />
 
             {/* Table */}
             <div className="overflow-x-auto">

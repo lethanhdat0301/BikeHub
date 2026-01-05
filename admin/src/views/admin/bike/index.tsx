@@ -5,37 +5,39 @@ const Bikes = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}bikes`,
-          { credentials: "include" }
-        );
-        const data = await response.json();
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}bikes`,
+        { credentials: "include" }
+      );
+      const data = await response.json();
 
-        // Normalize response: accept array or { data: [...] } or error objects
-        if (Array.isArray(data)) {
-          // Normalize bikes to include explicit location property (Park.location preferred)
-          setTableData(data.map((b: any) => ({
-            ...b,
-            location: b.Park?.location || b.location || "-",
-          })));
-        } else if (data && Array.isArray((data as any).data)) {
-          setTableData((data as any).data.map((b: any) => ({
-            ...b,
-            location: b.Park?.location || b.location || "-",
-          })));
-        } else {
-          setTableData([]);
-        }
-      } catch (error) {
-        console.error("Error fetching bikes:", error);
+      // Normalize response: accept array or { data: [...] } or error objects
+      if (Array.isArray(data)) {
+        // Normalize bikes to include explicit location property (Park.location preferred)
+        setTableData(data.map((b: any) => ({
+          ...b,
+          location: b.Park?.location || b.location || "-",
+        })));
+      } else if (data && Array.isArray((data as any).data)) {
+        setTableData((data as any).data.map((b: any) => ({
+          ...b,
+          location: b.Park?.location || b.location || "-",
+        })));
+      } else {
         setTableData([]);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching bikes:", error);
+      setTableData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -49,7 +51,7 @@ const Bikes = () => {
           Manage all vehicles in the system.
         </p>
       </div>
-      <BikeTable tableContent={tableData} loading={loading} />
+      <BikeTable tableContent={tableData} loading={loading} onRefresh={fetchData} />
     </div>
   );
 };

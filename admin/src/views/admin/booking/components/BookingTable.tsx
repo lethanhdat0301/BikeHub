@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 import { useTable, usePagination, useSortBy, useGlobalFilter } from "react-table";
-import { MdSearch, MdAdd } from "react-icons/md";
+import { MdSearch, MdAdd, MdEdit } from "react-icons/md";
+import UpdateBookingRequestModal from "../../booking-request/components/UpdateBookingModal";
 
 type Props = {
     tableContent: any[];
     loading: boolean;
+    onRefresh?: () => void;
 };
 
-const BookingTable: React.FC<Props> = ({ tableContent, loading }) => {
+const BookingTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
+    const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
     const data = React.useMemo(() => {
         if (!tableContent) return [];
@@ -18,11 +22,13 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading }) => {
 
             // Filter by search term
             if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
                 filtered = filtered.filter(
                     (item) =>
                         item.id?.toString().includes(searchTerm) ||
-                        item.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        item.customer_phone?.toLowerCase().includes(searchTerm.toLowerCase())
+                        item.bookingId?.toLowerCase().includes(searchLower) ||
+                        item.customer_name?.toLowerCase().includes(searchLower) ||
+                        item.customer_phone?.toLowerCase().includes(searchLower)
                 );
             }
 
@@ -41,9 +47,9 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading }) => {
             {
                 Header: "Booking ID",
                 accessor: "id",
-                Cell: ({ value }: any) => (
+                Cell: ({ row }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        #{value}
+                        {row.original.bookingId || `#${row.original.id}`}
                     </p>
                 ),
             },
@@ -115,18 +121,36 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading }) => {
                 Header: "Status",
                 accessor: "status",
                 Cell: ({ value }: any) => {
+                    const status = value?.toLowerCase() || 'pending';
                     let colorClass = "bg-gray-100 text-gray-700";
-                    if (value === "Confirmed") colorClass = "bg-blue-100 text-blue-700";
-                    if (value === "Delivering") colorClass = "bg-yellow-100 text-yellow-700";
-                    if (value === "Delivered") colorClass = "bg-green-100 text-green-700";
-                    if (value === "Returned") colorClass = "bg-purple-100 text-purple-700";
+                    if (status === "confirmed" || status === "active") colorClass = "bg-green-100 text-green-700";
+                    if (status === "pending") colorClass = "bg-yellow-100 text-yellow-700";
+                    if (status === "completed" || status === "delivered" || status === "returned") colorClass = "bg-blue-100 text-blue-700";
+                    if (status === "cancelled") colorClass = "bg-red-100 text-red-700";
+                    if (status === "delivering") colorClass = "bg-orange-100 text-orange-700";
 
                     return (
-                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${colorClass}`}>
+                        <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${colorClass}`}>
                             {value || "Pending"}
                         </span>
                     );
                 },
+            },
+            {
+                Header: "Actions",
+                id: "actions",
+                Cell: ({ row }: any) => (
+                    <button
+                        onClick={() => {
+                            setSelectedBooking(row.original);
+                            setIsUpdateModalOpen(true);
+                        }}
+                        className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                    >
+                        <MdEdit className="h-4 w-4" />
+                        Update
+                    </button>
+                ),
             },
         ],
         []
@@ -273,6 +297,19 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading }) => {
                     </div>
                 </div>
             )}
+
+            {/* Update Booking Modal */}
+            <UpdateBookingRequestModal
+                isOpen={isUpdateModalOpen}
+                onClose={() => {
+                    setIsUpdateModalOpen(false);
+                    setSelectedBooking(null);
+                }}
+                booking={selectedBooking}
+                onSuccess={() => {
+                    if (onRefresh) onRefresh();
+                }}
+            />
         </div>
     );
 };
