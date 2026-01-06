@@ -22,12 +22,12 @@ const Bookings = () => {
                 bookingId: `BK${String(br.id).padStart(6, '0')}`,
                 customer_name: br.name,
                 customer_phone: br.contact_details,
-                vehicle_model: 'Pending Assignment',
-                dealer_name: 'Not Assigned',
+                vehicle_model: br.Bike?.model || 'Pending Assignment',
+                dealer_name: br.Dealer?.name || 'Not Assigned',
                 location: br.pickup_location,
-                start_time: br.created_at,
-                end_time: null,
-                price: 0,
+                start_time: br.start_date,
+                end_time: br.end_date,
+                price: br.estimated_price || 0,
             })) : [];
 
             setTableData(formattedData);

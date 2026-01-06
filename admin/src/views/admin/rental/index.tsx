@@ -1,18 +1,6 @@
 import RentalTable from "./components/RentalTable";
 import { useEffect, useState } from "react";
-import AdminTable from "../user/components/AdminTable"; // reuse generic table
 import { Center, Spinner, Text, Box, Heading } from "@chakra-ui/react";
-
-// 1. Define columns
-const columnHeaders = [
-  { id: "id", title: "Booking ID" },
-  { id: "name", title: "Customer" },
-  { id: "vehicle", title: "Vehicle" },
-  { id: "rental_period", title: "Rental Period" },
-  { id: "pickup_location", title: "Location" },
-  { id: "price", title: "Price" },
-  { id: "status", title: "Status" },
-];
 
 const RentalsTable = () => {
   const [tableData, setTableData] = useState<any[]>([]);
@@ -46,18 +34,7 @@ const RentalsTable = () => {
       console.log('Rentals data:', rData);
 
       const rentalsList = Array.isArray(rData) ? rData : [];
-
-      const mapped = rentalsList.map((r: any) => ({
-        id: `BK${String(r.id).padStart(6, '0')}`, // All use same booking_id_seq
-        name: r.User?.name || r.contact_name || 'Guest',
-        vehicle: r.Bike?.model || r.bike_id,
-        rental_period: `${new Date(r.start_time).toLocaleDateString()}${r.end_time ? ` - ${new Date(r.end_time).toLocaleDateString()}` : ' - Ongoing'}`,
-        pickup_location: r.Bike?.Park?.location || r.pickup_location || "-",
-        price: r.price !== undefined && r.price !== null ? `$${r.price}` : '-',
-        status: r.status,
-      }));
-
-      setTableData(mapped);
+      setTableData(rentalsList);
     } catch (error) {
       console.error("Error loading rentals:", error);
       setError('Failed to load rentals. Please try again.');
@@ -94,7 +71,11 @@ const RentalsTable = () => {
           <Spinner size="xl" color="teal.500" />
         </Center>
       ) : (
-        <AdminTable tableContent={tableData} tableHeader={columnHeaders} moduleName={"rental"} />
+        <RentalTable
+          tableContent={tableData}
+          loading={loading}
+          onRefresh={fetchData}
+        />
       )}
     </Box>
   );

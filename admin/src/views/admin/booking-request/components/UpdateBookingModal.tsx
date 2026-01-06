@@ -118,8 +118,8 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
             if (response.ok) {
                 alert("Booking updated successfully!");
-                onSuccess();
                 onClose();
+                onSuccess(); // Call onSuccess after closing to refresh the table
             } else {
                 const errorData = await response.json();
                 alert(`Failed to update booking: ${errorData.message || "Unknown error"}`);
@@ -140,7 +140,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
                     <h2 className="text-xl font-bold text-gray-800">
-                        Update Booking Request
+                        Update Booking Request - {booking?.id ? `BK${String(booking.id).padStart(6, '0')}` : ''}
                     </h2>
                     <button
                         onClick={onClose}

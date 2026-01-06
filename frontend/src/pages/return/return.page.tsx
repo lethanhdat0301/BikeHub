@@ -113,7 +113,7 @@ const ReturnPage: React.FC = () => {
         if (!searchQuery.trim()) {
             toast({
                 title: "Search Required",
-                description: "Please enter a Booking ID, phone number, or license plate",
+                description: "Please enter a Booking ID, phone number, or email",
                 status: "warning",
                 duration: 3000,
                 isClosable: true,
@@ -124,49 +124,69 @@ const ReturnPage: React.FC = () => {
         setIsSearching(true);
 
         try {
-            // Search for rentals using the API
-            const response = await api.get('/rentals', { withCredentials: true });
-            const allRentals = response.data;
+            // Search both booking-requests and rentals
+            const [bookingResponse, rentalResponse] = await Promise.all([
+                api.get(`/booking-requests/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] })),
+                api.get(`/rentals/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] }))
+            ]);
 
-            // Filter rentals by booking ID, contact phone, or contact email
-            const foundRentals = (Array.isArray(allRentals) ? allRentals : [])
-                .filter((rental: any) => {
-                    const bookingId = `BK${String(rental.id).padStart(6, '0')}`;
-                    const query = searchQuery.toLowerCase();
-                    // Only show active rentals (not completed)
-                    return (
-                        rental.status !== 'completed' &&
-                        (bookingId.toLowerCase().includes(query) ||
-                            rental.contact_phone?.includes(searchQuery) ||
-                            rental.contact_email?.toLowerCase().includes(query) ||
-                            rental.User?.phone?.includes(searchQuery) ||
-                            rental.User?.email?.toLowerCase().includes(query))
-                    );
-                })
-                .map((rental: any) => {
-                    const startDate = new Date(rental.start_time);
-                    const endDate = rental.end_time ? new Date(rental.end_time) : new Date();
-                    const daysRented = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+            const foundBookings = Array.isArray(bookingResponse.data) ? bookingResponse.data : [];
+            const foundRentalsData = Array.isArray(rentalResponse.data) ? rentalResponse.data : [];
 
-                    return {
-                        id: rental.id,
-                        bookingId: `BK${String(rental.id).padStart(6, '0')}`,
-                        bikeName: rental.Bike?.model || 'N/A',
-                        bikeModel: rental.Bike?.transmission || 'N/A',
-                        bikeImage: rental.Bike?.image || bike1,
-                        startDate: startDate.toLocaleDateString(),
-                        endDate: endDate.toLocaleDateString(),
-                        pickupLocation: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
-                        status: rental.status === 'active' ? 'active' as const :
-                            rental.status === 'completed' ? 'completed' as const : 'active' as const,
-                        totalPrice: rental.price || 0,
-                        daysRented: daysRented,
-                    };
-                });
+            // Combine results - only show active/pending (not completed)
+            const allFoundRentals = [
+                // Map booking requests to rental format
+                ...foundBookings
+                    .filter((booking: any) => booking.status !== 'COMPLETED')
+                    .map((booking: any) => {
+                        const startDate = booking.start_date ? new Date(booking.start_date) : new Date();
+                        const endDate = booking.end_date ? new Date(booking.end_date) : new Date();
+                        const daysRented = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-            setRentals(foundRentals);
+                        return {
+                            id: booking.id,
+                            bookingId: `BK${String(booking.id).padStart(6, '0')}`,
+                            bikeName: booking.Bike?.model || 'N/A',
+                            bikeModel: booking.Bike?.transmission || 'N/A',
+                            bikeImage: booking.Bike?.image || bike1,
+                            startDate: startDate.toLocaleDateString(),
+                            endDate: endDate.toLocaleDateString(),
+                            pickupLocation: booking.pickup_location || 'N/A',
+                            status: booking.status === 'APPROVED' ? 'active' as const : 'active' as const,
+                            totalPrice: booking.estimated_price || 0,
+                            daysRented: daysRented > 0 ? daysRented : 1,
+                            isBookingRequest: true, // Flag to identify type
+                        };
+                    }),
+                // Map rentals
+                ...foundRentalsData
+                    .filter((rental: any) => rental.status !== 'completed')
+                    .map((rental: any) => {
+                        const startDate = new Date(rental.start_time);
+                        const endDate = rental.end_time ? new Date(rental.end_time) : new Date();
+                        const daysRented = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-            if (foundRentals.length === 0) {
+                        return {
+                            id: rental.id,
+                            bookingId: `BK${String(rental.id).padStart(6, '0')}`,
+                            bikeName: rental.Bike?.model || 'N/A',
+                            bikeModel: rental.Bike?.transmission || 'N/A',
+                            bikeImage: rental.Bike?.image || bike1,
+                            startDate: startDate.toLocaleDateString(),
+                            endDate: endDate.toLocaleDateString(),
+                            pickupLocation: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
+                            status: rental.status === 'active' ? 'active' as const :
+                                rental.status === 'completed' ? 'completed' as const : 'active' as const,
+                            totalPrice: rental.price || 0,
+                            daysRented: daysRented,
+                            isBookingRequest: false, // Flag to identify type
+                        };
+                    })
+            ];
+
+            setRentals(allFoundRentals);
+
+            if (allFoundRentals.length === 0) {
                 toast({
                     title: "No Rentals Found",
                     description: "No active rentals found with the provided information",

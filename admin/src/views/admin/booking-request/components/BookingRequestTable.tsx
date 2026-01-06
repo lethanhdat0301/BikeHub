@@ -28,11 +28,11 @@ const BookingRequestTable: React.FC<Props> = ({ tableContent, loading, onRefresh
     const columns = React.useMemo(
         () => [
             {
-                Header: "ID",
+                Header: "Booking ID",
                 accessor: "id",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        #{value}
+                        BK{String(value).padStart(6, '0')}
                     </p>
                 ),
             },
@@ -65,6 +65,52 @@ const BookingRequestTable: React.FC<Props> = ({ tableContent, loading, onRefresh
                 Cell: ({ value }: any) => (
                     <p className="text-sm text-navy-700 dark:text-white">
                         {value}
+                    </p>
+                ),
+            },
+            {
+                Header: "Bike",
+                accessor: "Bike",
+                Cell: ({ value }: any) => (
+                    <p className="text-sm text-navy-700 dark:text-white">
+                        {value?.model || "N/A"}
+                    </p>
+                ),
+            },
+            {
+                Header: "Dealer",
+                accessor: "Dealer",
+                Cell: ({ value }: any) => (
+                    <p className="text-sm text-navy-700 dark:text-white">
+                        {value?.name || "N/A"}
+                    </p>
+                ),
+            },
+            {
+                Header: "Rental Period",
+                accessor: "start_date",
+                Cell: ({ row }: any) => {
+                    const start = row.original.start_date;
+                    const end = row.original.end_date;
+                    if (!start) return <p className="text-sm text-navy-700 dark:text-white">N/A</p>;
+
+                    const startDate = new Date(start);
+                    const endDate = end ? new Date(end) : null;
+
+                    return (
+                        <div className="text-sm text-navy-700 dark:text-white">
+                            <p>{startDate.toLocaleDateString()}</p>
+                            {endDate && <p>→ {endDate.toLocaleDateString()}</p>}
+                        </div>
+                    );
+                },
+            },
+            {
+                Header: "Price",
+                accessor: "estimated_price",
+                Cell: ({ value }: any) => (
+                    <p className="text-sm font-bold text-navy-700 dark:text-white">
+                        {value ? `$${Number(value).toFixed(2)}` : "N/A"}
                     </p>
                 ),
             },

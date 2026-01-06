@@ -20,6 +20,7 @@ model Bike {
   dealer_id       Int?
   Dealer          User?    @relation("DealerBikes", fields: [dealer_id], references: [id])
   Rental          Rental[]
+  BookingRequest  BookingRequest[] @relation("BookingBike")
   image           String?
   description     String?  // Mô tả chi tiết về xe
   
@@ -106,6 +107,8 @@ model BookingRequest {
   end_date        DateTime?
   estimated_price Float?
   User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  Bike            Bike?    @relation("BookingBike", fields: [bike_id], references: [id], onDelete: SetNull)
+  Dealer          Dealer?  @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
@@ -124,6 +127,7 @@ model Dealer {
   last_payment_date DateTime?
   vehicle_count     Int      @default(0)
   image             String?
+  BookingRequest    BookingRequest[] @relation("BookingDealer")
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 }

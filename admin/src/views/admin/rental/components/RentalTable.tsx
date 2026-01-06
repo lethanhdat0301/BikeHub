@@ -1,14 +1,18 @@
 import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
-import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
+import { MdAdd, MdEdit, MdDelete, MdCheckCircle } from "react-icons/md";
+import UpdateRentalModal from "./UpdateRentalModal";
 
 type Props = {
     tableContent: any[];
     loading: boolean;
+    onRefresh?: () => void;
 };
 
-const RentalTable: React.FC<Props> = ({ tableContent, loading }) => {
+const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [statusFilter, setStatusFilter] = useState("All");
+    const [selectedRental, setSelectedRental] = useState<any>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const data = React.useMemo(() => {
         if (!tableContent) return [];
@@ -19,16 +23,25 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading }) => {
         return [];
     }, [tableContent, statusFilter]);
 
+    const handleUpdate = (rental: any) => {
+        setSelectedRental(rental);
+        setIsModalOpen(true);
+    };
+
     const columns = React.useMemo(
         () => [
             {
-                Header: "ID",
+                Header: "Booking ID",
                 accessor: "id",
-                Cell: ({ value }: any) => (
-                    <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        #{value}
-                    </p>
-                ),
+                Cell: ({ row }: any) => {
+                    // Use booking_request_id if available, otherwise use rental id
+                    const bookingId = row.original.booking_request_id || row.original.id;
+                    return (
+                        <p className="text-sm font-bold text-navy-700 dark:text-white">
+                            BK{String(bookingId).padStart(6, '0')}
+                        </p>
+                    );
+                },
             },
             {
                 Header: "Customer",
@@ -125,13 +138,12 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading }) => {
                 id: "actions",
                 Cell: ({ row }: any) => (
                     <div className="flex gap-2">
-                        <button className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600">
-                            <MdEdit className="h-4 w-4" />
-                            Edit
-                        </button>
-                        <button className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
-                            <MdDelete className="h-4 w-4" />
-                            Delete
+                        <button
+                            onClick={() => handleUpdate(row.original)}
+                            className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                        >
+                            <MdCheckCircle className="h-4 w-4" />
+                            Update
                         </button>
                     </div>
                 ),
@@ -172,26 +184,36 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading }) => {
 
     return (
         <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-navy-800">
+            {selectedRental && (
+                <UpdateRentalModal
+                    isOpen={isModalOpen}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setSelectedRental(null);
+                    }}
+                    rental={selectedRental}
+                    onSuccess={() => {
+                        if (onRefresh) onRefresh();
+                    }}
+                />
+            )}
+
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    {["All", "pending", "confirmed", "completed", "cancelled"].map((status) => (
+                    {["All", "pending", "active", "completed", "cancelled"].map((status) => (
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status)}
                             className={`rounded-lg px-4 py-2 text-sm font-medium capitalize ${statusFilter === status
-                                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-navy-700 dark:text-gray-300"
+                                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-navy-700 dark:text-gray-300"
                                 }`}
                         >
                             {status}
                         </button>
                     ))}
                 </div>
-                <button className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
-                    <MdAdd className="h-5 w-5" />
-                    Add Rental
-                </button>
             </div>
 
             {/* Table */}

@@ -226,6 +226,14 @@ BikeHub Team
   async listRentals(
     @CurrentUser() user: any,
   ): Promise<RentalModel[]> {
+    // Admin sees all rentals
+    if (user?.role === ROLES_ENUM.ADMIN) {
+      return this.rentalService.findAll({
+        orderBy: { created_at: 'desc' },
+      });
+    }
+
+    // Dealers see rentals for bikes they own
     if (user?.role === ROLES_ENUM.DEALER) {
       return this.rentalService.findAll({
         where: ({ Bike: { dealer_id: user.id } } as any),
@@ -233,13 +241,54 @@ BikeHub Team
       } as any);
     }
 
-    if (user?.role === ROLES_ENUM.ADMIN) {
+    // Regular users see only their own rentals
+    if (user?.id) {
       return this.rentalService.findAll({
+        where: { user_id: user.id },
         orderBy: { created_at: 'desc' },
       });
     }
 
+    // Guest users (not logged in) - return empty array
     return [];
+  }
+
+  // ================= PUBLIC SEARCH =================
+  // New endpoint for searching rentals by booking ID, phone, or email (public access)
+  // MUST be before rental/:id to prevent route matching issues
+  @Get('search/:query')
+  async searchRentals(
+    @Param('query') query: string,
+  ): Promise<RentalModel[]> {
+    // Search by booking ID (format: BK001234), phone, or email
+    // First check if query is a booking ID format
+    let bookingId: number | null = null;
+    if (query.toUpperCase().startsWith('BK')) {
+      const idStr = query.substring(2);
+      bookingId = parseInt(idStr, 10);
+    }
+
+    // Search in multiple fields
+    const rentals = await this.rentalService.findAll({
+      where: {
+        OR: [
+          ...(bookingId ? [{ id: bookingId }] : []),
+          { contact_phone: { contains: query } },
+          { contact_email: { contains: query.toLowerCase() } },
+          {
+            User: {
+              OR: [
+                { phone: { contains: query } },
+                { email: { contains: query.toLowerCase() } },
+              ]
+            }
+          }
+        ]
+      },
+      orderBy: { created_at: 'desc' },
+    } as any);
+
+    return rentals;
   }
 
   // ================= GET BY ID =================

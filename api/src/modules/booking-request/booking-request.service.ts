@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class BookingRequestService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findOne(
     bookingRequestWhereUniqueInput: Prisma.BookingRequestWhereUniqueInput,
@@ -40,6 +40,22 @@ export class BookingRequestService {
             phone: true,
           },
         },
+        Bike: {
+          select: {
+            id: true,
+            model: true,
+            price: true,
+            transmission: true,
+            image: true,
+          },
+        },
+        Dealer: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
       },
     });
   }
@@ -58,7 +74,7 @@ export class BookingRequestService {
     data: Prisma.BookingRequestUpdateInput;
   }): Promise<BookingRequest> {
     const { data, where } = params;
-    
+
     // Get current booking request to check status change
     const currentBooking = await this.prisma.bookingRequest.findUnique({
       where,

@@ -53,6 +53,31 @@ export class BookingRequestController {
     };
   }
 
+  // ================= PUBLIC SEARCH =================
+  // Public endpoint for searching booking requests by booking ID, phone, or email
+  @Get('search/:query')
+  async searchBookingRequests(
+    @Param('query') query: string,
+  ): Promise<BookingRequestModel[]> {
+    // Search by booking ID (format: BK001234), phone, or email
+    let bookingId: number | null = null;
+    if (query.toUpperCase().startsWith('BK')) {
+      const idStr = query.substring(2);
+      bookingId = parseInt(idStr, 10);
+    }
+
+    // Search in multiple fields
+    const where: any = {
+      OR: [
+        ...(bookingId ? [{ id: bookingId }] : []),
+        { contact_details: { contains: query } },
+        { email: { contains: query.toLowerCase() } },
+      ]
+    };
+
+    return this.bookingRequestService.findAll({ where });
+  }
+
   // Admin only - Get all booking requests
   @Get('/')
   @Roles(ROLES_ENUM.ADMIN)

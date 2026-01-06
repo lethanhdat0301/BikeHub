@@ -81,6 +81,19 @@ const BikeDetailsPage: React.FC = () => {
         if (urlEndDate) {
             setEndDate(urlEndDate);
         }
+
+        // Auto-fill contact info from logged-in user
+        const userString = localStorage.getItem("user");
+        if (userString) {
+            try {
+                const user = JSON.parse(userString);
+                if (user.name) setContactName(user.name);
+                if (user.email) setContactEmail(user.email);
+                if (user.phone) setContactPhone(user.phone);
+            } catch (error) {
+                console.error("Error parsing user data:", error);
+            }
+        }
     }, [id, location.search]);
 
     const handleBookNow = async () => {
@@ -546,50 +559,46 @@ const BikeDetailsPage: React.FC = () => {
                                     </HStack>
                                 </FormControl>
 
-                                {/* Contact Info for non-logged-in users */}
-                                {!localStorage.getItem("user") && (
-                                    <>
-                                        <FormControl isRequired>
-                                            <FormLabel fontWeight="semibold">Your Name</FormLabel>
-                                            <Input
-                                                type="text"
-                                                placeholder="Enter your full name"
-                                                value={contactName}
-                                                onChange={(e) => setContactName(e.target.value)}
-                                            />
-                                        </FormControl>
+                                {/* Contact Info - always show */}
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">Your Name</FormLabel>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter your full name"
+                                        value={contactName}
+                                        onChange={(e) => setContactName(e.target.value)}
+                                    />
+                                </FormControl>
 
-                                        <FormControl isRequired>
-                                            <FormLabel fontWeight="semibold">Email</FormLabel>
-                                            <Input
-                                                type="email"
-                                                placeholder="your.email@example.com"
-                                                value={contactEmail}
-                                                onChange={(e) => setContactEmail(e.target.value)}
-                                            />
-                                        </FormControl>
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">Email</FormLabel>
+                                    <Input
+                                        type="email"
+                                        placeholder="your.email@example.com"
+                                        value={contactEmail}
+                                        onChange={(e) => setContactEmail(e.target.value)}
+                                    />
+                                </FormControl>
 
-                                        <FormControl isRequired>
-                                            <FormLabel fontWeight="semibold">Phone Number</FormLabel>
-                                            <Input
-                                                type="tel"
-                                                placeholder="Enter your phone number"
-                                                value={contactPhone}
-                                                onChange={(e) => setContactPhone(e.target.value)}
-                                            />
-                                        </FormControl>
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">Phone Number</FormLabel>
+                                    <Input
+                                        type="tel"
+                                        placeholder="Enter your phone number"
+                                        value={contactPhone}
+                                        onChange={(e) => setContactPhone(e.target.value)}
+                                    />
+                                </FormControl>
 
-                                        <FormControl isRequired>
-                                            <FormLabel fontWeight="semibold">Pickup Location</FormLabel>
-                                            <Input
-                                                type="text"
-                                                placeholder="Enter pickup address (e.g., 123 Nguyen Hue Street)"
-                                                value={pickupLocation}
-                                                onChange={(e) => setPickupLocation(e.target.value)}
-                                            />
-                                        </FormControl>
-                                    </>
-                                )}
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">Pickup Location</FormLabel>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter pickup address (e.g., 123 Nguyen Hue Street)"
+                                        value={pickupLocation}
+                                        onChange={(e) => setPickupLocation(e.target.value)}
+                                    />
+                                </FormControl>
 
                                 {/* Referrer Phone (Optional) */}
                                 <FormControl>

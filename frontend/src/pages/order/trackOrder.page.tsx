@@ -148,7 +148,7 @@ const TrackOrderPage: React.FC = () => {
         if (!searchQuery.trim()) {
             toast({
                 title: "Search Required",
-                description: "Please enter a Booking ID, phone number, or license plate",
+                description: "Please enter a Booking ID, phone number, or email",
                 status: "warning",
                 duration: 3000,
                 isClosable: true,
@@ -159,25 +159,54 @@ const TrackOrderPage: React.FC = () => {
         setIsSearching(true);
 
         try {
-            // Search for rentals using the public list endpoint
-            const response = await api.get('/rentals/list', { withCredentials: true });
-            const allRentals = response.data;
+            // Search both booking-requests and rentals
+            const [bookingResponse, rentalResponse] = await Promise.all([
+                api.get(`/booking-requests/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] })),
+                api.get(`/rentals/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] }))
+            ]);
 
-            // Filter rentals by booking ID, contact phone, or contact email
-            const foundOrders = (Array.isArray(allRentals) ? allRentals : [])
-                .filter((rental: any) => {
-                    const bookingId = `BK${String(rental.id).padStart(6, '0')}`;
-                    const query = searchQuery.toLowerCase();
-                    return (
-                        bookingId.toLowerCase().includes(query) ||
-                        rental.id?.toString().includes(searchQuery) ||
-                        rental.contact_phone?.includes(searchQuery) ||
-                        rental.contact_email?.toLowerCase().includes(query) ||
-                        rental.User?.phone?.includes(searchQuery) ||
-                        rental.User?.email?.toLowerCase().includes(query)
-                    );
-                })
-                .map((rental: any) => ({
+            const foundBookings = Array.isArray(bookingResponse.data) ? bookingResponse.data : [];
+            const foundRentals = Array.isArray(rentalResponse.data) ? rentalResponse.data : [];
+
+            // Combine and transform results
+            const foundOrders = [
+                ...foundBookings.map((booking: any) => ({
+                    id: booking.id,
+                    bookingId: `BK${String(booking.id).padStart(6, '0')}`,
+                    bikeName: booking.Bike?.model || 'N/A',
+                    bikeModel: booking.Bike?.transmission || 'N/A',
+                    bikeImage: booking.Bike?.image || bike1,
+                    customerName: booking.name || 'Guest',
+                    phoneNumber: booking.contact_details || 'N/A',
+                    deliveryAddress: booking.pickup_location || 'N/A',
+                    orderDate: new Date(booking.created_at).toLocaleString(),
+                    expectedDelivery: booking.start_date ? new Date(booking.start_date).toLocaleString() : 'N/A',
+                    currentStatus: booking.status === 'COMPLETED' ? 3 : booking.status === 'APPROVED' ? 2 : 1,
+                    totalPrice: booking.estimated_price || 0,
+                    trackingSteps: [
+                        {
+                            title: "Order Confirmed",
+                            description: "Your order has been confirmed",
+                            timestamp: new Date(booking.created_at).toLocaleString(),
+                        },
+                        {
+                            title: "Preparing Motorcycle",
+                            description: "We're getting your motorcycle ready",
+                            timestamp: booking.status !== 'PENDING' ? new Date(booking.created_at).toLocaleString() : undefined,
+                        },
+                        {
+                            title: "Out for Delivery",
+                            description: "Your motorcycle is on the way",
+                            timestamp: booking.status === 'APPROVED' || booking.status === 'COMPLETED' ? (booking.start_date ? new Date(booking.start_date).toLocaleString() : undefined) : undefined,
+                        },
+                        {
+                            title: "Delivered",
+                            description: "Motorcycle delivered to your location",
+                            timestamp: booking.status === 'COMPLETED' && booking.end_date ? new Date(booking.end_date).toLocaleString() : undefined,
+                        },
+                    ],
+                })),
+                ...foundRentals.map((rental: any) => ({
                     id: rental.id,
                     bookingId: `BK${String(rental.id).padStart(6, '0')}`,
                     bikeName: rental.Bike?.model || 'N/A',
@@ -212,7 +241,8 @@ const TrackOrderPage: React.FC = () => {
                             timestamp: rental.status === 'completed' && rental.end_time ? new Date(rental.end_time).toLocaleString() : undefined,
                         },
                     ],
-                }));
+                }))
+            ];
 
             setOrders(foundOrders);
 
