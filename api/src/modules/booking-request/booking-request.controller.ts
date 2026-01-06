@@ -47,7 +47,7 @@ export class BookingRequestController {
   // Admin only - Get all booking requests
   @Get('/')
   @Roles(ROLES_ENUM.ADMIN)
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getAllBookingRequests(
     @Query('status') status?: string,
   ): Promise<BookingRequestModel[]> {

@@ -87,6 +87,25 @@ class BookingRequestService {
             throw error;
         }
     }
+
+    async createBookingRequest(data: {
+        name: string;
+        email?: string;
+        contact_method: string;
+        contact_details: string;
+        pickup_location: string;
+        user_id?: number;
+        admin_notes?: string;
+        status?: string;
+    }): Promise<BookingRequest> {
+        try {
+            const response = await axiosClient.post('/booking-requests/', data);
+            return response.data;
+        } catch (error) {
+            console.error("Error creating booking request:", error);
+            throw error;
+        }
+    }
 }
 
 export default new BookingRequestService();

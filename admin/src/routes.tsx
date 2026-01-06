@@ -5,6 +5,7 @@ import DataTables from "views/admin/user";
 import ManageBikes from "views/admin/bike";
 import ManageParks from "views/admin/park";
 import ManageRentals from "views/admin/rental";
+import ManageBookings from "views/admin/bookings";
 import InboxPage from "views/admin/inbox";
 import ReferralsPage from "views/admin/referrals";
 
@@ -39,11 +40,18 @@ const routes = [
     component: <React.Suspense fallback={<div/>}><InboxPage /></React.Suspense>,
   },
   {
+    name: "Rentals",
+    layout: "/admin",
+    path: "rentals",
+    icon: <FaFileInvoiceDollar className="h-6 w-6" />,
+    component: <ManageRentals />,
+  },
+  {
     name: "Bookings",
     layout: "/admin",
     path: "bookings",
     icon: <FaFileInvoiceDollar className="h-6 w-6" />,
-    component: <ManageRentals />,
+    component: <React.Suspense fallback={<div/>}><ManageBookings /></React.Suspense>,
   },
   {
     name: "Dealers",

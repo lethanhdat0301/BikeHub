@@ -9,6 +9,7 @@ import { AiFillEdit, AiFillDelete, AiOutlinePlus } from "react-icons/ai";
 import DrawerEdit from "./DrawerEdit";
 import ModalCreate from "./ModelCreate";
 import useAuth from "utils/auth/AuthHook";
+import { useToast, useDisclosure, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Button } from "@chakra-ui/react";
 
 type ColumnHeader = {
   id: string;
@@ -19,12 +20,20 @@ type Props = {
   tableContent: any[];
   tableHeader: ColumnHeader[];
   moduleName: string;
+  resourcePath?: string; // optional API resource path override, e.g. 'booking-requests'
+  allowCreate?: boolean; // whether to show the Create button (default true)
+  onEdit?: (row: any) => void; // optional override for edit action
+  onDelete?: (row: any) => void; // optional override for delete action
 };
 
 const AdminTable: React.FC<Props> = ({
   tableHeader,
   tableContent,
   moduleName,
+  resourcePath,
+  allowCreate = true,
+  onEdit,
+  onDelete,
 }) => {
   // Ensure data is always an array (API may return an object or { data: [...] })
   const data = React.useMemo(() => {
@@ -44,7 +53,7 @@ const AdminTable: React.FC<Props> = ({
             const date = value ? new Date(value) : null;
             return (
               <p className="text-sm font-bold text-navy-700 dark:text-white">
-                {date ? date.toLocaleDateString() : "-"}
+                {date ? date.toLocaleString() : "-"}
               </p>
             );
           }
@@ -144,8 +153,16 @@ const AdminTable: React.FC<Props> = ({
   // eslint-disable-next-line
   const [editData, setEditData] = useState(null);
   const { user } = useAuth();
+  const toast = useToast();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
+  const [pendingDelete, setPendingDelete] = useState<any | null>(null);
+  const cancelRef = React.useRef<any>();
 
   const handleEdit = (row: any) => {
+    if (onEdit) {
+      onEdit(row);
+      return;
+    }
     setEditData({ module: moduleName, id: row.id });
   };
 
@@ -153,34 +170,42 @@ const AdminTable: React.FC<Props> = ({
     setEditData(null);
   };
 
-  const handleDelete = async (row: any) => {
+  const handleDelete = (row: any) => {
     // prevent non-admin from deleting rentals
     if (moduleName === 'rental' && user?.role !== 'admin') {
-      alert('Only admins can delete bookings');
+      toast({ title: 'Only admins can delete bookings', status: 'error' });
       return;
     }
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${moduleName} with ID: ${row.id} ?`
-    );
-    if (confirmDelete) {
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}${moduleName}s/${moduleName}/${row.id}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          }
-        );
-        // console.log("-response------------")
-        // console.log(response)
-        // console.log("-------------")
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-      } catch (err) {
-        console.error("Error:", err);
+    setPendingDelete(row);
+    onDeleteOpen();
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    try {
+      if (onDelete) {
+        // If caller provided custom delete handler, use it
+        await onDelete(pendingDelete);
+      } else {
+        const path = resourcePath
+          ? `${process.env.REACT_APP_API_URL}${resourcePath}/${pendingDelete.id}`
+          : `${process.env.REACT_APP_API_URL}${moduleName}s/${moduleName}/${pendingDelete.id}`;
+
+        const response = await fetch(path, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error('Delete failed');
       }
+
+      toast({ title: `${moduleName} deleted`, status: 'success' });
+    } catch (err) {
+      console.error("Error:", err);
+      toast({ title: 'Failed to delete', status: 'error' });
+    } finally {
+      setPendingDelete(null);
+      onDeleteClose();
     }
   };
 
@@ -190,7 +215,7 @@ const AdminTable: React.FC<Props> = ({
         <div className="text-xl font-bold text-navy-700 dark:text-white">
           {moduleName.charAt(0).toUpperCase() + moduleName.slice(1)}s Table
         </div>
-        {!(moduleName === 'rental' && user?.role !== 'admin') && (
+        {allowCreate && !(moduleName === 'rental' && user?.role !== 'admin') && (
           <ModalCreate module={moduleName}>
             <button className="flex items-center gap-1 rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-400">
               <AiOutlinePlus />
@@ -274,6 +299,24 @@ const AdminTable: React.FC<Props> = ({
         }}
         data={editData}
       />
+
+      <AlertDialog
+        isOpen={isDeleteOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onDeleteClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">Delete {moduleName}</AlertDialogHeader>
+            <AlertDialogBody>Are you sure you want to delete this {moduleName}?</AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onDeleteClose}>Cancel</Button>
+              <Button colorScheme="red" onClick={confirmDelete} ml={3}>Delete</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
       <div className="mt-4 flex items-center justify-between">
         <button
           onClick={() => previousPage()}
