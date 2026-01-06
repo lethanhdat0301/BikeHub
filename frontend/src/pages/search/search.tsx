@@ -19,7 +19,11 @@ import {
     Divider,
     Button,
     Flex,
+    Collapse,
+    IconButton,
+    useDisclosure,
 } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { useSearchParams } from "react-router-dom";
 import CardBike from "../../components/home/bikes/cardBike.component";
 import bikeService from "../../services/bikeService";
@@ -35,6 +39,7 @@ const SearchPage: React.FC = () => {
     const [bikes, setBikes] = useState<any[]>([]);
     const [filteredBikes, setFilteredBikes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { isOpen: isFilterOpen, onToggle: onFilterToggle } = useDisclosure({ defaultIsOpen: true });
 
     // Filter states
     const [priceRange, setPriceRange] = useState<number[]>([0, 1000000]);
@@ -141,91 +146,122 @@ const SearchPage: React.FC = () => {
                 <Box
                     w={{ base: "100%", lg: "300px" }}
                     bg="white"
-                    p={6}
                     borderRadius="lg"
                     boxShadow="md"
                     h="fit-content"
                     position={{ base: "relative", lg: "sticky" }}
                     top={{ lg: "20px" }}
                 >
-                    <VStack align="stretch" spacing={6}>
-                        <Flex justify="space-between" align="center">
+                    {/* Filter Header - Always Visible */}
+                    <Flex
+                        justify="space-between"
+                        align="center"
+                        p={4}
+                        cursor={{ base: "pointer", lg: "default" }}
+                        onClick={{ base: onFilterToggle, lg: undefined }}
+                        bg="gray.50"
+                        borderTopRadius="lg"
+                        _hover={{ base: { bg: "gray.100" }, lg: { bg: "gray.50" } }}
+                    >
+                        <HStack>
                             <Heading size="md">Filters</Heading>
-                            <Button size="sm" variant="ghost" colorScheme="teal" onClick={handleResetFilters}>
-                                Reset
-                            </Button>
-                        </Flex>
+                            <IconButton
+                                aria-label="Toggle filters"
+                                icon={isFilterOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                                size="sm"
+                                variant="ghost"
+                                display={{ base: "flex", lg: "none" }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onFilterToggle();
+                                }}
+                            />
+                        </HStack>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            colorScheme="teal"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleResetFilters();
+                            }}
+                        >
+                            Reset
+                        </Button>
+                    </Flex>
 
-                        <Divider />
-
-                        {/* Price Range Filter */}
-                        <Box>
-                            <Text fontWeight="semibold" mb={3}>
-                                Price Range (VNĐ/day)
-                            </Text>
-                            <RangeSlider
-                                aria-label={["min", "max"]}
-                                value={priceRange}
-                                onChange={setPriceRange}
-                                min={0}
-                                max={1000000}
-                                step={50000}
-                            >
-                                <RangeSliderTrack bg="teal.100">
-                                    <RangeSliderFilledTrack bg="teal.500" />
-                                </RangeSliderTrack>
-                                <RangeSliderThumb index={0} />
-                                <RangeSliderThumb index={1} />
-                            </RangeSlider>
-                            <HStack justify="space-between" mt={2}>
-                                <Text fontSize="sm" color="gray.600">
-                                    {priceRange[0].toLocaleString()} đ
+                    {/* Filter Content - Collapsible on Mobile */}
+                    <Collapse in={isFilterOpen} animateOpacity>
+                        <VStack align="stretch" spacing={6} p={6}>
+                            {/* Price Range Filter */}
+                            <Box>
+                                <Text fontWeight="semibold" mb={3}>
+                                    Price Range (VNĐ/day)
                                 </Text>
-                                <Text fontSize="sm" color="gray.600">
-                                    {priceRange[1].toLocaleString()} đ
+                                <RangeSlider
+                                    aria-label={["min", "max"]}
+                                    value={priceRange}
+                                    onChange={setPriceRange}
+                                    min={0}
+                                    max={1000000}
+                                    step={50000}
+                                >
+                                    <RangeSliderTrack bg="teal.100">
+                                        <RangeSliderFilledTrack bg="teal.500" />
+                                    </RangeSliderTrack>
+                                    <RangeSliderThumb index={0} />
+                                    <RangeSliderThumb index={1} />
+                                </RangeSlider>
+                                <HStack justify="space-between" mt={2}>
+                                    <Text fontSize="sm" color="gray.600">
+                                        {priceRange[0].toLocaleString()} đ
+                                    </Text>
+                                    <Text fontSize="sm" color="gray.600">
+                                        {priceRange[1].toLocaleString()} đ
+                                    </Text>
+                                </HStack>
+                            </Box>
+
+                            <Divider />
+
+                            {/* Motorcycle Type Filter */}
+                            <Box>
+                                <Text fontWeight="semibold" mb={3}>
+                                    Motorcycle Type
                                 </Text>
-                            </HStack>
-                        </Box>
+                                <CheckboxGroup
+                                    colorScheme="teal"
+                                    value={selectedTypes}
+                                    onChange={(values) => setSelectedTypes(values as string[])}
+                                >
+                                    <Stack spacing={2}>
+                                        <Checkbox value="Electric Scooter">Electric Scooter</Checkbox>
+                                        <Checkbox value="Scooter">Automatic Scooter</Checkbox>
+                                        <Checkbox value="Manual Bike">Manual Bike</Checkbox>
+                                    </Stack>
+                                </CheckboxGroup>
+                            </Box>
 
-                        <Divider />
+                            <Divider />
 
-                        {/* Motorcycle Type Filter */}
-                        <Box>
-                            <Text fontWeight="semibold" mb={3}>
-                                Motorcycle Type
-                            </Text>
-                            <CheckboxGroup
-                                colorScheme="teal"
-                                value={selectedTypes}
-                                onChange={(values) => setSelectedTypes(values as string[])}
-                            >
-                                <Stack spacing={2}>
-                                    <Checkbox value="Electric Scooter">Electric Scooter</Checkbox>
-                                    <Checkbox value="Scooter">Automatic Scooter</Checkbox>
-                                    <Checkbox value="Manual Bike">Manual Bike</Checkbox>
-                                </Stack>
-                            </CheckboxGroup>
-                        </Box>
-
-                        <Divider />
-
-                        {/* Transmission Filter */}
-                        <Box>
-                            <Text fontWeight="semibold" mb={3}>
-                                Transmission
-                            </Text>
-                            <CheckboxGroup
-                                colorScheme="teal"
-                                value={selectedTransmission}
-                                onChange={(values) => setSelectedTransmission(values as string[])}
-                            >
-                                <Stack spacing={2}>
-                                    <Checkbox value="automatic">Automatic</Checkbox>
-                                    <Checkbox value="manual">Manual</Checkbox>
-                                </Stack>
-                            </CheckboxGroup>
-                        </Box>
-                    </VStack>
+                            {/* Transmission Filter */}
+                            <Box>
+                                <Text fontWeight="semibold" mb={3}>
+                                    Transmission
+                                </Text>
+                                <CheckboxGroup
+                                    colorScheme="teal"
+                                    value={selectedTransmission}
+                                    onChange={(values) => setSelectedTransmission(values as string[])}
+                                >
+                                    <Stack spacing={2}>
+                                        <Checkbox value="automatic">Automatic</Checkbox>
+                                        <Checkbox value="manual">Manual</Checkbox>
+                                    </Stack>
+                                </CheckboxGroup>
+                            </Box>
+                        </VStack>
+                    </Collapse>
                 </Box>
 
                 {/* Bikes Grid */}
