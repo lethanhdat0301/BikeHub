@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty, IsDate, IsString } from 'class-validator';
+import { IsNumber, IsNotEmpty, IsDate, IsString, IsOptional } from 'class-validator';
 
 export class CreateRentalDto {
   @IsNumber()
@@ -13,7 +13,7 @@ export class CreateRentalDto {
   @IsNotEmpty()
   start_time: Date;
 
-   //@IsDate()
+  //@IsDate()
   @IsNotEmpty()
   end_time: Date;
 
@@ -37,35 +37,38 @@ export class CreateRentalDto {
 
 export class UpdateRentalDto {
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   user_id?: number;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   bike_id?: number;
 
-   //@IsDate()
-  @IsNotEmpty()
+  //@IsDate()
+  @IsOptional()
   start_time?: Date;
 
-   //@IsDate()
-  @IsNotEmpty()
+  //@IsDate()
+  @IsOptional()
   end_time?: Date;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   status?: string;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   price?: number;
 
   @IsString()
+  @IsOptional()
   qrcode?: string;
 
   @IsString()
+  @IsOptional()
   payment_id?: string;
 
   @IsString()
+  @IsOptional()
   order_id?: string;
 }
