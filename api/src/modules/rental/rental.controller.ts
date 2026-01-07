@@ -115,49 +115,6 @@ export class RentalController {
       price: price,
       status: rental.status,
     };
-
-    // Send confirmation email
-    if (contact_email) {
-      try {
-        console.log('=== Attempting to send confirmation email to:', contact_email);
-        const emailContent = `
-Dear ${contact_name || 'Customer'},
-
-Your bike rental booking has been confirmed!
-
-Booking Details:
-- Booking ID: ${formattedBookingId}
-- Bike Model: ${bookingDetails.bikeModel}
-- Bike Code: ${bookingDetails.bikeCode}
-- Booking Date: ${new Date(bookingDetails.bookingDate).toLocaleDateString()}
-- Rental Period: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}
-- Pickup Location: ${bookingDetails.pickupLocation}
-- Total Price: $${price}
-- Dealer: ${bookingDetails.dealerName}
-- Dealer Contact: ${bookingDetails.dealerPhone}
-
-Thank you for choosing BikeHub!
-
-Best regards,
-BikeHub Team
-        `;
-
-        await this.emailService.sendEmail(
-          contact_email,
-          'Booking Confirmation - BikeHub',
-          emailContent,
-        );
-        console.log('=== Email sent successfully to:', contact_email);
-      } catch (error) {
-        console.error('=== Failed to send confirmation email:', error);
-        // Don't fail the request if email fails
-      }
-    } else {
-      console.log('=== No contact_email provided, skipping email notification');
-    }
-
-    console.log('=== Returning booking details:', bookingDetails);
-    return bookingDetails;
   }
 
   // ================= HELPER =================
