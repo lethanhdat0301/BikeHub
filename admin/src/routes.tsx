@@ -85,7 +85,7 @@ const routes = [
     path: "rentals",
     icon: <FaFileInvoiceDollar className="h-6 w-6" />,
     component: <ManageRentals />,
-    roles: ["admin"],
+    roles: ["admin", "dealer"],
   },
   {
     name: "Bikes",

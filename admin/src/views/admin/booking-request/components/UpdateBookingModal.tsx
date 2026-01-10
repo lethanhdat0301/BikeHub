@@ -63,10 +63,11 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
     const fetchDealers = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}dealers`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}users/dealers`, {
                 credentials: "include",
             });
             const data = await response.json();
+            console.log('Dealers fetched:', data);
             setDealers(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error fetching dealers:", error);
@@ -93,6 +94,12 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
             return updated;
         });
+    };
+
+    // Get filtered bikes based on selected dealer
+    const getFilteredBikes = () => {
+        if (!formData.dealer_id) return bikes;
+        return bikes.filter(bike => bike.dealer_id === Number(formData.dealer_id));
     };
 
     const handleUpdateBooking = async () => {
@@ -183,9 +190,10 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                                 value={formData.bike_id}
                                 onChange={handleInputChange}
                                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                disabled={!formData.dealer_id}
                             >
-                                <option value="">Select a bike</option>
-                                {bikes
+                                <option value="">{!formData.dealer_id ? "Select a dealer first" : "Select a bike"}</option>
+                                {getFilteredBikes()
                                     .filter((b) => b.status === "available")
                                     .map((bike) => (
                                         <option key={bike.id} value={bike.id}>

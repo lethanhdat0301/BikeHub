@@ -71,4 +71,16 @@ export class UpdateRentalDto {
   @IsString()
   @IsOptional()
   order_id?: string;
+
+  @IsNumber()
+  @IsOptional()
+  transfer_park_id?: number;
+
+  @IsNumber()
+  @IsOptional()
+  transfer_dealer_id?: number;
+
+  @IsString()
+  @IsOptional()
+  current_location?: string;
 }

@@ -42,6 +42,12 @@ export type Bike = {
     name: string;
     location: string;
   };
+  Dealer?: {
+    id: number;
+    name: string;
+    email?: string;
+    phone?: string;
+  };
 };
 
 const CardBike = ({
@@ -61,7 +67,8 @@ const CardBike = ({
   const bikeData = {
     rating: bike.rating || 0,
     reviewCount: bike.review_count || 0,
-    provider: bike.dealer_name || bike.Park?.name || "BikeHub",
+    // provider: bike.Dealer?.name || bike.dealer_name || "RentnRide",
+    provider: bike.Park?.name || bike.location || "RentnRide",
     condition: bike.rating && bike.rating >= 4.5 ? "excellent" : bike.rating && bike.rating >= 3.5 ? "good" : "fair",
     features: bike.rating && bike.rating >= 4.5 ? ["Highly Rated", "Recently Serviced"] : ["Recently Serviced"],
     seats: bike.seats || 2,

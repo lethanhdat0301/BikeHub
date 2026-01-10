@@ -49,14 +49,29 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 Cell: ({ row }: any) => {
                     const user = row.original.User;
                     const contactName = row.original.contact_name;
+                    const contactEmail = row.original.contact_email;
+                    const contactPhone = row.original.contact_phone;
+                    
+                    console.log('Customer data:', {
+                        user,
+                        contactName,
+                        contactEmail,
+                        contactPhone,
+                    });
+
                     return (
                         <div>
                             <p className="text-sm font-bold text-navy-700 dark:text-white">
                                 {user ? user.name : contactName || "Guest"}
                             </p>
                             <p className="text-xs text-gray-600 dark:text-gray-400">
-                                {user ? user.email : row.original.contact_email || "N/A"}
+                                {user ? user.email : contactEmail || "N/A"}
                             </p>
+                            {!user && contactPhone && (
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    {contactPhone}
+                                </p>
+                            )}
                         </div>
                     );
                 },
@@ -123,13 +138,21 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 Cell: ({ value }: any) => {
                     const date = new Date(value);
                     return (
-                        <p className="text-sm text-navy-700 dark:text-white">
-                            {date.toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                            })}
-                        </p>
+                        <div>
+                            <p className="text-sm text-navy-700 dark:text-white">
+                                {date.toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                })}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {date.toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </p>
+                        </div>
                     );
                 },
             },

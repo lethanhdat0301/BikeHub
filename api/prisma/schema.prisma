@@ -68,18 +68,19 @@ model User {
 }
 
 model Rental {
-  id                  Int       @id @default(dbgenerated("nextval('booking_id_seq')"))
+  id                  Int              @id @default(dbgenerated("nextval('booking_id_seq')"))
   user_id             Int?
   bike_id             Int
-  booking_request_id  Int?      // Link to original booking request
+  booking_request_id  Int?             // Link to original booking request
   start_time          DateTime
   end_time            DateTime?
   status              String
   price               Float
-  User                User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  Bike                Bike      @relation(fields: [bike_id], references: [id], onDelete: Cascade)
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
+  User                User?            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Bike                Bike             @relation(fields: [bike_id], references: [id], onDelete: Cascade)
+  BookingRequest      BookingRequest?  @relation(fields: [booking_request_id], references: [id], onDelete: SetNull)
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
   qrcode              String?
   payment_id          String?
   order_id            String?
@@ -109,6 +110,7 @@ model BookingRequest {
   User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
   Bike            Bike?    @relation("BookingBike", fields: [bike_id], references: [id], onDelete: SetNull)
   Dealer          Dealer?  @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
+  Rental          Rental[] // One booking request can have multiple rentals (though usually just one)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }

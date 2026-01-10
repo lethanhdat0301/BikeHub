@@ -11,6 +11,14 @@ export class UserService {
   async findUser(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | null> {
+    console.log('==== findUser called with ====', userWhereUniqueInput);
+    console.log('Stack trace:', new Error().stack);
+
+    if (!userWhereUniqueInput || (!userWhereUniqueInput.id && !userWhereUniqueInput.email)) {
+      console.error('Invalid userWhereUniqueInput:', userWhereUniqueInput);
+      throw new Error('findUser requires id or email in userWhereUniqueInput');
+    }
+
     return this.prisma.user.findUnique({
       where: userWhereUniqueInput,
     });
@@ -172,6 +180,7 @@ export class UserService {
   }
 
   async getCustomersWithStats() {
+    // Get registered users (customers with accounts)
     const users = await this.prisma.user.findMany({
       where: { role: 'user' },
       include: {
@@ -184,7 +193,7 @@ export class UserService {
       },
     });
 
-    return users.map(user => {
+    const registeredCustomers = users.map(user => {
       const totalRentals = user.Rental.length;
       const totalSpent = user.Rental.reduce((sum, rental) => sum + rental.price, 0);
       const lastRental = user.Rental.length > 0
@@ -201,8 +210,116 @@ export class UserService {
         total_spent: totalSpent,
         average_rating: 4, // Mock data - you can add real ratings later
         last_rental_date: lastRental?.created_at || null,
+        customer_type: 'registered',
       };
     });
+
+    // Get guest customers from rentals (customers without accounts)
+    const guestRentals = await this.prisma.rental.findMany({
+      where: {
+        user_id: null, // Guest rentals (no account)
+        contact_name: { not: null },
+      },
+      select: {
+        contact_name: true,
+        contact_email: true,
+        contact_phone: true,
+        price: true,
+        created_at: true,
+      },
+    });
+
+    // Group guest rentals by email to get unique customers
+    const guestCustomersMap = new Map();
+    guestRentals.forEach(rental => {
+      const email = rental.contact_email;
+      if (!email) return;
+
+      // Skip if email already exists in registered users
+      const emailExistsInUsers = registeredCustomers.some(user => user.email === email);
+      if (emailExistsInUsers) return;
+
+      if (guestCustomersMap.has(email)) {
+        const existing = guestCustomersMap.get(email);
+        existing.total_rentals += 1;
+        existing.total_spent += rental.price;
+        if (new Date(rental.created_at) > new Date(existing.last_rental_date)) {
+          existing.last_rental_date = rental.created_at;
+        }
+      } else {
+        guestCustomersMap.set(email, {
+          id: `guest_${email}`,
+          name: rental.contact_name,
+          email: rental.contact_email,
+          phone: rental.contact_phone,
+          image: null,
+          total_rentals: 1,
+          total_spent: rental.price,
+          average_rating: 4,
+          last_rental_date: rental.created_at,
+          customer_type: 'guest',
+        });
+      }
+    });
+
+    const guestCustomers = Array.from(guestCustomersMap.values());
+
+    // Get customers from booking requests (not yet converted to rentals)
+    const bookingRequests = await this.prisma.bookingRequest.findMany({
+      where: {
+        user_id: null, // Guest booking requests
+      },
+      select: {
+        name: true,
+        email: true,
+        contact_details: true,
+        created_at: true,
+      },
+    });
+
+    // Filter out booking requests with empty names
+    const validBookingRequests = bookingRequests.filter(
+      booking => booking.name && booking.name.trim() !== ''
+    );
+
+    // Group booking requests by email
+    const bookingCustomersMap = new Map();
+    validBookingRequests.forEach(booking => {
+      const email = booking.email;
+      if (!email) return; // Skip if no email
+
+      // Skip if email already exists in registered users
+      const emailExistsInUsers = registeredCustomers.some(user => user.email === email);
+      if (emailExistsInUsers) return;
+
+      // Skip if email already exists in guest rentals
+      if (guestCustomersMap.has(email)) return;
+
+      if (bookingCustomersMap.has(email)) {
+        const existing = bookingCustomersMap.get(email);
+        if (new Date(booking.created_at) > new Date(existing.last_rental_date)) {
+          existing.last_rental_date = booking.created_at;
+        }
+      } else {
+        bookingCustomersMap.set(email, {
+          id: `booking_${email}`,
+          name: booking.name,
+          email: booking.email,
+          phone: booking.contact_details,
+          image: null,
+          total_rentals: 0,
+          total_spent: 0,
+          average_rating: 4,
+          last_rental_date: booking.created_at,
+          customer_type: 'prospect',
+        });
+      }
+    });
+
+    const bookingCustomers = Array.from(bookingCustomersMap.values());
+
+    // Combine all customer types
+    return [...registeredCustomers, ...guestCustomers, ...bookingCustomers];
   }
 
 }

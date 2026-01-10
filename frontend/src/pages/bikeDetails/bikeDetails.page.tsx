@@ -210,9 +210,11 @@ const BikeDetailsPage: React.FC = () => {
                 }
             }
 
-            // Calculate total days and price
+            // Calculate total days and price (with discount)
             const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-            const totalPrice = days * bike.price;
+            const basePrice = days * bike.price;
+            const discount = calculateDiscount(days);
+            const totalPrice = basePrice * (1 - discount);
 
             // Create rental request
             const response = await api.post(

@@ -23,6 +23,7 @@ import { RentalService } from './rental.service';
 import { CreateRentalDto, UpdateRentalDto } from './rental.dto';
 import { EmailService } from '../email/email.service';
 import { UserService } from '../user/user.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @ApiTags('rentals')
 @Controller('/rentals')
@@ -31,6 +32,7 @@ export class RentalController {
     private rentalService: RentalService,
     private emailService: EmailService,
     private userService: UserService,
+    private prisma: PrismaService,
   ) { }
 
   // ================= PUBLIC ENDPOINT =================
@@ -193,7 +195,7 @@ BikeHub Team
         orderBy: { created_at: 'desc' },
       });
     }
-    
+
     // Dealers see rentals for bikes they own
     if (user.role === ROLES_ENUM.DEALER) {
       return this.rentalService.findAll({
@@ -366,7 +368,7 @@ BikeHub Team
   ): Promise<RentalModel> {
     await this.checkDealerOwnRental(id, user);
 
-    const { user_id, bike_id, ...rest } = dto;
+    const { user_id, bike_id, transfer_park_id, transfer_dealer_id, current_location, ...rest } = dto;
 
     if (
       user.role !== ROLES_ENUM.ADMIN &&
@@ -374,6 +376,44 @@ BikeHub Team
       user_id !== user.id
     ) {
       throw new ForbiddenException('You cannot change rental owner');
+    }
+
+    // Handle transfer logic if provided
+    let transferData = {};
+    if (transfer_park_id && user.role === ROLES_ENUM.ADMIN) {
+      // Transfer bike to new park (admin only)
+      const currentRental = await this.rentalService.findOne({ id });
+      if (currentRental?.bike_id) {
+        await this.prisma.bike.update({
+          where: { id: currentRental.bike_id },
+          data: { park_id: transfer_park_id }
+        });
+        console.log(`Transferred bike ${currentRental.bike_id} to park ${transfer_park_id}`);
+      }
+    }
+
+    if (transfer_dealer_id && user.role === ROLES_ENUM.ADMIN) {
+      // Transfer bike to new dealer (admin only)
+      const currentRental = await this.rentalService.findOne({ id });
+      if (currentRental?.bike_id) {
+        await this.prisma.bike.update({
+          where: { id: currentRental.bike_id },
+          data: { dealer_id: transfer_dealer_id }
+        });
+        console.log(`Transferred bike ${currentRental.bike_id} to dealer ${transfer_dealer_id}`);
+      }
+    }
+
+    // Update bike location if current_location is provided
+    if (current_location) {
+      const currentRental = await this.rentalService.findOne({ id });
+      if (currentRental?.bike_id) {
+        await this.prisma.bike.update({
+          where: { id: currentRental.bike_id },
+          data: { location: current_location }
+        });
+        console.log(`Updated bike ${currentRental.bike_id} location to: ${current_location}`);
+      }
     }
 
     return this.rentalService.update({
@@ -401,6 +441,7 @@ BikeHub Team
 
   @Get('bookings')
   async getBookings() {
+    // This endpoint returns rentals (confirmed bookings), not booking requests
     return this.rentalService.getBookingsWithDetails();
   }
 
@@ -412,4 +453,13 @@ BikeHub Team
   ): Promise<RentalModel> {
     return this.rentalService.returnBike(id, body.rating, body.review);
   }
+
+  // ================= FIX MISSING CONTACT INFO =================
+  @Post('fix-contact-info')
+  @Roles(ROLES_ENUM.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  async fixMissingContactInfo(): Promise<any> {
+    return this.rentalService.fixMissingContactInfo();
+  }
+
 }

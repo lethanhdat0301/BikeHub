@@ -97,6 +97,16 @@ export class BookingRequestService {
       updatedBooking.end_date &&
       updatedBooking.estimated_price
     ) {
+      console.log('==== Creating rental from booking request ====');
+      console.log('BookingRequest data:', {
+        id: updatedBooking.id,
+        name: updatedBooking.name,
+        email: updatedBooking.email,
+        contact_details: updatedBooking.contact_details,
+        pickup_location: updatedBooking.pickup_location,
+        user_id: updatedBooking.user_id,
+      });
+
       await this.prisma.rental.create({
         data: {
           user_id: updatedBooking.user_id,
@@ -106,8 +116,15 @@ export class BookingRequestService {
           end_time: updatedBooking.end_date,
           status: 'ONGOING',
           price: updatedBooking.estimated_price,
+          // Transfer customer contact information from booking
+          contact_name: updatedBooking.name,
+          contact_email: updatedBooking.email,
+          contact_phone: updatedBooking.contact_details,
+          pickup_location: updatedBooking.pickup_location,
         },
       });
+
+      console.log('==== Rental created successfully ====');
 
       // Update bike status to rented
       await this.prisma.bike.update({

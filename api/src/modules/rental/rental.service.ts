@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Bike, Park, Rental, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -129,7 +129,11 @@ export class RentalService {
     });
 
     if (!rental) {
-      throw new Error('Rental not found');
+      throw new NotFoundException(`Rental with ID ${rentalId} not found`);
+    }
+
+    if (rental.status === 'completed') {
+      throw new NotFoundException(`Rental ${rentalId} has already been returned`);
     }
 
     // Update rental status to completed and set end_time
@@ -157,5 +161,47 @@ export class RentalService {
     });
 
     return updatedRental;
+  }
+
+  // Fix missing contact info for existing rentals
+  async fixMissingContactInfo() {
+    // Find rentals that have booking_request_id but missing contact info
+    const rentalsToFix = await this.prisma.rental.findMany({
+      where: {
+        booking_request_id: { not: null },
+        OR: [
+          { contact_name: null },
+          { contact_name: '' },
+          { contact_email: null },
+          { contact_email: '' },
+        ],
+      },
+    });
+
+    console.log(`Found ${rentalsToFix.length} rentals with missing contact info`);
+
+    for (const rental of rentalsToFix) {
+      if (rental.booking_request_id) {
+        // Get the original booking request manually
+        const bookingRequest = await this.prisma.bookingRequest.findUnique({
+          where: { id: rental.booking_request_id },
+        });
+
+        if (bookingRequest) {
+          await this.prisma.rental.update({
+            where: { id: rental.id },
+            data: {
+              contact_name: bookingRequest.name,
+              contact_email: bookingRequest.email,
+              contact_phone: bookingRequest.contact_details,
+              pickup_location: bookingRequest.pickup_location,
+            },
+          });
+          console.log(`Fixed rental ${rental.id} with booking request ${rental.booking_request_id}`);
+        }
+      }
+    }
+
+    return { fixed: rentalsToFix.length };
   }
 }

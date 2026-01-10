@@ -14,6 +14,7 @@ import { BookingRequest as BookingRequestModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
 import { Roles } from '../auth/auth.roles.decorator';
 import { ROLES_ENUM } from '../../shared/constants/global.constants';
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { BookingRequestService } from './booking-request.service';
 import {
   CreateBookingRequestDto,
@@ -78,14 +79,24 @@ export class BookingRequestController {
     return this.bookingRequestService.findAll({ where });
   }
 
-  // Admin only - Get all booking requests
+  // Admin and Dealer - Get all booking requests
   @Get('/')
-  @Roles(ROLES_ENUM.ADMIN)
-  // @UseGuards(JwtAuthGuard)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @UseGuards(JwtAuthGuard)
   async getAllBookingRequests(
+    @CurrentUser() user: any,
     @Query('status') status?: string,
   ): Promise<BookingRequestModel[]> {
-    const where = status ? { status } : {};
+    let where: any = status ? { status } : {};
+
+    // Dealers only see booking requests for their bikes
+    if (user.role === ROLES_ENUM.DEALER) {
+      where = {
+        ...where,
+        dealer_id: user.id,
+      };
+    }
+
     return this.bookingRequestService.findAll({ where });
   }
 
@@ -97,9 +108,9 @@ export class BookingRequestController {
     return this.bookingRequestService.getStatistics();
   }
 
-  // Admin only - Get single booking request
+  // Admin and Dealer - Get single booking request
   @Get('/:id')
-  @Roles(ROLES_ENUM.ADMIN)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
   @UseGuards(JwtAuthGuard)
   async getBookingRequestById(
     @Param('id') id: string,
@@ -107,10 +118,10 @@ export class BookingRequestController {
     return this.bookingRequestService.findOne({ id: Number(id) });
   }
 
-  // Admin only - Update booking request (approve/reject/complete)
+  // Admin and Dealer - Update booking request (approve/reject/complete)
   @Put('/:id')
-  @Roles(ROLES_ENUM.ADMIN)
-  // @UseGuards(JwtAuthGuard)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @UseGuards(JwtAuthGuard)
   async updateBookingRequest(
     @Param('id') id: string,
     @Body() updateBookingRequestDto: UpdateBookingRequestDto,
