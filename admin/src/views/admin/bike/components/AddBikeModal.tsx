@@ -1,20 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { MdClose } from "react-icons/md";
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    Button,
-    FormControl,
-    FormLabel,
-    Input,
-    Textarea,
-    HStack,
-    useToast,
-} from "@chakra-ui/react";
 
 interface AddBikeModalProps {
     isOpen: boolean;
@@ -26,7 +11,6 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
     const [loading, setLoading] = useState(false);
     const [parks, setParks] = useState<any[]>([]);
     const [dealers, setDealers] = useState<any[]>([]);
-    const toast = useToast();
 
     type BikeFormData = {
         model: string;
@@ -125,12 +109,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
 
         // Validate required fields
         if (!formData.model || !formData.price || !formData.park_id || !formData.location) {
-            toast({
-                title: "Please fill in all required fields",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            alert("Please fill in all required fields");
             return;
         }
 
@@ -169,45 +148,38 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                 throw new Error(error.message || "Failed to add motorbike");
             }
 
-            toast({
-                title: "Motorbike added successfully!",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
+            alert("Motorbike added successfully!");
             onSuccess();
             onClose();
         } catch (error: any) {
-            toast({
-                title: error.message || "Failed to add bike",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            alert(error.message || "Failed to add bike");
         } finally {
             setLoading(false);
         }
     };
 
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} size="4xl">
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>
-                    <div className="flex items-center justify-between">
-                        <span>Add New Motorbikes</span>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                            <MdClose className="h-6 w-6" />
-                        </button>
-                    </div>
-                </ModalHeader>
+    if (!isOpen) return null;
 
+    return (
+        <div className="fixed inset-0 z-50 bg-black/60 p-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
+                    <h2 className="text-xl font-bold text-gray-800">
+                        Add New Motorbikes
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <MdClose className="h-6 w-6" />
+                    </button>
+                </div>
+
+                {/* Form Fields - Scrollable */}
                 <form onSubmit={handleSubmit}>
-                    <ModalBody>
-                        <div className="grid grid-cols-2 gap-4 w-full">
+                    <div className="px-6 py-4 max-h-[70vh] overflow-y-auto bg-white">
+                        <div className="grid grid-cols-2 gap-4">
                             {/* Model */}
                             <div className="col-span-2">
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
@@ -425,7 +397,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                             setFormData({ ...formData, image: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
                                         } catch (err) {
                                             console.error('Upload failed', err);
-                                            toast({ title: 'Upload failed', status: 'error', duration: 3000, isClosable: true });
+                                            alert('Upload failed');
                                         }
                                     }}
                                 />
@@ -450,24 +422,28 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                 />
                             </div>
                         </div>
-                    </ModalBody>
+                    </div>
 
-                    <ModalFooter borderTop="1px" borderColor="gray.200" pt={4}>
-                        <Button variant="ghost" mr={3} onClick={onClose} fontSize="sm">
-                            Cancel
-                        </Button>
-                        <Button
-                            colorScheme="blue"
-                            type="submit"
-                            isLoading={loading}
-                            fontSize="sm"
+                    {/* Footer Buttons */}
+                    <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
                         >
-                            Create
-                        </Button>
-                    </ModalFooter>
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? "Creating..." : "Create"}
+                        </button>
+                    </div>
                 </form>
-            </ModalContent>
-        </Modal>
+            </div>
+        </div>
     );
 };
 
