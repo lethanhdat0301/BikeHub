@@ -34,7 +34,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 ),
             },
             {
-                Header: "Bike Model",
+                Header: "Motorbike Model",
                 accessor: "model",
                 Cell: ({ row }: any) => (
                     <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                     className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                 >
                     <MdAdd className="h-5 w-5" />
-                    Add Bike
+                    Add motorbike
                 </button>
             </div>
 
@@ -227,7 +227,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                         {page.length === 0 ? (
                             <tr>
                                 <td colSpan={8} className="py-8 text-center text-gray-500">
-                                    No bikes found
+                                    No motorbikes found
                                 </td>
                             </tr>
                         ) : (

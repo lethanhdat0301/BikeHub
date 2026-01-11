@@ -88,10 +88,10 @@ const routes = [
     roles: ["admin", "dealer"],
   },
   {
-    name: "Bikes",
+    name: "Motorbikes",
     layout: "/admin",
     icon: <MdElectricBike className="h-6 w-6" />,
-    path: "bikes",
+    path: "motorbikes",
     component: <ManageBikes />,
     roles: ["admin", "dealer"],
   },

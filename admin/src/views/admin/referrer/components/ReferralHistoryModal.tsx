@@ -153,7 +153,7 @@ const ReferralHistoryModal: React.FC<ReferralHistoryModalProps> = ({
                                                 <tr className="border-b border-gray-200 dark:border-gray-600">
                                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Booking ID</th>
                                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Customer</th>
-                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Bike</th>
+                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Motorbike</th>
                                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Rental Period</th>
                                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Price</th>
                                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Commission</th>
@@ -224,13 +224,12 @@ const ReferralHistoryModal: React.FC<ReferralHistoryModalProps> = ({
                                                             </div>
                                                         </td>
                                                         <td className="px-4 py-4">
-                                                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                                                referral.status === 'completed' 
-                                                                    ? 'bg-green-100 text-green-800' 
+                                                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${referral.status === 'completed'
+                                                                    ? 'bg-green-100 text-green-800'
                                                                     : referral.status === 'active' || referral.status === 'ONGOING'
-                                                                    ? 'bg-blue-100 text-blue-800'
-                                                                    : 'bg-gray-100 text-gray-800'
-                                                            }`}>
+                                                                        ? 'bg-blue-100 text-blue-800'
+                                                                        : 'bg-gray-100 text-gray-800'
+                                                                }`}>
                                                                 {referral.status}
                                                             </span>
                                                         </td>

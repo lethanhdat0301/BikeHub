@@ -33,7 +33,7 @@ import {
     Textarea,
 } from "@chakra-ui/react";
 import { SearchIcon, StarIcon } from "@chakra-ui/icons";
-import { FaMotorcycle, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign } from "react-icons/fa";
+import { FaMotorcycle, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign, FaPhone, FaUser } from "react-icons/fa";
 import api from "../../apis/axios";
 import bike1 from "../../assets/images/bikes/bike1.jpg";
 import bike2 from "../../assets/images/bikes/bike2.webp";
@@ -51,6 +51,8 @@ interface Rental {
     status: "active" | "completed" | "overdue";
     totalPrice: number;
     daysRented: number;
+    dealerName?: string;
+    dealerPhone?: string;
 }
 
 const ReturnPage: React.FC = () => {
@@ -76,8 +78,10 @@ const ReturnPage: React.FC = () => {
             endDate: "2024-12-27",
             pickupLocation: "Phu Quoc Airport",
             status: "active",
-            totalPrice: 350,
+            totalPrice: 8750000,
             daysRented: 7,
+            dealerName: "Nguyen Van A",
+            dealerPhone: "0912345678",
         },
         {
             id: 2,
@@ -89,8 +93,10 @@ const ReturnPage: React.FC = () => {
             endDate: "2024-12-29",
             pickupLocation: "Nha Trang Center",
             status: "active",
-            totalPrice: 245,
+            totalPrice: 6125000,
             daysRented: 7,
+            dealerName: "Tran Thi B",
+            dealerPhone: "0987654321",
         },
         {
             id: 3,
@@ -102,8 +108,10 @@ const ReturnPage: React.FC = () => {
             endDate: "2024-12-22",
             pickupLocation: "Downtown",
             status: "completed",
-            totalPrice: 175,
+            totalPrice: 4375000,
             daysRented: 7,
+            dealerName: "Le Van C",
+            dealerPhone: "0901234567",
         },
     ];
 
@@ -150,6 +158,8 @@ const ReturnPage: React.FC = () => {
                             rental.status === 'completed' ? 'completed' as const : 'active' as const,
                         totalPrice: rental.price || 0,
                         daysRented: daysRented,
+                        dealerName: rental.Bike?.Dealer?.name || rental.dealer_name || 'N/A',
+                        dealerPhone: rental.Bike?.Dealer?.phone || rental.dealer_contact || 'N/A',
                     };
                 });
 
@@ -368,6 +378,24 @@ const ReturnPage: React.FC = () => {
                                                     </Text>
                                                 </HStack>
 
+                                                {rental.dealerName && (
+                                                    <HStack spacing={2}>
+                                                        <Icon as={FaUser} color="teal.500" />
+                                                        <Text fontSize="sm" color="gray.600">
+                                                            Dealer: <strong>{rental.dealerName}</strong>
+                                                        </Text>
+                                                    </HStack>
+                                                )}
+
+                                                {rental.dealerPhone && (
+                                                    <HStack spacing={2}>
+                                                        <Icon as={FaPhone} color="teal.500" />
+                                                        <Text fontSize="sm" color="gray.600">
+                                                            Contact: <strong>{rental.dealerPhone}</strong>
+                                                        </Text>
+                                                    </HStack>
+                                                )}
+
                                                 <HStack spacing={2}>
                                                     <Icon as={FaCalendarAlt} color="teal.500" />
                                                     <Text fontSize="sm" color="gray.600">
@@ -385,10 +413,11 @@ const ReturnPage: React.FC = () => {
                                                 <HStack spacing={2}>
                                                     <Icon as={FaDollarSign} color="teal.500" />
                                                     <Text fontSize="sm" color="gray.600">
-                                                        Total: <strong>${rental.totalPrice}</strong> ({rental.daysRented}{" "}
+                                                        Total: <strong>{rental.totalPrice?.toLocaleString('vi-VN')} VNĐ</strong> ({rental.daysRented}{" "}
                                                         days)
                                                     </Text>
                                                 </HStack>
+
                                             </VStack>
                                         </CardBody>
 
@@ -399,7 +428,7 @@ const ReturnPage: React.FC = () => {
                                                 isDisabled={rental.status === "completed"}
                                                 onClick={() => handleReturnClick(rental)}
                                             >
-                                                {rental.status === "completed" ? "Already Returned" : "Return Bike"}
+                                                {rental.status === "completed" ? "Already Returned" : "Return Motorbike"}
                                             </Button>
                                         </CardFooter>
                                     </Card>
@@ -428,11 +457,22 @@ const ReturnPage: React.FC = () => {
                                             <strong>Booking ID:</strong> {selectedRental.bookingId}
                                         </Text>
                                         <Text>
-                                            <strong>Bike:</strong> {selectedRental.bikeName}
+                                            <strong>Motorbike:</strong> {selectedRental.bikeName}
                                         </Text>
+                                        {selectedRental.dealerName && (
+                                            <Text>
+                                                <strong>Dealer:</strong> {selectedRental.dealerName}
+                                            </Text>
+                                        )}
+                                        {selectedRental.dealerPhone && (
+                                            <Text>
+                                                <strong>Contact:</strong> {selectedRental.dealerPhone}
+                                            </Text>
+                                        )}
                                         <Text>
-                                            <strong>Total Cost:</strong> ${selectedRental.totalPrice}
+                                            <strong>Total Cost:</strong> {selectedRental.totalPrice?.toLocaleString('vi-VN')} VNĐ
                                         </Text>
+
                                     </VStack>
                                 </Box>
 
@@ -461,13 +501,13 @@ const ReturnPage: React.FC = () => {
                                     <Textarea
                                         value={review}
                                         onChange={(e) => setReview(e.target.value)}
-                                        placeholder="Share your experience with this bike..."
+                                        placeholder="Share your experience with this motorbike..."
                                         rows={4}
                                     />
                                 </FormControl>
 
                                 <Text fontSize="sm" color="gray.600">
-                                    Please ensure you've returned the bike to the designated location and removed
+                                    Please ensure you've returned the motorbike to the designated location and removed
                                     all personal belongings.
                                 </Text>
                             </VStack>

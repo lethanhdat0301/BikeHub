@@ -51,7 +51,7 @@ class BikeService {
       const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching bikes for park ${parkId}:`, error);
+      console.error(`Error fetching motorbikes for park ${parkId}:`, error);
       throw error;
     }
   }

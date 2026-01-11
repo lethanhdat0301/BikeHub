@@ -25,7 +25,7 @@ const SwiperReviews = () => {
       avatar:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       review:
-        "RentnRide made my Ha Giang Loop adventure unforgettable! The manual bike was powerful enough for the steep passes, and having the helmet and rain gear included saved me so much hassle. Highly recommended!",
+        "RentnRide made my Ha Giang Loop adventure unforgettable! The manual motorbike was powerful enough for the steep passes, and having the helmet and rain gear included saved me so much hassle. Highly recommended!",
     },
     {
       id: 2,
@@ -35,7 +35,7 @@ const SwiperReviews = () => {
         "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
       review:
-        "I loved the chatbot booking feature! It took less than 2 minutes to rent a scooter. They delivered it right to my resort in Phu Quoc for free. The bike was new, clean, and fuel-efficient.",
+        "I loved the chatbot booking feature! It took less than 2 minutes to rent a scooter. They delivered it right to my resort in Phu Quoc for free. The motorbike was new, clean, and fuel-efficient.",
     },
     {
       id: 3,
@@ -45,7 +45,7 @@ const SwiperReviews = () => {
         "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
       review:
-        "As an avid cyclist, finding RentnRide was a game-changer. The variety of bikes caters to all preferences, and the ease of renting makes planning spontaneous rides a breeze. Thank you, RentnRide, for turning my biking dreams into a reality!",
+        "As an avid cyclist, finding RentnRide was a game-changer. The variety of motorbikes caters to all preferences, and the ease of renting makes planning spontaneous rides a breeze. Thank you, RentnRide, for turning my biking dreams into a reality!",
     },
     {
       id: 4,
@@ -55,7 +55,7 @@ const SwiperReviews = () => {
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
       review:
-        "RentnRide has nailed the perfect combination of convenience and quality. Renting a bike has never been this easy, and the bikes themselves are in top-notch condition. Kudos to RentnRide for providing a hassle-free biking experience!",
+        "RentnRide has nailed the perfect combination of convenience and quality. Renting a motorbike has never been this easy, and the motorbikes themselves are in top-notch condition. Kudos to RentnRide for providing a hassle-free biking experience!",
     },
   ];
 

@@ -196,7 +196,7 @@ const BikeList: React.FC = () => {
                 ) : bikes.length === 0 ? (
                     <Center gridColumn="1 / -1" py={10}>
                         <Text fontSize="lg" color="gray.500">
-                            Hiện tại chưa có xe nào. Vui lòng quay lại sau.
+                            No motorbikes are available at the moment. Please come back later.
                         </Text>
                     </Center>
                 ) : (
@@ -249,7 +249,7 @@ const BikeList: React.FC = () => {
 
                     {/* Page Info */}
                     <Text textAlign="center" mt={3} fontSize={{ base: "xs", md: "sm" }} color="gray.600">
-                        Trang {currentPage} / {totalPages} • Tổng {bikes.length} xe
+                        Page {currentPage} / {totalPages} • Total {bikes.length} motorbikes
                     </Text>
                 </Box>
             )}

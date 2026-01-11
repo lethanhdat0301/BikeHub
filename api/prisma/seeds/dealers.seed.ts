@@ -4,10 +4,10 @@ import { faker } from '@faker-js/faker';
 export async function seedDealers(prisma: PrismaClient) {
     const dealerData = [
         {
-            name: 'Phu Quoc Bike Rentals',
-            email: 'contact@pqbikes.com',
+            name: 'Phu Quoc Motorbike Rentals',
+            email: 'contact@pqmotorbikes.com',
             phone: '0987654321',
-            telegram: '@pqbikes_telegram',
+            telegram: '@pqmotorbikes_telegram',
             location: 'Phu Quoc',
             status: 'Active',
             total_revenue: 12234.56,
@@ -31,9 +31,9 @@ export async function seedDealers(prisma: PrismaClient) {
         },
         {
             name: 'Hanoi Motorbikes',
-            email: 'rentals@hanoibikes.net',
+            email: 'rentals@hanoimotorbikes.net',
             phone: '0912345678',
-            telegram: '@hanoibikes_telegram',
+            telegram: '@hanoimotorbikes_telegram',
             location: 'Hanoi',
             status: 'Inactive',
             total_revenue: 4350.25,

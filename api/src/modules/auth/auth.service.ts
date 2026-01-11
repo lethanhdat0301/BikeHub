@@ -63,7 +63,7 @@ export class AuthService {
   }
 
   public async register(user: RegisterUserDTO): Promise<User> {
-    const object = 'Welcome to RentnRide! - Enjoy your bike!';
+    const object = 'Welcome to RentnRide! - Enjoy your motorbike!';
     const content = `
     Hello ${user.name},
 
@@ -74,7 +74,7 @@ export class AuthService {
     Link: ${process.env.REDIRECT_URL}/setting-profile/
 
     Thank you,
-    Enjoy your Bike :)
+    Enjoy your Motorbike :)
     `;
     const userData = await this.userService.findUser({
       email: user.email,
@@ -125,7 +125,7 @@ export class AuthService {
     Link: ${process.env.REDIRECT_URL}/setting-profile/updatePassword
 
 
-    Enjoy your Bike :)
+    Enjoy your Motorbike :)
     `;
 
     const user = await this.prisma.user.findUnique({

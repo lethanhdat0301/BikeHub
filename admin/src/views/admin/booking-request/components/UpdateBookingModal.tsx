@@ -57,7 +57,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             const data = await response.json();
             setBikes(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error fetching bikes:", error);
+            console.error("Error fetching motorbikes:", error);
         }
     };
 
@@ -183,7 +183,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                         {/* Bike */}
                         <div className="col-span-2">
                             <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                Bike
+                                Motorbike
                             </label>
                             <select
                                 name="bike_id"

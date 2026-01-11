@@ -53,7 +53,7 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                     const contactName = row.original.contact_name;
                     const contactEmail = row.original.contact_email;
                     const contactPhone = row.original.contact_phone;
-                    
+
                     console.log('Customer data:', {
                         user,
                         contactName,
@@ -79,7 +79,7 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                 },
             },
             {
-                Header: "Bike",
+                Header: "Motorbike",
                 accessor: "Bike",
                 Cell: ({ value }: any) => (
                     <div>

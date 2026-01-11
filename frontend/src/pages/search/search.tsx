@@ -19,9 +19,8 @@ import {
     Divider,
     Button,
     Flex,
-    Collapse,
-    IconButton,
     useDisclosure,
+    useBreakpointValue,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { useSearchParams } from "react-router-dom";
@@ -39,7 +38,12 @@ const SearchPage: React.FC = () => {
     const [bikes, setBikes] = useState<any[]>([]);
     const [filteredBikes, setFilteredBikes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const { isOpen: isFilterOpen, onToggle: onFilterToggle } = useDisclosure({ defaultIsOpen: true });
+
+    // Default filter open state: closed on mobile, open on desktop
+    const isMobile = useBreakpointValue({ base: true, lg: false });
+    const { isOpen: isFilterOpen, onToggle: onFilterToggle } = useDisclosure({
+        defaultIsOpen: !isMobile
+    });
 
     // Filter states
     const [priceRange, setPriceRange] = useState<number[]>([0, 1000000]);
@@ -142,6 +146,27 @@ const SearchPage: React.FC = () => {
             </Box>
 
             <Flex gap={6} direction={{ base: "column", lg: "row" }}>
+                {/* Mobile Filter Toggle Button */}
+                <Box display={{ base: "block", lg: "none" }} mb={4}>
+                    <Button
+                        leftIcon={isFilterOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                        onClick={onFilterToggle}
+                        width="full"
+                        variant="outline"
+                        colorScheme="teal"
+                        borderRadius="lg"
+                        size="lg"
+                        fontWeight="semibold"
+                    >
+                        {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+                        {!isFilterOpen && (
+                            <Text ml={2} fontSize="sm" color="gray.500">
+                                (Found {filteredBikes.length} results)
+                            </Text>
+                        )}
+                    </Button>
+                </Box>
+
                 {/* Filters Sidebar */}
                 <Box
                     w={{ base: "100%", lg: "300px" }}
@@ -151,48 +176,36 @@ const SearchPage: React.FC = () => {
                     h="fit-content"
                     position={{ base: "relative", lg: "sticky" }}
                     top={{ lg: "20px" }}
+                    display={{ base: isFilterOpen ? "block" : "none", lg: "block" }}
                 >
-                    {/* Filter Header - Always Visible */}
+                    {/* Filter Header - Only Visible on Desktop */}
                     <Flex
                         justify="space-between"
                         align="center"
                         p={4}
-                        cursor={{ base: "pointer", lg: "default" }}
-                        onClick={{ base: onFilterToggle, lg: undefined }}
                         bg="gray.50"
                         borderTopRadius="lg"
-                        _hover={{ base: { bg: "gray.100" }, lg: { bg: "gray.50" } }}
+                        display={{ base: "none", lg: "flex" }}
                     >
-                        <HStack>
-                            <Heading size="md">Filters</Heading>
-                            <IconButton
-                                aria-label="Toggle filters"
-                                icon={isFilterOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                                size="sm"
-                                variant="ghost"
-                                display={{ base: "flex", lg: "none" }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onFilterToggle();
-                                }}
-                            />
-                        </HStack>
+                        <Heading size="md">Filters</Heading>
                         <Button
                             size="sm"
                             variant="ghost"
                             colorScheme="teal"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleResetFilters();
-                            }}
+                            onClick={handleResetFilters}
                         >
                             Reset
                         </Button>
                     </Flex>
 
-                    {/* Filter Content - Collapsible on Mobile */}
-                    <Collapse in={isFilterOpen} animateOpacity>
-                        <VStack align="stretch" spacing={6} p={6}>
+                    {/* Filter Content */}
+                    <Box display={{ base: isFilterOpen ? "block" : "none", lg: "block" }}>
+                        <VStack
+                            align="stretch"
+                            spacing={6}
+                            p={6}
+                            borderTopRadius={{ base: "lg", lg: "none" }}
+                        >
                             {/* Price Range Filter */}
                             <Box>
                                 <Text fontWeight="semibold" mb={3}>
@@ -260,8 +273,21 @@ const SearchPage: React.FC = () => {
                                     </Stack>
                                 </CheckboxGroup>
                             </Box>
+
+                            {/* Mobile Reset Button */}
+                            <Box display={{ base: "block", lg: "none" }} pt={4}>
+                                <Button
+                                    width="full"
+                                    variant="outline"
+                                    colorScheme="teal"
+                                    onClick={handleResetFilters}
+                                    size="lg"
+                                >
+                                    Reset All Filters
+                                </Button>
+                            </Box>
                         </VStack>
-                    </Collapse>
+                    </Box>
                 </Box>
 
                 {/* Bikes Grid */}

@@ -69,7 +69,7 @@ const BookingRequestTable: React.FC<Props> = ({ tableContent, loading, onRefresh
                 ),
             },
             {
-                Header: "Bike",
+                Header: "Motorbike",
                 accessor: "Bike",
                 Cell: ({ value }: any) => (
                     <p className="text-sm text-navy-700 dark:text-white">

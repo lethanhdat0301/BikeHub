@@ -53,10 +53,10 @@ const BikeDetailsPage: React.FC = () => {
                 const data = await bikeService.getBikeById(Number(id));
                 setBike(data);
             } catch (error) {
-                console.error("Error fetching bike:", error);
+                console.error("Error fetching motorbike:", error);
                 toast({
                     title: "Error",
-                    description: "Could not load bike details",
+                    description: "Could not load motorbike details",
                     status: "error",
                     duration: 3000,
                     isClosable: true,
@@ -239,18 +239,34 @@ const BikeDetailsPage: React.FC = () => {
             console.log('=== Booking response received:', bookingData);
             console.log('=== Booking ID from response:', bookingData?.bookingId);
 
+            // Toast duration and navigate delay - longer on mobile
+            const isMobile = window.innerWidth <= 768;
+            const toastDuration = isMobile ? 10000 : 7000; // 10s on mobile, 7s on desktop
+            const navigateDelay = isMobile ? 4000 : 2000;  // 4s on mobile, 2s on desktop
+
             toast({
                 title: "Booking Successful! 🎉",
-                description: `Booking ID: ${bookingData?.bookingId || 'N/A'}. Check your email for confirmation details.`,
+                description: `Booking ID: ${bookingData?.bookingId || 'N/A'}. Your Booking has transferred to dealer ${dealerData?.name} chuyển đến dealer tên là gì, số điện thoại của dealer, chúng tôi sẽ giao xe cho bạn sớm. Vui lòng kiểm tra email để biết thêm thông tin chi tiết về email`,
                 status: "success",
-                duration: 7000,
+                duration: toastDuration,
                 isClosable: true,
             });
 
-            // Navigate to track order page
+            // Show redirect notification after a delay
+            setTimeout(() => {
+                toast({
+                    title: "Redirecting...",
+                    description: "Taking you to track your booking",
+                    status: "info",
+                    duration: 2000,
+                    isClosable: true,
+                });
+            }, navigateDelay - 1000);
+
+            // Navigate to track order page - delayed longer on mobile
             setTimeout(() => {
                 navigate("/tracking");
-            }, 2000);
+            }, navigateDelay);
 
         } catch (error: any) {
             console.error("Booking error:", error);
@@ -316,7 +332,7 @@ const BikeDetailsPage: React.FC = () => {
     if (!bike) {
         return (
             <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
-                <Text>Bike not found</Text>
+                <Text>Motorbike not found</Text>
             </Box>
         );
     }

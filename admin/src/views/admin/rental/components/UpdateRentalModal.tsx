@@ -286,18 +286,18 @@ const UpdateRentalModal: React.FC<Props> = ({ isOpen, onClose, rental, onSuccess
                             <h4 className="text-lg font-semibold text-gray-800 mb-4">Current Location</h4>
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Where is the bike now?
+                                    Where is the motorbike now?
                                 </label>
                                 <textarea
                                     name="current_location"
                                     value={formData.current_location}
                                     onChange={handleInputChange}
                                     rows={3}
-                                    placeholder="Enter current location or address where bike is located..."
+                                    placeholder="Enter current location or address where motorbike is located..."
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    This helps track bike location especially when rental is completed or in progress.
+                                    This helps track motorbike location especially when rental is completed or in progress.
                                 </p>
                             </div>
                         </div>

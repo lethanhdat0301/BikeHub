@@ -90,7 +90,7 @@ const Dashboard = () => {
 
         <Widget
           icon={<MdElectricBike className="h-7 w-7" />}
-          title={"Bikes"}
+          title={"Motorbikes"}
           subtitle={(stats?.bikes?.length ?? 0).toString()}
         />
         <Widget

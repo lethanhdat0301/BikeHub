@@ -14,7 +14,7 @@ const HowItWork: React.FC = () => {
   const dataSteps = [
     {
       icon: FaMagnifyingGlass,
-      title: "Find Your Bike",
+      title: "Find Your Motorbike",
       text: "Browse our wide selection of motorcycles and find the perfect one for your trip.",
       after: true,
       delay: 0.5,
@@ -30,7 +30,7 @@ const HowItWork: React.FC = () => {
     },
     {
       icon: FaMotorcycle,
-      title: "Receive Your Bike",
+      title: "Receive Your Motorbike",
       text: "We deliver the motorcycle directly to your location at the specified time.",
       after: true,
       delay: 1.5,

@@ -96,7 +96,7 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
         if (!formData.bike_id || !formData.start_time || !formData.end_time || !formData.price) {
             toast({
                 title: "Missing Information",
-                description: "Please fill in all required fields (Bike, Time, Price)",
+                description: "Please fill in all required fields (Motorbike, Time, Price)",
                 status: "warning",
                 duration: 3000,
                 isClosable: true,

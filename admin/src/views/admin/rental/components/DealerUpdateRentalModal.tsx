@@ -124,8 +124,8 @@ const DealerUpdateRentalModal: React.FC<Props> = ({ isOpen, onClose, rental, onS
                                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
                                 <option value="pending">Pending - Waiting for customer pickup</option>
-                                <option value="active">Active - Customer has the bike</option>
-                                <option value="completed">Completed - Bike returned successfully</option>
+                                <option value="active">Active - Customer has the motorbike</option>
+                                <option value="completed">Completed - Motorbike returned successfully</option>
                                 <option value="cancelled">Cancelled - Rental cancelled</option>
                             </select>
                             <p className="text-xs text-gray-500 mt-2">
@@ -136,7 +136,7 @@ const DealerUpdateRentalModal: React.FC<Props> = ({ isOpen, onClose, rental, onS
                         {/* Current Location */}
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-2">
-                                Current Bike Location
+                                Current Motorbike Location
                             </label>
                             <textarea
                                 name="current_location"
@@ -147,7 +147,7 @@ const DealerUpdateRentalModal: React.FC<Props> = ({ isOpen, onClose, rental, onS
                                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                             />
                             <p className="text-xs text-gray-500 mt-2">
-                                Keep track of bike location for pickup/return coordination
+                                Keep track of motorbike location for pickup/return coordination
                             </p>
                         </div>
                     </div>

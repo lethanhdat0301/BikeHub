@@ -127,10 +127,10 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || "Failed to add bike");
+                throw new Error(error.message || "Failed to add motorbike");
             }
 
-            alert("Bike added successfully!");
+            alert("Motorbike added successfully!");
             onSuccess();
             onClose();
         } catch (error: any) {
@@ -148,7 +148,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
                     <h2 className="text-xl font-bold text-gray-800">
-                        Add New Bike
+                        Add New Motorbikes
                     </h2>
                     <button
                         onClick={onClose}
@@ -379,7 +379,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                     name="description"
                                     value={formData.description}
                                     onChange={handleInputChange}
-                                    placeholder="Describe the bike features, condition, etc..."
+                                    placeholder="Describe the motorbike features, condition, etc..."
                                     rows={3}
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
@@ -401,7 +401,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                             disabled={loading}
                             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? "Creating..." : "Create Bike"}
+                            {loading ? "Creating..." : "Create Motorbike"}
                         </button>
                     </div>
                 </form>

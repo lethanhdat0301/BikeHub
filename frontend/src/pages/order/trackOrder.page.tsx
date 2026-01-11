@@ -484,7 +484,7 @@ const TrackOrderPage: React.FC = () => {
                                                     Total Amount
                                                 </Text>
                                                 <Text fontSize="2xl" fontWeight="bold" color="teal.600">
-                                                    ${order.totalPrice}
+                                                    {order.totalPrice?.toLocaleString('vi-VN')} VNĐ
                                                 </Text>
                                             </Flex>
                                         </VStack>

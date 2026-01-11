@@ -86,7 +86,7 @@ const SearchBikeVietnam: React.FC = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: "linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.5) 100%)",
+                background: "linear-gradient(135deg, rgba(0, 50, 80, 0.3) 0%, rgba(0, 30, 60, 0.5) 50%, rgba(20, 40, 70, 0.4) 100%)",
                 zIndex: 1
             }}
         >
@@ -100,12 +100,12 @@ const SearchBikeVietnam: React.FC = () => {
                             color="white"
                             fontWeight="bold"
                             lineHeight="1.1"
-                            textShadow="3px 3px 6px rgba(0,0,0,0.7)"
+                            textShadow="2px 2px 8px rgba(0,0,0,0.8)"
                             letterSpacing="-0.02em"
                         >
-                            Journey Through
-                            <Text as="span" color="orange.300" display="block">
-                                Vietnam's Wonders
+                            Rent Easier
+                            <Text as="span" color="cyan.300" display="block">
+                                Ride Further
                             </Text>
                         </Heading>
                         <Text
@@ -113,12 +113,12 @@ const SearchBikeVietnam: React.FC = () => {
                             color="white"
                             fontWeight="medium"
                             maxW="3xl"
-                            textShadow="2px 2px 4px rgba(0,0,0,0.6)"
+                            textShadow="2px 2px 6px rgba(0,0,0,0.8)"
                             lineHeight="1.4"
                         >
-                            Experience the freedom of the open road on premium motorcycles through Vietnam's breathtaking landscapes
+                            Your trusted companion for motorbike adventures in Vietnam with verified quality motorbikes and offer hassle-free delivery services.
                         </Text>
-                        <HStack
+                        {/* <HStack
                             spacing={8}
                             justify="center"
                             flexWrap="wrap"
@@ -138,29 +138,29 @@ const SearchBikeVietnam: React.FC = () => {
                                 <Text>📍</Text>
                                 <Text>Multiple Locations</Text>
                             </HStack>
-                        </HStack>
+                        </HStack> */}
                     </VStack>
 
                     {/* Search Form */}
                     <Box
-                        bg="rgba(255, 255, 255, 0.95)"
-                        backdropFilter="blur(20px)"
+                        bg="rgba(255, 255, 255, 0.92)"
+                        backdropFilter="blur(25px)"
                         p={{ base: 8, md: 10, lg: 12 }}
                         borderRadius="3xl"
-                        boxShadow="0 25px 50px -12px rgba(0, 0, 0, 0.35)"
+                        boxShadow="0 30px 60px -15px rgba(0, 50, 100, 0.4)"
                         w="full"
                         maxW="1000px"
-                        border="1px solid"
-                        borderColor="whiteAlpha.300"
+                        border="2px solid"
+                        borderColor="rgba(255,255,255,0.4)"
                         position="relative"
                         _before={{
                             content: '""',
                             position: "absolute",
-                            top: "-2px",
-                            left: "-2px",
-                            right: "-2px",
-                            bottom: "-2px",
-                            background: "linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))",
+                            top: "-3px",
+                            left: "-3px",
+                            right: "-3px",
+                            bottom: "-3px",
+                            background: "linear-gradient(135deg, rgba(56, 178, 172, 0.2), rgba(59, 130, 246, 0.15))",
                             borderRadius: "3xl",
                             zIndex: -1
                         }}
@@ -184,21 +184,21 @@ const SearchBikeVietnam: React.FC = () => {
                                         alignItems="center"
                                         gap={2}
                                     >
-                                        <Box color="orange.500">📍</Box>
+                                        <Box color="blue.500">📍</Box>
                                         Pickup Location
                                     </FormLabel>
                                     <Select
-                                        placeholder={loading ? "Loading locations..." : "Select your starting point"}
+                                        placeholder={loading ? "Loading locations..." : "Select location"}
                                         value={parkId}
                                         onChange={(e) => setParkId(e.target.value)}
                                         size="lg"
                                         borderColor="gray.300"
                                         borderWidth="2px"
                                         borderRadius="xl"
-                                        _hover={{ borderColor: "orange.400" }}
+                                        _hover={{ borderColor: "blue.400" }}
                                         _focus={{
-                                            borderColor: "orange.500",
-                                            boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.1)"
+                                            borderColor: "blue.500",
+                                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.15)"
                                         }}
                                         isDisabled={loading}
                                         bg="white"
@@ -232,7 +232,7 @@ const SearchBikeVietnam: React.FC = () => {
                                             alignItems="center"
                                             gap={2}
                                         >
-                                            <Box color="orange.500">📅</Box>
+                                            <Box color="blue.500">📅</Box>
                                             Start Date
                                         </FormLabel>
                                         <Input
@@ -243,10 +243,10 @@ const SearchBikeVietnam: React.FC = () => {
                                             borderColor="gray.300"
                                             borderWidth="2px"
                                             borderRadius="xl"
-                                            _hover={{ borderColor: "orange.400" }}
+                                            _hover={{ borderColor: "blue.400" }}
                                             _focus={{
-                                                borderColor: "orange.500",
-                                                boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.1)"
+                                                borderColor: "blue.500",
+                                                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.15)"
                                             }}
                                             bg="white"
                                             h="60px"
@@ -265,7 +265,7 @@ const SearchBikeVietnam: React.FC = () => {
                                             alignItems="center"
                                             gap={2}
                                         >
-                                            <Box color="orange.500">📅</Box>
+                                            <Box color="blue.500">📅</Box>
                                             End Date
                                         </FormLabel>
                                         <Input
@@ -276,10 +276,10 @@ const SearchBikeVietnam: React.FC = () => {
                                             borderColor="gray.300"
                                             borderWidth="2px"
                                             borderRadius="xl"
-                                            _hover={{ borderColor: "orange.400" }}
+                                            _hover={{ borderColor: "blue.400" }}
                                             _focus={{
-                                                borderColor: "orange.500",
-                                                boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.1)"
+                                                borderColor: "blue.500",
+                                                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.15)"
                                             }}
                                             bg="white"
                                             h="60px"
@@ -296,15 +296,15 @@ const SearchBikeVietnam: React.FC = () => {
                                     h="60px"
                                     leftIcon={<SearchIcon />}
                                     onClick={handleSearch}
-                                    bgGradient="linear(to-r, orange.400, orange.600)"
+                                    bgGradient="linear(to-r, blue.500, cyan.500)"
                                     color="white"
                                     borderRadius="xl"
                                     fontSize="lg"
                                     fontWeight="700"
                                     _hover={{
-                                        bgGradient: "linear(to-r, orange.500, orange.700)",
+                                        bgGradient: "linear(to-r, blue.600, cyan.600)",
                                         transform: "translateY(-3px)",
-                                        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                                        boxShadow: "0 25px 30px -8px rgba(59, 130, 246, 0.4), 0 15px 15px -8px rgba(6, 182, 212, 0.3)",
                                     }}
                                     _active={{
                                         transform: "translateY(-1px)"
@@ -312,9 +312,9 @@ const SearchBikeVietnam: React.FC = () => {
                                     transition="all 0.3s ease"
                                     w={{ base: "full", lg: "auto" }}
                                     minW="250px"
-                                    boxShadow="0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
+                                    boxShadow="0 15px 20px -5px rgba(59, 130, 246, 0.3), 0 8px 10px -5px rgba(6, 182, 212, 0.2)"
                                 >
-                                    Begin Adventure
+                                    Find motorbike
                                 </Button>
                             </Flex>
                         </VStack>

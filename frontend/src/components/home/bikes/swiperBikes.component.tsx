@@ -41,11 +41,11 @@ const SwiperBikes = () => {
       });
   }, [selectedParkId]);
 
-  const handleParkChange = (event:any) => {
+  const handleParkChange = (event: any) => {
     const parkId = event.target.value;
     setSelectedParkId(parkId);
   };
-  console.log("--- ",swiperRef.current?.isEnd)
+  console.log("--- ", swiperRef.current?.isEnd)
   return (
     <Box
       id="weOffer"
@@ -75,7 +75,7 @@ const SwiperBikes = () => {
             className="py-4"
             color={"orange.500"}
           >
-            Explore Our Bike Range
+            Explore Our Motorbike Range
           </Heading>
         </Reveal>
       </Center>
@@ -99,7 +99,7 @@ const SwiperBikes = () => {
             }}
           >
             <option value="all">All Parks</option>
-            {parks.map((park:any) => (
+            {parks.map((park: any) => (
               <option key={park.id} value={park.id}>
                 {park.name}
               </option>
@@ -136,7 +136,7 @@ const SwiperBikes = () => {
             setSlideIndex(swiper.activeIndex);
             setIsSwiperInitialized(true);
           }}
-          onBeforeInit={(swiper:any) => {
+          onBeforeInit={(swiper: any) => {
             swiperRef.current = swiper;
             setIsSwiperInitialized(false);
           }}

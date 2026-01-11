@@ -19,9 +19,9 @@ const Sidebar = (props: {
     if (!user || !user.role) return routes;
     if (user.role === "admin") return routes;
     if (user.role === "dealer") {
-      // Dealers only see: Dashboard, Bikes, Bookings, Referrals, Rentals
+      // Dealers only see: Dashboard, MotorBikes, Bookings, Referrals, Rentals
       return routes.filter((r) =>
-        ["default", "bikes", "bookings", "referrals", "rentals", "sign-in"].includes(r.path)
+        ["default", "motorbikes", "bookings", "referrals", "rentals", "sign-in"].includes(r.path)
       );
     }
     // default: hide admin pages for regular users
@@ -42,7 +42,7 @@ const Sidebar = (props: {
 
       <div className={`mx-[56px] mt-[50px] flex items-center`}>
         <div className="ml-1 mt-1 h-2.5 font-poppins text-[26px] font-bold uppercase text-navy-700 dark:text-white">
-          Bike<span className="font-medium">Hub</span>
+          RentnRide
         </div>
       </div>
       <div className="mb-7 mt-[58px] h-px bg-gray-300 dark:bg-white/30" />

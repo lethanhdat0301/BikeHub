@@ -9,6 +9,7 @@ const Footer = () => {
     { label: "Booking Request", path: "request-booking" },
     { label: "Return", path: "return" },
     { label: "Track Order", path: "tracking" },
+    { label: "Terms of Service", path: "terms" },
     { label: "How It Works", path: "howItWork", isHash: true }
   ];
 
@@ -97,6 +98,9 @@ const Footer = () => {
             RentnRide
           </Link>
           . All Rights Reserved.<br />
+          <Link to="/terms" className="hover:underline text-teal-600">
+            Terms of Service
+          </Link>
         </span>
       </div>
     </footer>
