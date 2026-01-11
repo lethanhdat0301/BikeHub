@@ -16,7 +16,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'automatic',
       seats: 2,
-      basePrice: 12
+      basePrice: 120000, // 120,000 VND/day
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop'
     },
     {
       model: 'Yamaha Exciter 155',
@@ -24,7 +25,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'manual',
       seats: 2,
-      basePrice: 18
+      basePrice: 180000, // 180,000 VND/day
+      image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&h=400&fit=crop'
     },
     {
       model: 'Honda Winner X',
@@ -32,7 +34,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'manual',
       seats: 2,
-      basePrice: 20
+      basePrice: 200000, // 200,000 VND/day
+      image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=400&fit=crop'
     },
     {
       model: 'Honda Air Blade 150',
@@ -40,7 +43,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'automatic',
       seats: 2,
-      basePrice: 16
+      basePrice: 160000, // 160,000 VND/day
+      image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&h=400&fit=crop'
     },
     {
       model: 'Yamaha Jupiter',
@@ -48,7 +52,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'manual',
       seats: 2,
-      basePrice: 10
+      basePrice: 100000, // 100,000 VND/day
+      image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=400&fit=crop'
     },
     {
       model: 'Suzuki Raider 150',
@@ -56,7 +61,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'manual',
       seats: 2,
-      basePrice: 22
+      basePrice: 220000, // 220,000 VND/day
+      image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&h=400&fit=crop'
     },
     {
       model: 'VinFast Klara A2',
@@ -64,7 +70,8 @@ export async function seedBikes(
       fuel_type: 'electric',
       transmission: 'automatic',
       seats: 2,
-      basePrice: 25
+      basePrice: 250000, // 250,000 VND/day
+      image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&h=400&fit=crop'
     },
     {
       model: 'Honda PCX 160',
@@ -72,7 +79,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'automatic',
       seats: 2,
-      basePrice: 28
+      basePrice: 280000, // 280,000 VND/day
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop'
     },
     {
       model: 'Yamaha NVX 155',
@@ -80,7 +88,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'automatic',
       seats: 2,
-      basePrice: 24
+      basePrice: 240000, // 240,000 VND/day
+      image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&h=400&fit=crop'
     },
     {
       model: 'Honda CB150R',
@@ -88,7 +97,8 @@ export async function seedBikes(
       fuel_type: 'gasoline',
       transmission: 'manual',
       seats: 2,
-      basePrice: 26
+      basePrice: 260000, // 260,000 VND/day
+      image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=400&fit=crop'
     }
   ];
 
@@ -111,8 +121,8 @@ export async function seedBikes(
       seats: bikeTemplate.seats,
       lock: false,
       location: `Parking Slot ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(Math.random() * 99) + 1}`,
-      price: Number((bikeTemplate.basePrice + Math.random() * 15).toFixed(2)),
-      image: `https://picsum.photos/600/400?random=${i + 1}`,
+      price: Number((bikeTemplate.basePrice + Math.random() * 50000).toFixed(0)), // Add variation of up to 50,000 VND
+      image: bikeTemplate.image,
       description: bikeTemplate.description,
       fuel_type: bikeTemplate.fuel_type,
       transmission: bikeTemplate.transmission,
