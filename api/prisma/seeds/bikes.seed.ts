@@ -140,6 +140,6 @@ export async function seedBikes(
     bikes.push(bike);
   }
 
-  console.log(`✅ Seeded ${bikes.length} motorbikes.);
+  console.log(`✅ Seeded ${bikes.length} motorbikes.`);
   return bikes;
 }
