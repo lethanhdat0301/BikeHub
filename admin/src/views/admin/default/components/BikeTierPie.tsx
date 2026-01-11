@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import apiClient from "services/api";
+import useAuth from "utils/auth/AuthHook";
 import Card from "components/card";
 import Chart from "react-apexcharts";
 import { pieChartOptions } from "variables/charts";
@@ -31,6 +32,7 @@ const getColor = (name: string) => {
 };
 
 const BikeTierPie = () => {
+  const { user } = useAuth();
   const [chartData, setChartData] = useState<{ name: string; data: number }[]>(
     []
   );
@@ -44,7 +46,7 @@ const BikeTierPie = () => {
         console.log("-response------------")
         console.log(response)
         console.log("-------------")
-        
+
         // Handle both array and object responses
         let bikes: Bike[] = [];
         if (Array.isArray(response.data)) {
@@ -87,7 +89,7 @@ const BikeTierPie = () => {
       <div className="flex flex-row justify-between px-3 pt-2">
         <div>
           <h4 className="text-lg font-bold text-navy-700 dark:text-white">
-            Tier Price
+            {user?.role === 'dealer' ? 'My Bike Tiers' : 'Bike Price Tiers'}
           </h4>
         </div>
       </div>

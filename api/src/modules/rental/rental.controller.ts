@@ -111,7 +111,7 @@ export class RentalController {
       bookingDate: rental.start_time,
       startDate: rental.start_time,
       endDate: rental.end_time,
-      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'BikeHub',
+      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'RentnRide',
       dealerPhone: rentalDetails?.Bike?.Dealer?.phone || rentalDetails?.Bike?.dealer_contact || 'Contact support',
       pickupLocation: pickup_location || rentalDetails?.Bike?.Park?.location || 'N/A',
       price: price,
@@ -138,15 +138,15 @@ Booking Details:
 - Dealer: ${bookingDetails.dealerName}
 - Dealer Contact: ${bookingDetails.dealerPhone}
 
-Thank you for choosing BikeHub!
+Thank you for choosing RentnRide!
 
 Best regards,
-BikeHub Team
+RentnRide Team
         `;
 
         await this.emailService.sendEmail(
           contact_email,
-          'Booking Confirmation - BikeHub',
+          'Booking Confirmation - RentnRide',
           emailContent,
         );
         console.log('=== Email sent successfully to:', contact_email);

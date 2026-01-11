@@ -50,6 +50,20 @@ export class DealerService {
         return { user, dealer };
     }
 
+    // New method to find dealer by user ID
+    async findDealerByUserId(userId: number) {
+        // Find dealer by matching email with user email
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (!user) return null;
+
+        return this.prisma.dealer.findUnique({
+            where: { email: user.email }
+        });
+    }
+
     async update(id: number, data: any) {
         return this.prisma.dealer.update({
             where: { id },

@@ -21,8 +21,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix(API_PREFIX);
 
-  const allowedOrigins = process.env.CORS_ALLOW_URL 
-    ? process.env.CORS_ALLOW_URL.split(',') 
+  const allowedOrigins = process.env.CORS_ALLOW_URL
+    ? process.env.CORS_ALLOW_URL.split(',')
     : ['http://localhost:3000', 'http://localhost:5173'];
 
   app.use(
@@ -36,18 +36,18 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,  
+    whitelist: true,
     forbidNonWhitelisted: true,
     transform: true,
   }),);
 
   const swaggerConfig = GLOBAL_CONFIG.swagger;
-  
+
   // Swagger Api
   if (swaggerConfig.enabled) {
     const options = new DocumentBuilder()
-      .setTitle(swaggerConfig.title || 'BikeHub')
-      .setDescription(swaggerConfig.description || 'BikeHub API')
+      .setTitle(swaggerConfig.title || 'RentnRide')
+      .setDescription(swaggerConfig.description || 'RentnRide API')
       .setVersion(swaggerConfig.version || '1.0')
       .addBearerAuth()
       .build();

@@ -45,7 +45,7 @@ const SwiperReviews = () => {
         "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
       review:
-        "As an avid cyclist, finding BikeHub was a game-changer. The variety of bikes caters to all preferences, and the ease of renting makes planning spontaneous rides a breeze. Thank you, BikeHub, for turning my biking dreams into a reality!",
+        "As an avid cyclist, finding RentnRide was a game-changer. The variety of bikes caters to all preferences, and the ease of renting makes planning spontaneous rides a breeze. Thank you, RentnRide, for turning my biking dreams into a reality!",
     },
     {
       id: 4,
@@ -55,7 +55,7 @@ const SwiperReviews = () => {
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
       review:
-        "BikeHub has nailed the perfect combination of convenience and quality. Renting a bike has never been this easy, and the bikes themselves are in top-notch condition. Kudos to BikeHub for providing a hassle-free biking experience!",
+        "RentnRide has nailed the perfect combination of convenience and quality. Renting a bike has never been this easy, and the bikes themselves are in top-notch condition. Kudos to RentnRide for providing a hassle-free biking experience!",
     },
   ];
 

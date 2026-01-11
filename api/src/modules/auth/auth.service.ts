@@ -63,11 +63,11 @@ export class AuthService {
   }
 
   public async register(user: RegisterUserDTO): Promise<User> {
-    const object = 'Welcome to BikeHub! - Enjoy your bike!';
+    const object = 'Welcome to RentnRide! - Enjoy your bike!';
     const content = `
     Hello ${user.name},
 
-    Welcome to BikeHub!
+    Welcome to RentnRide!
 
     You can update your profile information from profile settings.
 
@@ -83,20 +83,20 @@ export class AuthService {
     if (userData) {
       throw new UnauthorizedException("This email already exists");
     }
-    
+
     // Allow role to be specified (for dealer creation), otherwise default to USER
-    const newUser = { 
-      ...user, 
-      role: user.role || ROLES_ENUM.USER 
+    const newUser = {
+      ...user,
+      role: user.role || ROLES_ENUM.USER
     };
-    
+
     const Res = await this.userService.createUser(newUser);
-    
+
     // Only send welcome email for regular users, not dealers
     if (newUser.role === ROLES_ENUM.USER) {
       await this.emailService.sendEmail(user.email, object, content);
     }
-    
+
     delete Res.password;
     return Res;
   }
@@ -112,11 +112,11 @@ export class AuthService {
   public async validateUser(details: UserDetails): Promise<AuthResponseDTO> {
     let data = null;
     let newUser = null;
-    const object = 'Welcome to BikeHub! - Your Password!';
+    const object = 'Welcome to RentnRide! - Your Password!';
     const content = `
     Hello ${details.name},
 
-    Welcome to BikeHub!
+    Welcome to RentnRide!
 
     Your password is: ${details.password}
 

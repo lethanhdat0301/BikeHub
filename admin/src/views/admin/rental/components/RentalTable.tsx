@@ -2,14 +2,16 @@ import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
 import { MdAdd, MdEdit, MdDelete, MdCheckCircle } from "react-icons/md";
 import UpdateRentalModal from "./UpdateRentalModal";
+import DealerUpdateRentalModal from "./DealerUpdateRentalModal";
 
 type Props = {
     tableContent: any[];
     loading: boolean;
     onRefresh?: () => void;
+    userRole?: string; // 'admin' or 'dealer'
 };
 
-const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
+const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRole = 'admin' }) => {
     const [statusFilter, setStatusFilter] = useState("All");
     const [selectedRental, setSelectedRental] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -208,17 +210,31 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     return (
         <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-navy-800">
             {selectedRental && (
-                <UpdateRentalModal
-                    isOpen={isModalOpen}
-                    onClose={() => {
-                        setIsModalOpen(false);
-                        setSelectedRental(null);
-                    }}
-                    rental={selectedRental}
-                    onSuccess={() => {
-                        if (onRefresh) onRefresh();
-                    }}
-                />
+                userRole === 'dealer' ? (
+                    <DealerUpdateRentalModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedRental(null);
+                        }}
+                        rental={selectedRental}
+                        onSuccess={() => {
+                            if (onRefresh) onRefresh();
+                        }}
+                    />
+                ) : (
+                    <UpdateRentalModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedRental(null);
+                        }}
+                        rental={selectedRental}
+                        onSuccess={() => {
+                            if (onRefresh) onRefresh();
+                        }}
+                    />
+                )
             )}
 
             {/* Header */}

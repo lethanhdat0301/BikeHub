@@ -131,17 +131,43 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
             );
 
             if (rentalResponse.ok) {
-                // 2. Cập nhật Booking Request thành COMPLETED
+                // Lấy thông tin bike để tìm dealer
+                const selectedBike = bikes.find(b => b.id === Number(formData.bike_id));
+                let dealerIdToAssign = null;
+
+                // Nếu bike có dealer_id, tìm dealer record tương ứng
+                if (selectedBike?.dealer_id) {
+                    try {
+                        const dealerResponse = await fetch(
+                            `${process.env.REACT_APP_API_URL}dealers/user/${selectedBike.dealer_id}`,
+                            { credentials: "include" }
+                        );
+                        if (dealerResponse.ok) {
+                            const dealer = await dealerResponse.json();
+                            if (dealer) {
+                                dealerIdToAssign = dealer.id;
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Error finding dealer:", error);
+                    }
+                }
+
+                // 2. Cập nhật Booking Request thành COMPLETED và gán dealer_id
+                const updateData = {
+                    status: "COMPLETED",
+                    admin_notes: `Converted to rental (Order: ${formData.order_id})`,
+                    bike_id: Number(formData.bike_id),
+                    ...(dealerIdToAssign && { dealer_id: dealerIdToAssign })
+                };
+
                 await fetch(
                     `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
                     {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include",
-                        body: JSON.stringify({
-                            status: "COMPLETED",
-                            admin_notes: `Converted to rental (Order: ${formData.order_id})`,
-                        }),
+                        body: JSON.stringify(updateData),
                     }
                 );
 

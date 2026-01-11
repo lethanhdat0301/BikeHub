@@ -371,7 +371,7 @@ const BikeDetailsPage: React.FC = () => {
                                 {bike.model}
                             </Heading>
                             <Text color="gray.600" fontSize="sm" mb={4}>
-                                {bike.Park?.name || "BikeHub"}
+                                {bike.Park?.name || "RentnRide"}
                             </Text>
 
                             {/* Type Badge */}

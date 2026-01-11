@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@chakra-ui/react";
-import SearchBike from "../components/home/searchBike/searchBike.component";
+import SearchBikeVietnam from "../components/home/searchBike/searchBikeVietnam.component";
 import HowItWork from "../components/home/howItWork/howItWork.component";
 import BikeList from "../components/home/bikes/bikeList.component";
 import SwiperReviews from "../components/home/reviews/swiperReviews.component";
@@ -12,7 +12,7 @@ const HomePage: React.FC = () => {
 
   return (
     <Box overflowX="hidden" width="100%">
-      <SearchBike />
+      <SearchBikeVietnam />
       <HowItWork />
       <WhyChoose />
       <BikeList />

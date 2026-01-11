@@ -5,7 +5,7 @@ import nodemailer, { Transporter } from 'nodemailer';
 export class EmailService implements OnModuleInit {
   private transporter: Transporter | undefined;
 
-  constructor() {}
+  constructor() { }
 
   async onModuleInit() {
     if (process.env.EMAIL_USERNAME && process.env.EMAIL_PASSWORD) {
@@ -43,7 +43,7 @@ export class EmailService implements OnModuleInit {
     }
 
     const mailOptions = {
-      from: 'BikeHub <noreply@bikehub.me>',
+      from: 'RentnRide <noreply@rentnride.me>',
       to,
       subject,
       text: content,

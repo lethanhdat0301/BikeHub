@@ -16,6 +16,7 @@ import { Roles } from '../auth/auth.roles.decorator';
 import { ROLES_ENUM } from '../../shared/constants/global.constants';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { BookingRequestService } from './booking-request.service';
+import { DealerService } from '../dealer/dealer.service';
 import {
   CreateBookingRequestDto,
   UpdateBookingRequestDto,
@@ -24,7 +25,10 @@ import {
 @ApiTags('booking-requests')
 @Controller('/booking-requests')
 export class BookingRequestController {
-  constructor(private bookingRequestService: BookingRequestService) { }
+  constructor(
+    private bookingRequestService: BookingRequestService,
+    private dealerService: DealerService,
+  ) { }
 
   // Public endpoint - Anyone can create a booking request
   @Post('/')
@@ -91,10 +95,17 @@ export class BookingRequestController {
 
     // Dealers only see booking requests for their bikes
     if (user.role === ROLES_ENUM.DEALER) {
-      where = {
-        ...where,
-        dealer_id: user.id,
-      };
+      // Find dealer record from user
+      const dealer = await this.dealerService.findDealerByUserId(user.id);
+      if (dealer) {
+        where = {
+          ...where,
+          dealer_id: dealer.id,
+        };
+      } else {
+        // If no dealer found, return empty array
+        return [];
+      }
     }
 
     return this.bookingRequestService.findAll({ where });
@@ -125,11 +136,56 @@ export class BookingRequestController {
   async updateBookingRequest(
     @Param('id') id: string,
     @Body() updateBookingRequestDto: UpdateBookingRequestDto,
+    @CurrentUser() user: any,
   ): Promise<BookingRequestModel> {
     console.log('Updating booking request:', id, updateBookingRequestDto);
+
+    // For dealers, verify they own this booking
+    if (user.role === ROLES_ENUM.DEALER) {
+      const dealer = await this.dealerService.findDealerByUserId(user.id);
+      if (dealer) {
+        const booking = await this.bookingRequestService.findOne({ id: Number(id) });
+        if (booking && booking.dealer_id !== dealer.id) {
+          throw new Error('You can only update your own bookings');
+        }
+      }
+    }
+
     return this.bookingRequestService.update({
       where: { id: Number(id) },
       data: updateBookingRequestDto,
+    });
+  }
+
+  // New endpoint specifically for dealer actions (accept/reject)
+  @Put('/:id/dealer-action')
+  @Roles(ROLES_ENUM.DEALER)
+  @UseGuards(JwtAuthGuard)
+  async dealerAction(
+    @Param('id') id: string,
+    @Body() body: { action: 'accept' | 'reject'; notes?: string },
+    @CurrentUser() user: any,
+  ): Promise<BookingRequestModel> {
+    const dealer = await this.dealerService.findDealerByUserId(user.id);
+    if (!dealer) {
+      throw new Error('Dealer not found');
+    }
+
+    const booking = await this.bookingRequestService.findOne({ id: Number(id) });
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+
+    if (booking.dealer_id !== dealer.id) {
+      throw new Error('You can only update your own bookings');
+    }
+
+    const status = body.action === 'accept' ? 'CONFIRMED' : 'REJECTED';
+    const admin_notes = body.notes || `${body.action === 'accept' ? 'Accepted' : 'Rejected'} by dealer ${dealer.name}`;
+
+    return this.bookingRequestService.update({
+      where: { id: Number(id) },
+      data: { status, admin_notes },
     });
   }
 

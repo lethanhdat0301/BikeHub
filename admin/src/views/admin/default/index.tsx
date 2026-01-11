@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import useAuth from "utils/auth/AuthHook";
 
 import MiniCalendar from "components/calendar/MiniCalendar";
-import { MdElectricBike, MdLocalParking, MdFace } from "react-icons/md";
+import { MdElectricBike, MdLocalParking, MdFace, MdAttachMoney } from "react-icons/md";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 
 import Widget from "components/widget/Widget";
@@ -17,6 +17,8 @@ type Stats = {
   parks: Park[];
   bikes: Bike[];
   rentals: Rental[];
+  totalRevenue?: number;
+  activeRentals?: number;
 };
 
 const Dashboard = () => {
@@ -33,28 +35,42 @@ const Dashboard = () => {
         );
 
         const responses = await Promise.all(allRequests);
-        // console.log("-response------------")
-        // console.log(responses)
-        // console.log("-------------")
         const data = await Promise.all(
           responses.map((response) => response.json())
         );
-        // console.log("-response------------")
-        // console.log(data)
-        // console.log("-------------")
-        // If the user is a dealer, filter results to dealer-only (defensive client-side filter)
+
         let users = data[0];
         let parks = data[1];
         let bikes = data[2];
         let rentals = data[3];
 
+        // Calculate total revenue from rentals
+        const totalRevenue = Array.isArray(rentals) ?
+          rentals.reduce((sum, rental) => sum + (rental.price || 0), 0) : 0;
 
+        // Count active rentals (status: active, ongoing, or confirmed)
+        const activeRentals = Array.isArray(rentals) ?
+          rentals.filter(rental =>
+            rental.status && ['active', 'ongoing', 'confirmed'].includes(rental.status.toLowerCase())
+          ).length : 0;
+
+        console.log('Dashboard stats:', {
+          users: Array.isArray(users) ? users.length : 0,
+          parks: Array.isArray(parks) ? parks.length : 0,
+          bikes: Array.isArray(bikes) ? bikes.length : 0,
+          rentals: Array.isArray(rentals) ? rentals.length : 0,
+          totalRevenue,
+          activeRentals,
+          userRole: user?.role
+        });
 
         setStats({
           users,
           parks,
           bikes,
           rentals,
+          totalRevenue,
+          activeRentals,
         });
       } catch (error) {
         console.error("Error fetching data: ", error);
@@ -64,13 +80,13 @@ const Dashboard = () => {
     fetchData();
   }, [user]);
 
-  const topCardCount = user && user.role === 'admin' ? 4 : 3;
+  const topCardCount = user && user.role === 'admin' ? 5 : 4;
 
   return (
     <div>
       {/* Card widget */}
 
-      <div className={`mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 ${topCardCount === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
+      <div className={`mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 ${topCardCount === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
 
         <Widget
           icon={<MdElectricBike className="h-7 w-7" />}
@@ -78,9 +94,19 @@ const Dashboard = () => {
           subtitle={(stats?.bikes?.length ?? 0).toString()}
         />
         <Widget
-          icon={<MdLocalParking className="h-6 w-6" />}
-          title={"Parks"}
-          subtitle={(stats?.parks?.length ?? 0).toString()}
+          icon={<FaFileInvoiceDollar className="h-6 w-6" />}
+          title={"Total Rentals"}
+          subtitle={(stats?.rentals?.length ?? 0).toString()}
+        />
+        <Widget
+          icon={<MdAttachMoney className="h-7 w-7" />}
+          title={"Active Rentals"}
+          subtitle={(stats?.activeRentals ?? 0).toString()}
+        />
+        <Widget
+          icon={<MdAttachMoney className="h-7 w-7" />}
+          title={"Total Revenue"}
+          subtitle={`$${(stats?.totalRevenue ?? 0).toLocaleString()}`}
         />
         {user && user.role === 'admin' && (
           <Widget
@@ -89,11 +115,6 @@ const Dashboard = () => {
             subtitle={(stats?.users?.length ?? 0).toString()}
           />
         )}
-        <Widget
-          icon={<FaFileInvoiceDollar className="h-6 w-6" />}
-          title={"Rentals"}
-          subtitle={(stats?.rentals?.length ?? 0).toString()}
-        />
       </div>
 
       {/* Charts */}

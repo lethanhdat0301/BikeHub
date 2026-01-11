@@ -17,6 +17,7 @@ const dealersHeaders = [
   { id: "name", title: "Dealer" },
   { id: "email", title: "Contact" },
   { id: "vehicles", title: "Vehicles" },
+  { id: "total_rentals", title: "Rentals" },
   { id: "total_revenue", title: "Total Revenue" },
   { id: "platform_fee_est", title: "Platform Fee (Est.)" },
   { id: "current_debt", title: "Current Debt" },
@@ -48,7 +49,7 @@ const Tables: React.FC<{ initialTab?: 'accounts' | 'dealers' | 'customers' }> = 
   // listen for query param ?tab=dealers|accounts|customers to switch and refresh
   useEffect(() => {
     const q = new URLSearchParams(location.search);
-    const t = q.get('tab') as 'accounts'|'dealers'|'customers' | null;
+    const t = q.get('tab') as 'accounts' | 'dealers' | 'customers' | null;
     if (t && t !== activeTab) {
       setActiveTab(t);
     }
@@ -95,16 +96,17 @@ const Tables: React.FC<{ initialTab?: 'accounts' | 'dealers' | 'customers' }> = 
       // last payment: latest rental created_at or end_time for dealer's bikes
       const lastPayment = dealerRentals.length
         ? dealerRentals.reduce((latest: string | null, r: any) => {
-            const candidate = r.end_time ?? r.created_at;
-            if (!candidate) return latest;
-            if (!latest) return candidate;
-            return new Date(candidate) > new Date(latest) ? candidate : latest;
-          }, null)
+          const candidate = r.end_time ?? r.created_at;
+          if (!candidate) return latest;
+          if (!latest) return candidate;
+          return new Date(candidate) > new Date(latest) ? candidate : latest;
+        }, null)
         : null;
 
       return {
         ...d,
         vehicles: bikes.filter((b) => (b.Park && b.Park.dealer_id === d.id) || b.dealer_id === d.id).length,
+        total_rentals: dealerRentals.length,
         total_revenue: totalRevenue,
         platform_fee_est: platformFeeEst,
         current_debt: currentDebt,

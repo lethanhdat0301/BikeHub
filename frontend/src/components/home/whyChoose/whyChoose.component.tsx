@@ -129,7 +129,7 @@ const WhyChoose = () => {
               🤝 Community Vibes: Join a cyclist family!
             </Text>
             <Text className="text-gray-500 sm:text-base text-sm font-medium mb-5" maxWidth="600px" mx="auto">
-              Choose BikeHub – Where Every Ride is an Adventure!🚴‍♀️
+              Choose RentnRide – Where Every Ride is an Adventure!🚴‍♀️
             </Text>
           </Box>
         </Reveal> */}

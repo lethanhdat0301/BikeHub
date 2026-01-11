@@ -47,6 +47,14 @@ export class BookingRequestService {
             price: true,
             transmission: true,
             image: true,
+            dealer_id: true,
+            Dealer: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
           },
         },
         Dealer: {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import apiClient from "services/api";
+import useAuth from "utils/auth/AuthHook";
 import Card from "components/card";
 import { BarChartOptionsTopCustomers } from "variables/charts-config";
 import { MdBarChart } from "react-icons/md";
@@ -14,6 +15,7 @@ type Rental = {
 };
 
 const RevenueChart = () => {
+  const { user } = useAuth();
   const [chartData, setChartData] = useState<
     { name: string; data: number[] }[]
   >([]);
@@ -28,7 +30,7 @@ const RevenueChart = () => {
         console.log("-response------------")
         console.log(response)
         console.log("-------------")
-        
+
         // Handle both array and object responses
         let rentals: Rental[] = [];
         if (Array.isArray(response.data)) {
@@ -81,7 +83,7 @@ const RevenueChart = () => {
     <Card extra="flex flex-col bg-white w-full rounded-3xl py-6 px-2 text-center">
       <div className="mb-auto flex items-center justify-between px-6">
         <h2 className="text-lg font-bold text-navy-700 dark:text-white">
-          Revenue Chart
+          {user?.role === 'dealer' ? 'My Revenue Chart' : 'Revenue Chart'}
         </h2>
         <button className="!linear z-[1] flex items-center justify-center rounded-lg bg-lightPrimary p-2 text-teal-600 !transition !duration-200 hover:bg-gray-100 active:bg-gray-200 dark:bg-navy-700 dark:text-white dark:hover:bg-white/20 dark:active:bg-white/10">
           <MdBarChart className="h-6 w-6" />

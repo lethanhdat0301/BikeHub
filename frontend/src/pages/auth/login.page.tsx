@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
 
           {/* <h1 className="text-2xl font-bold text-gray-700">Sign in</h1> */}
           <p className="text-sm font-normal text-gray-500">
-            Sign in to continue using Bikehub
+            Sign in to continue using RentnRide
           </p>
           {/* dddddddddddddd */}
           <a
