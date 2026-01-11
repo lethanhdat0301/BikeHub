@@ -112,6 +112,9 @@ export class BikeService {
       payload.status = 'available';
     }
 
+    // Remove transient/UI-only fields
+    if ((payload as any).image_preview) delete (payload as any).image_preview;
+
     return this.prisma.bike.create({
       data: payload,
     });
@@ -144,6 +147,20 @@ export class BikeService {
       // otherwise, assume caller provided a valid nested op like connect/update
     }
 
+    // If caller provided dealer_id (scalar) convert it to proper nested Prisma operation
+    if (Object.prototype.hasOwnProperty.call(payload, 'dealer_id')) {
+      const val = (payload as any).dealer_id;
+      // remove scalar to avoid Prisma validation errors
+      delete (payload as any).dealer_id;
+      if (val === null) {
+        // disconnect relation
+        payload.Dealer = { disconnect: true };
+      } else {
+        const id = Number(val);
+        if (!Number.isNaN(id)) payload.Dealer = { connect: { id } };
+      }
+    }
+
     // Sanitize Dealer payload to avoid passing a raw User object to Prisma
     if (payload.Dealer && typeof payload.Dealer === 'object') {
       const D: any = payload.Dealer;
@@ -167,6 +184,13 @@ export class BikeService {
         }
       }
     }
+
+    // Remove immutable/read-only fields if present in the payload (created_at, updated_at, id)
+    ['created_at', 'updated_at', 'id', 'image_preview'].forEach((f) => delete (payload as any)[f]);
+
+    // Also strip any nested arrays/relations that shouldn't be passed directly
+    if ((payload as any).Rental) delete (payload as any).Rental;
+    if ((payload as any).BookingRequest) delete (payload as any).BookingRequest;
 
     return this.prisma.bike.update({
       data: payload,

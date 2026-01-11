@@ -31,13 +31,30 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
     const [loading, setLoading] = useState(false);
     const [parks, setParks] = useState<any[]>([]);
 
-    const [formData, setFormData] = useState({
+    type BikeFormData = {
+        model: string;
+        status: string;
+        location: string;
+        price: number;
+        park_id: string;
+        image: string;
+        image_preview?: string;
+        description: string;
+        dealer_name: string;
+        dealer_contact: string;
+        seats: number;
+        fuel_type: string;
+        transmission: string;
+    };
+
+    const [formData, setFormData] = useState<BikeFormData>({
         model: "",
         status: "available",
         location: "",
         price: 0,
         park_id: "",
         image: "",
+        image_preview: undefined,
         description: "",
         dealer_name: "",
         dealer_contact: "",
@@ -259,14 +276,36 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
 
                             <FormControl>
                                 <FormLabel fontSize="sm" color="gray.600" mb={2}>
-                                    Image URL
+                                    Image
                                 </FormLabel>
-                                <Input
-                                    value={formData.image}
-                                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                                    placeholder="https://example.com/bike-image.jpg"
-                                    fontSize="sm"
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                        const file = e.target.files && e.target.files[0];
+                                        if (!file) return;
+                                        try {
+                                            const fd = new FormData();
+                                            fd.append('file', file);
+                                            const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, {
+                                                method: 'POST',
+                                                body: fd,
+                                                credentials: 'include',
+                                            });
+                                            const payload = await res.json();
+                                            if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                            setFormData({ ...formData, image: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
+                                        } catch (err) {
+                                            console.error('Upload failed', err);
+                                            toast({ title: 'Upload failed', status: 'error', duration: 3000, isClosable: true });
+                                        }
+                                    }}
                                 />
+                                {formData.image_preview || (formData.image && formData.image.startsWith('http') ? formData.image : null) ? (
+                                    <div className="mt-2 h-24 w-32 overflow-hidden rounded bg-gray-100">
+                                        <img src={formData.image_preview || formData.image} className="h-full w-full object-cover" alt="preview" />
+                                    </div>
+                                ) : null}
                             </FormControl>
 
                             <FormControl>

@@ -15,15 +15,24 @@ const Bikes = () => {
       const data = await response.json();
 
       // Normalize response: accept array or { data: [...] } or error objects
+      const bucketName = process.env.REACT_APP_GCS_BUCKET || 'bike_images';
+      const normalizeImage = (img: any) => {
+        if (!img) return '';
+        if (typeof img === 'string' && (img.startsWith('http') || img.startsWith('data:'))) return img;
+        return `https://storage.googleapis.com/${bucketName}/${encodeURIComponent(String(img))}`;
+      };
+
       if (Array.isArray(data)) {
         // Normalize bikes to include explicit location property (Park.location preferred)
         setTableData(data.map((b: any) => ({
           ...b,
+          image: normalizeImage(b.image),
           location: b.Park?.location || b.location || "-",
         })));
       } else if (data && Array.isArray((data as any).data)) {
         setTableData((data as any).data.map((b: any) => ({
           ...b,
+          image: normalizeImage(b.image),
           location: b.Park?.location || b.location || "-",
         })));
       } else {

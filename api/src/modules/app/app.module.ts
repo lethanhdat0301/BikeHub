@@ -11,6 +11,7 @@ import { PaypalModule } from '../payment/paypal.module';
 import { BookingRequestModule } from '../booking-request/booking-request.module';
 import { DealerModule } from '../dealer/dealer.module';
 import { ReferrerModule } from '../referrer/referrer.module';
+import { UploadsModule } from '../uploads/uploads.module';
 import { GLOBAL_CONFIG } from '../../configs/global.config';
 
 import { AppService } from './app.service';
@@ -27,6 +28,7 @@ import { AppController } from './app.controller';
     BookingRequestModule,
     DealerModule,
     ReferrerModule,
+    UploadsModule,
     // ConfigModule.forRoot({ isGlobal: true, load: [() => GLOBAL_CONFIG] }),
     // ConfigModule.forRoot({ 
     //   isGlobal: true, 

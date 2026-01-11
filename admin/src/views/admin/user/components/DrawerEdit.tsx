@@ -24,8 +24,20 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
         }
       )
         .then((response) => response.json())
-        .then((data) => {
+        .then(async (data) => {
           setFormData(data);
+          // If image is a stored key (not an absolute url), fetch signed url for preview
+          try {
+            if (data && data.image && typeof data.image === 'string' && !data.image.startsWith('http')) {
+              const r = await fetch(`${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(data.image)}`);
+              if (r.ok) {
+                const p = await r.json();
+                setFormData((prev: any) => ({ ...prev, image_preview: p.url }));
+              }
+            }
+          } catch (err) {
+            // ignore
+          }
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
@@ -214,6 +226,37 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
                                   <option value="delivered">Delivered</option>
                                   <option value="returned">Returned</option>
                                 </select>
+                              ) : key === "image" ? (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    name={key}
+                                    onChange={async (e) => {
+                                      const file = e.target.files && e.target.files[0];
+                                      if (!file) return;
+                                      try {
+                                        const fd = new FormData();
+                                        fd.append('file', file);
+                                        const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, {
+                                          method: 'POST',
+                                          body: fd,
+                                          credentials: 'include',
+                                        });
+                                        const payload = await res.json();
+                                        if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                        setFormData({ ...formData, [key]: payload.name || payload.url, image_preview: payload.url });
+                                      } catch (err) {
+                                        console.error('Upload failed', err);
+                                        alert('Image upload failed');
+                                      }
+                                    }}
+                                    className="mt-1"
+                                  />
+                                  {formData.image_preview || (formData[key] && formData[key].startsWith('http') ? formData[key] : null) ? (
+                                    <img src={formData.image_preview || formData[key]} className="h-12 w-12 rounded object-cover" alt="preview" />
+                                  ) : null}
+                                </div>
                               ) : (
                                 <input
                                   type={key.endsWith("id") ? "number" : "text"}

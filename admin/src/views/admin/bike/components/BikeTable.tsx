@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
 import { MdAdd, MdEdit, MdDelete, MdFilterList } from "react-icons/md";
 import AddBikeModal from "./AddBikeModal";
+import UpdateBikeModal from "./UpdateBikeModal";
 
 type Props = {
     tableContent: any[];
@@ -12,6 +13,8 @@ type Props = {
 const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [statusFilter, setStatusFilter] = useState("All");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingBikeId, setEditingBikeId] = useState<number | null>(null);
 
     const data = React.useMemo(() => {
         if (!tableContent) return [];
@@ -120,7 +123,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 id: "actions",
                 Cell: ({ row }: any) => (
                     <div className="flex gap-2">
-                        <button className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600">
+                        <button onClick={() => { setEditingBikeId(row.original.id); setIsEditModalOpen(true); }} className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600">
                             <MdEdit className="h-4 w-4" />
                             Edit
                         </button>
@@ -199,6 +202,13 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 onSuccess={() => {
                     if (onRefresh) onRefresh();
                 }}
+            />
+
+            <UpdateBikeModal
+                isOpen={isEditModalOpen}
+                bikeId={editingBikeId}
+                onClose={() => { setIsEditModalOpen(false); setEditingBikeId(null); }}
+                onSuccess={() => { if (onRefresh) onRefresh(); setIsEditModalOpen(false); setEditingBikeId(null); }}
             />
 
             {/* Table */}
