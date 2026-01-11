@@ -9,6 +9,8 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 import { ApiTags } from '@nestjs/swagger';
 import { BookingRequest as BookingRequestModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
@@ -16,6 +18,8 @@ import { Roles } from '../auth/auth.roles.decorator';
 import { ROLES_ENUM } from '../../shared/constants/global.constants';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { BookingRequestService } from './booking-request.service';
+import { EmailService } from '../email/email.service';
+import { buildBookingConfirmationHtml } from '../email/templates/booking-confirmation.template';
 import { DealerService } from '../dealer/dealer.service';
 import {
   CreateBookingRequestDto,
@@ -28,6 +32,7 @@ export class BookingRequestController {
   constructor(
     private bookingRequestService: BookingRequestService,
     private dealerService: DealerService,
+    private emailService: EmailService,
   ) { }
 
   // Public endpoint - Anyone can create a booking request
@@ -51,6 +56,71 @@ export class BookingRequestController {
 
     // Return formatted response with Booking ID for customer display
     const formattedBookingId = `BK${String(bookingRequest.id).padStart(6, '0')}`;
+
+    // Send confirmation email (non-blocking for the API response)
+    try {
+      if (bookingRequest.email) {
+        const subject = `Booking request received: ${formattedBookingId}`;
+        const text = `Hi ${bookingRequest.name},\n\n` +
+          `Your booking request (${formattedBookingId}) has been received successfully.\n\n` +
+          `Pickup location: ${bookingRequest.pickup_location}\n` +
+          `Contact method: ${bookingRequest.contact_method}\n\n` +
+          `We will contact you soon to confirm availability.\n\n` +
+          `Thank you,\nRentNRide Team`;
+
+        // Build HTML version — use the shared template to match the posted design
+        const emailLogoUrl = process.env.EMAIL_LOGO_URL;
+        let logoSrc = 'cid:logo';
+        let inlineLogoPath: string | undefined = undefined;
+
+        if (emailLogoUrl) {
+          // Absolute URL -> use directly
+          if (/^https?:\/\//i.test(emailLogoUrl)) {
+            logoSrc = emailLogoUrl;
+          } else {
+            // Try resolving to a local file to attach inline (preferred to avoid mail-proxy rewriting)
+            const candidates = [
+              path.resolve(process.cwd(), emailLogoUrl),
+              path.resolve(process.cwd(), 'frontend', emailLogoUrl),
+              path.resolve(process.cwd(), '..', 'frontend', emailLogoUrl),
+              path.resolve(__dirname, '..', '..', '..', emailLogoUrl),
+            ];
+
+            const found = candidates.find((p) => fs.existsSync(p));
+            if (found) {
+              logoSrc = 'cid:logo';
+              inlineLogoPath = found;
+              // Make the resolved path available for other email codepaths
+              process.env.EMAIL_LOGO_PATH = found;
+              console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
+            } else {
+              // Fallback to public URL assembled from BASE_URL_PROD
+              const base = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD.replace(/\/$/, '') : '';
+              logoSrc = base ? `${base}/${emailLogoUrl.replace(/^\//, '')}` : emailLogoUrl;
+            }
+          }
+        }
+
+        const baseUrl = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD : '/';
+        const html = buildBookingConfirmationHtml({
+          baseUrl: baseUrl,
+          name: bookingRequest.name,
+          bookingId: formattedBookingId,
+          pickupLocation: bookingRequest.pickup_location,
+          contactMethod: bookingRequest.contact_method,
+          contactDetail: bookingRequest.contact_details || '',
+          serverName: '',
+          daysToDisconnect: 2,
+          logoSrc,
+        });
+
+        await this.emailService.sendEmail(bookingRequest.email, subject, text, html, { inlineLogoPath });
+      }
+    } catch (e) {
+      // Log and continue — do not fail booking creation if email sending fails
+      console.error('Failed to send booking confirmation email:', e);
+    }
+
     return {
       ...bookingRequest,
       bookingId: formattedBookingId,
