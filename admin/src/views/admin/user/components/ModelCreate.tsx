@@ -401,6 +401,38 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border-b-2 pl-1 shadow-md outline-none focus:border-indigo-300"
                           />
+                        ) : field === "image" ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              name={field}
+                              onChange={async (e) => {
+                                const file = e.target.files && e.target.files[0];
+                                if (!file) return;
+                                try {
+                                  const fd = new FormData();
+                                  fd.append('file', file);
+                                  const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, {
+                                    method: 'POST',
+                                    body: fd,
+                                    credentials: 'include',
+                                  });
+                                  const payload = await res.json();
+                                  if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                  // store returned value (use name if you prefer to store filename)
+                                  setFormValues({ ...formValues, [field]: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
+                                } catch (err) {
+                                  console.error('Upload failed', err);
+                                  alert('Image upload failed');
+                                }
+                              }}
+                              className="mt-1"
+                            />
+                            {formValues.image_preview || (formValues.image && formValues.image.startsWith('http') ? formValues.image : null) ? (
+                              <img src={formValues.image_preview || formValues.image} className="h-12 w-12 rounded object-cover" alt="preview" />
+                            ) : null}
+                          </div>
                         ) : (
                           <input
                             type={field === 'password' ? 'password' : (field.endsWith("id") ? "number" : "text")}

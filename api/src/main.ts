@@ -10,6 +10,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import * as express from 'express';
+import path from 'path';
 
 import { GLOBAL_CONFIG } from './configs/global.config';
 import { AppModule } from './modules/app/app.module';
@@ -34,6 +36,10 @@ async function bootstrap() {
   );
 
   app.use(cookieParser());
+
+  // Serve local uploads directory in development (or when fallback is used)
+  const uploadsPath = path.join(process.cwd(), 'uploads');
+  app.use('/uploads', express.static(uploadsPath));
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

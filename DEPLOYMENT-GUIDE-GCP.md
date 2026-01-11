@@ -198,6 +198,13 @@ gcloud run jobs execute migrate-db --region=asia-southeast1
 
 ## 4. Triển khai Frontend & Admin
 
+### 4.4 Cloud Storage (GCS) for uploaded images
+The API supports uploading images to a GCS bucket and serving signed URLs. Set the following environment variables for the API service:
+
+- `GCS_BUCKET` - the target GCS bucket name (required)
+- `GOOGLE_APPLICATION_CREDENTIALS` - path to the service account JSON file on the running machine/container (or set application default credentials for Cloud Run)
+
+
 ### Phương án A: Firebase Hosting (Đơn giản)
 
 #### 4.1 Cài đặt Firebase CLI

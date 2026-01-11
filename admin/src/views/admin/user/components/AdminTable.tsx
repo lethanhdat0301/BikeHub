@@ -52,13 +52,39 @@ const AdminTable: React.FC<Props> = ({
           }
 
           if (header.id === "image") {
-            return (
-              <img
-                src={value || ""}
-                alt="img"
-                className="h-12 w-12 rounded object-cover"
-              />
-            );
+            const ImageFromKey: React.FC<{ keyOrUrl: string }>= ({ keyOrUrl }) => {
+              const [src, setSrc] = React.useState<string | null>(null);
+              const cache = React.useRef<Map<string, string>>(new Map());
+
+              React.useEffect(() => {
+                let cancelled = false;
+                const fetchUrl = async () => {
+                  if (!keyOrUrl) return setSrc(null);
+                  if (keyOrUrl.startsWith('http')) return setSrc(keyOrUrl);
+                  const cached = cache.current.get(keyOrUrl);
+                  if (cached) return setSrc(cached);
+                  try {
+                    const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(keyOrUrl)}`);
+                    if (!res.ok) throw new Error('Failed to fetch image url');
+                    const payload = await res.json();
+                    if (payload?.url && !cancelled) {
+                      cache.current.set(keyOrUrl, payload.url);
+                      setSrc(payload.url);
+                    }
+                  } catch (err) {
+                    console.error('Failed to fetch image url for', keyOrUrl, err);
+                    setSrc(null);
+                  }
+                };
+                fetchUrl();
+                return () => { cancelled = true };
+              }, [keyOrUrl]);
+
+              if (!src) return <div className="h-12 w-12 rounded bg-gray-100" />;
+              return <img src={src} alt="img" className="h-12 w-12 rounded object-cover" />;
+            };
+
+            return <ImageFromKey keyOrUrl={value} />;
           }
 
           if (header.id === "status") {

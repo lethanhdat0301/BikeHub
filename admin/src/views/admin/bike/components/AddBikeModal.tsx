@@ -10,9 +10,24 @@ interface AddBikeModalProps {
 const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [parks, setParks] = useState<any[]>([]);
-    const [dealers, setDealers] = useState<any[]>([]);
 
-    const [formData, setFormData] = useState({
+    type BikeFormData = {
+        model: string;
+        status: string;
+        location: string;
+        price: number;
+        park_id: string;
+        image: string;
+        image_preview?: string;
+        description: string;
+        dealer_name: string;
+        dealer_contact: string;
+        seats: number;
+        fuel_type: string;
+        transmission: string;
+    };
+
+    const [formData, setFormData] = useState<BikeFormData>({
         model: "",
         status: "available",
         location: "",
@@ -20,6 +35,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
         park_id: "",
         dealer_id: "",
         image: "",
+        image_preview: undefined,
         description: "",
         dealer_name: "",
         dealer_contact: "",
@@ -355,58 +371,97 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                 />
                             </div>
 
-                            {/* Image URL */}
-                            <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Image URL (Optional)
-                                </label>
+                            <FormControl>
+                                <FormLabel fontSize="sm" color="gray.600" mb={2}>
+                                    Image
+                                </FormLabel>
                                 <input
-                                    type="text"
-                                    name="image"
-                                    value={formData.image}
-                                    onChange={handleInputChange}
-                                    placeholder="https://example.com/bike-image.jpg"
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                        const file = e.target.files && e.target.files[0];
+                                        if (!file) return;
+                                        try {
+                                            const fd = new FormData();
+                                            fd.append('file', file);
+                                            const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, {
+                                                method: 'POST',
+                                                body: fd,
+                                                credentials: 'include',
+                                            });
+                                            const payload = await res.json();
+                                            if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                            setFormData({ ...formData, image: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
+                                        } catch (err) {
+                                            console.error('Upload failed', err);
+                                            toast({ title: 'Upload failed', status: 'error', duration: 3000, isClosable: true });
+                                        }
+                                    }}
                                 />
-                            </div>
+                                {formData.image_preview || (formData.image && formData.image.startsWith('http') ? formData.image : null) ? (
+                                    <div className="mt-2 h-24 w-32 overflow-hidden rounded bg-gray-100">
+                                        <img src={formData.image_preview || formData.image} className="h-full w-full object-cover" alt="preview" />
+                                    </div>
+                                ) : null}
+                            </FormControl>
 
-                            {/* Description */}
-                            <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Description (Optional)
-                                </label>
-                                <textarea
-                                    name="description"
+                            <FormControl>
+                                <FormLabel fontSize="sm" color="gray.600" mb={2}>
+                                    Description
+                                </FormLabel>
+                                <Textarea
                                     value={formData.description}
                                     onChange={handleInputChange}
                                     placeholder="Describe the motorbike features, condition, etc..."
                                     rows={3}
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    fontSize="sm"
                                 />
-                            </div>
-                        </div>
-                    </div>
+                            </FormControl>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
+                            <HStack width="100%" spacing={4}>
+                                <FormControl flex={1}>
+                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>
+                                        Dealer Name
+                                    </FormLabel>
+                                    <Input
+                                        value={formData.dealer_name}
+                                        onChange={(e) => setFormData({ ...formData, dealer_name: e.target.value })}
+                                        placeholder="Dealer or Shop Name"
+                                        fontSize="sm"
+                                    />
+                                </FormControl>
+
+                                <FormControl flex={1}>
+                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>
+                                        Dealer Contact
+                                    </FormLabel>
+                                    <Input
+                                        value={formData.dealer_contact}
+                                        onChange={(e) => setFormData({ ...formData, dealer_contact: e.target.value })}
+                                        placeholder="Phone or Email"
+                                        fontSize="sm"
+                                    />
+                                </FormControl>
+                            </HStack>
+                        </VStack>
+                    </ModalBody>
+
+                    <ModalFooter borderTop="1px" borderColor="gray.200" pt={4}>
+                        <Button variant="ghost" mr={3} onClick={onClose} fontSize="sm">
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            colorScheme="blue"
                             type="submit"
-                            disabled={loading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            isLoading={loading}
+                            fontSize="sm"
                         >
-                            {loading ? "Creating..." : "Create Motorbike"}
-                        </button>
-                    </div>
+                            Create
+                        </Button>
+                    </ModalFooter>
                 </form>
-            </div>
-        </div>
+            </ModalContent>
+        </Modal>
     );
 };
 
