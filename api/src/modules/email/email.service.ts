@@ -180,7 +180,18 @@ export class EmailService implements OnModuleInit {
       throw new Error('Email transporter is not initialized. Set EMAIL_USERNAME and EMAIL_PASSWORD, or check logs for test account creation.');
     }
 
-    const mailOptions = {
+    const mailOptions: {
+      from: string;
+      to: string;
+      subject: string;
+      text: string;
+      html?: string;
+      attachments?: Array<{
+        filename: string;
+        path: string;
+        cid: string;
+      }>;
+    } = {
       from: this.fromAddress,
       to,
       subject,

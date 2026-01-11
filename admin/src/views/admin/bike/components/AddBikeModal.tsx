@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { MdClose } from "react-icons/md";
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    Button,
+    FormControl,
+    FormLabel,
+    Input,
+    Textarea,
+    HStack,
+    useToast,
+} from "@chakra-ui/react";
 
 interface AddBikeModalProps {
     isOpen: boolean;
@@ -10,19 +25,22 @@ interface AddBikeModalProps {
 const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [parks, setParks] = useState<any[]>([]);
+    const [dealers, setDealers] = useState<any[]>([]);
+    const toast = useToast();
 
     type BikeFormData = {
         model: string;
         status: string;
         location: string;
-        price: number;
+        price: string;
         park_id: string;
+        dealer_id: string;
         image: string;
         image_preview?: string;
         description: string;
         dealer_name: string;
         dealer_contact: string;
-        seats: number;
+        seats: string;
         fuel_type: string;
         transmission: string;
     };
@@ -107,7 +125,12 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
 
         // Validate required fields
         if (!formData.model || !formData.price || !formData.park_id || !formData.location) {
-            alert("Please fill in all required fields");
+            toast({
+                title: "Please fill in all required fields",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
             return;
         }
 
@@ -146,38 +169,45 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                 throw new Error(error.message || "Failed to add motorbike");
             }
 
-            alert("Motorbike added successfully!");
+            toast({
+                title: "Motorbike added successfully!",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
             onSuccess();
             onClose();
         } catch (error: any) {
-            alert(error.message || "Failed to add bike");
+            toast({
+                title: error.message || "Failed to add bike",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
         } finally {
             setLoading(false);
         }
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 bg-black/60 p-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
-                    <h2 className="text-xl font-bold text-gray-800">
-                        Add New Motorbikes
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                        <MdClose className="h-6 w-6" />
-                    </button>
-                </div>
+        <Modal isOpen={isOpen} onClose={onClose} size="4xl">
+            <ModalOverlay />
+            <ModalContent>
+                <ModalHeader>
+                    <div className="flex items-center justify-between">
+                        <span>Add New Motorbikes</span>
+                        <button
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <MdClose className="h-6 w-6" />
+                        </button>
+                    </div>
+                </ModalHeader>
 
-                {/* Form Fields - Scrollable */}
                 <form onSubmit={handleSubmit}>
-                    <div className="px-6 py-4 max-h-[70vh] overflow-y-auto bg-white">
-                        <div className="grid grid-cols-2 gap-4">
+                    <ModalBody>
+                        <div className="grid grid-cols-2 gap-4 w-full">
                             {/* Model */}
                             <div className="col-span-2">
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
@@ -371,13 +401,14 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                 />
                             </div>
 
-                            <FormControl>
-                                <FormLabel fontSize="sm" color="gray.600" mb={2}>
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
                                     Image
-                                </FormLabel>
+                                </label>
                                 <input
                                     type="file"
                                     accept="image/*"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                                         const file = e.target.files && e.target.files[0];
                                         if (!file) return;
@@ -403,47 +434,22 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                         <img src={formData.image_preview || formData.image} className="h-full w-full object-cover" alt="preview" />
                                     </div>
                                 ) : null}
-                            </FormControl>
+                            </div>
 
-                            <FormControl>
-                                <FormLabel fontSize="sm" color="gray.600" mb={2}>
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
                                     Description
-                                </FormLabel>
-                                <Textarea
+                                </label>
+                                <textarea
+                                    name="description"
                                     value={formData.description}
                                     onChange={handleInputChange}
                                     placeholder="Describe the motorbike features, condition, etc..."
                                     rows={3}
-                                    fontSize="sm"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                 />
-                            </FormControl>
-
-                            <HStack width="100%" spacing={4}>
-                                <FormControl flex={1}>
-                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>
-                                        Dealer Name
-                                    </FormLabel>
-                                    <Input
-                                        value={formData.dealer_name}
-                                        onChange={(e) => setFormData({ ...formData, dealer_name: e.target.value })}
-                                        placeholder="Dealer or Shop Name"
-                                        fontSize="sm"
-                                    />
-                                </FormControl>
-
-                                <FormControl flex={1}>
-                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>
-                                        Dealer Contact
-                                    </FormLabel>
-                                    <Input
-                                        value={formData.dealer_contact}
-                                        onChange={(e) => setFormData({ ...formData, dealer_contact: e.target.value })}
-                                        placeholder="Phone or Email"
-                                        fontSize="sm"
-                                    />
-                                </FormControl>
-                            </HStack>
-                        </VStack>
+                            </div>
+                        </div>
                     </ModalBody>
 
                     <ModalFooter borderTop="1px" borderColor="gray.200" pt={4}>
