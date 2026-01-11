@@ -20,11 +20,13 @@ export async function seedUsers(prisma: PrismaClient) {
     },
   });
 
-  // 2. Tạo 3 Dealer cụ thể cho 3 khu vực (Theo PRD)
+  // 2. Tạo dealers cụ thể (Dữ liệu mới)
   const dealerData = [
-    { name: 'Phu Quoc Rental', email: 'dealer.pq@rentnride.com', phone: '0912345678' },
-    { name: 'Nha Trang Easy Rider', email: 'dealer.nt@rentnride.com', phone: '0933444555' },
-    { name: 'Ha Giang Loop Tour', email: 'dealer.hg@rentnride.com', phone: '0966777888' },
+    { name: 'Phú Quốc Motorbike Rental', email: 'phuquoc@rentnride.vn', phone: '0902123456' },
+    { name: 'Nha Trang Adventure Bikes', email: 'nhatrang@rentnride.vn', phone: '0933456789' },
+    { name: 'Hà Giang Loop Motors', email: 'hagiang@rentnride.vn', phone: '0966789012' },
+    { name: 'Hồ Chí Minh City Riders', email: 'saigon@rentnride.vn', phone: '0977123456' },
+    { name: 'Đà Nẵng Bike Station', email: 'danang@rentnride.vn', phone: '0988234567' },
   ];
 
   const dealers: User[] = [];
@@ -62,6 +64,5 @@ export async function seedUsers(prisma: PrismaClient) {
     users.push(user);
   }
 
-  console.log(`✅ Seeded: 1 Admin, ${dealers.length} Dealers, ${users.length} Users`);
-  return { dealers, users }; // Trả về để dùng cho file khác
+  return { dealers, users };
 }

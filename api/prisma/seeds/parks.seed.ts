@@ -1,33 +1,47 @@
 import { PrismaClient, Park, User } from '@prisma/client';
 
 export async function seedParks(prisma: PrismaClient, dealers: User[]) {
-  // Map dealer theo email để lấy đúng ID
-  const pqDealer = dealers.find(u => u.email === 'dealer.pq@rentnride.com');
-  const ntDealer = dealers.find(u => u.email === 'dealer.nt@rentnride.com');
-  const hgDealer = dealers.find(u => u.email === 'dealer.hg@rentnride.com');
+  // Map dealer theo email để lấy đúng ID (Updated emails)
+  const pqDealer = dealers.find(u => u.email === 'phuquoc@rentnride.vn');
+  const ntDealer = dealers.find(u => u.email === 'nhatrang@rentnride.vn');
+  const hgDealer = dealers.find(u => u.email === 'hagiang@rentnride.vn');
+  const hcmDealer = dealers.find(u => u.email === 'saigon@rentnride.vn');
+  const dnDealer = dealers.find(u => u.email === 'danang@rentnride.vn');
 
-  if (!pqDealer || !ntDealer || !hgDealer) {
+  if (!pqDealer || !ntDealer || !hgDealer || !hcmDealer || !dnDealer) {
     throw new Error("Missing Dealers. Please seed users first.");
   }
 
   const parksData = [
     {
-      name: 'Phú Quốc Station',
-      location: 'Phú Quốc',
+      name: 'Phu Quoc Island Station',
+      location: 'Phu Quoc Island, Kien Giang Province',
       dealer_id: pqDealer.id,
-      image: 'https://statics.vinpearl.com/du-lich-phu-quoc-2-ngay-1-dem-1_1629272392.jpg'
+      image: 'https://picsum.photos/800/600?random=1'
     },
     {
-      name: 'Nha Trang Station',
-      location: 'Nha Trang',
+      name: 'Nha Trang Central Station',
+      location: 'Nha Trang City, Khanh Hoa Province',
       dealer_id: ntDealer.id,
-      image: 'https://ik.imagekit.io/tvlk/blog/2022/11/dia-diem-du-lich-nha-trang-1.jpg'
+      image: 'https://picsum.photos/800/600?random=2'
     },
     {
-      name: 'Hà Giang Station',
-      location: 'Hà Giang',
+      name: 'Ha Giang Loop Station',
+      location: 'Ha Giang City, Ha Giang Province',
       dealer_id: hgDealer.id,
-      image: 'https://vcdn1-dulich.vnecdn.net/2021/01/15/ha-giang-1-1610680194.jpg'
+      image: 'https://picsum.photos/800/600?random=3'
+    },
+    {
+      name: 'Ho Chi Minh City Station',
+      location: 'District 1, Ho Chi Minh City',
+      dealer_id: hcmDealer.id,
+      image: 'https://picsum.photos/800/600?random=4'
+    },
+    {
+      name: 'Da Nang Coastal Station',
+      location: 'Da Nang City, Central Vietnam',
+      dealer_id: dnDealer.id,
+      image: 'https://picsum.photos/800/600?random=5'
     },
   ];
 
@@ -51,6 +65,5 @@ export async function seedParks(prisma: PrismaClient, dealers: User[]) {
     }
   }
 
-  console.log(`✅ Seeded ${createdParks.length} Parks (Phu Quoc, Nha Trang, Ha Giang)`);
   return createdParks;
 }
