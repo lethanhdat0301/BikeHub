@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 export async function seedBikes(
   prisma: PrismaClient,
   parks: Park[],
-  users: User[]
+  usersAndDealers: { dealers: User[], users: User[] }
 ) {
   const bikes = [];
 
@@ -102,18 +102,11 @@ export async function seedBikes(
     }
   ];
 
-  const dealerNames = [
-    'Saigon Premium Motors', 'Hanoi Adventure Bikes', 'Da Nang Central Rentals',
-    'Nha Trang Coastal Riders', 'Phu Quoc Island Motors', 'Hoi An Classic Bikes',
-    'Ha Long Bay Rentals', 'Sapa Mountain Bikes', 'Can Tho Delta Tours',
-    'Vung Tau Beach Scooters'
-  ];
-
   for (let i = 0; i < vietnamBikes.length; i++) {
     const park = parks[Math.floor(Math.random() * parks.length)];
-    const dealer = users[Math.floor(Math.random() * users.length)];
+    // Only use dealers, not regular users
+    const dealer = usersAndDealers.dealers[Math.floor(Math.random() * usersAndDealers.dealers.length)];
     const bikeTemplate = vietnamBikes[i];
-    const dealerName = dealerNames[Math.floor(Math.random() * dealerNames.length)];
 
     const bikeData: any = {
       model: bikeTemplate.model,
@@ -126,8 +119,8 @@ export async function seedBikes(
       description: bikeTemplate.description,
       fuel_type: bikeTemplate.fuel_type,
       transmission: bikeTemplate.transmission,
-      dealer_name: dealerName,
-      dealer_contact: `+84 ${90 + Math.floor(Math.random() * 9)} ${Math.floor(Math.random() * 900) + 100} ${Math.floor(Math.random() * 9000) + 1000}`,
+      dealer_name: dealer.name, // Use real dealer name
+      dealer_contact: dealer.phone, // Use real dealer phone
       Park: {
         connect: { id: park.id },
       },

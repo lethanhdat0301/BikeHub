@@ -239,19 +239,6 @@ const BikeDetailsPage: React.FC = () => {
             console.log('=== Booking response received:', bookingData);
             console.log('=== Booking ID from response:', bookingData?.bookingId);
 
-            // Fetch dealer information if not already available in bike object
-            let dealerInfo = null;
-            if (bike?.Dealer) {
-                dealerInfo = bike.Dealer;
-            } else if (bike?.dealer_id) {
-                try {
-                    const dealerResponse = await api.get(`/dealers/${bike.dealer_id}`);
-                    dealerInfo = dealerResponse.data;
-                } catch (error) {
-                    console.warn('Could not fetch dealer information:', error);
-                }
-            }
-
             // Toast duration and navigate delay - longer on mobile
             const isMobile = window.innerWidth <= 768;
             const toastDuration = isMobile ? 10000 : 7000; // 10s on mobile, 7s on desktop
@@ -259,7 +246,7 @@ const BikeDetailsPage: React.FC = () => {
 
             toast({
                 title: "Booking Successful! 🎉",
-                description: `Booking ID: ${bookingData?.bookingId || 'N/A'}. Your booking has been processed successfully! ${dealerInfo?.name ? `It has been assigned to dealer ${dealerInfo.name}${dealerInfo.phone ? ` (Phone: ${dealerInfo.phone})` : ''}.` : ''} We will deliver the bike to you soon. Please check your email for detailed information.`,
+                description: `Booking ID: ${bookingData?.bookingId || 'N/A'}. Your booking has been processed successfully! ${bookingData?.dealerName ? `It has been assigned to dealer ${bookingData.dealerName}${bookingData.dealerPhone ? ` (Phone: ${bookingData.dealerPhone})` : ''}.` : ''} We will deliver the bike to you soon. Please check your email for detailed information.`,
                 status: "success",
                 duration: toastDuration,
                 isClosable: true,

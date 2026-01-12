@@ -117,6 +117,8 @@ export class RentalController {
       price: price,
       status: rental.status,
     };
+
+    return bookingDetails;
   }
 
   // ================= HELPER =================
