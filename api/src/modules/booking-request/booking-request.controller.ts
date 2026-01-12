@@ -56,7 +56,9 @@ export class BookingRequestController {
     const formattedBookingId = `BK${String(bookingRequest.id).padStart(6, '0')}`;
 
     // Send confirmation email if email provided (send both text and HTML template, do not fail request on email errors)
+    console.log('=== Checking email for booking request:', { email: bookingRequest.email });
     if (bookingRequest.email) {
+      console.log('=== Email found, preparing to send confirmation email...');
       try {
         const emailText = `Dear ${bookingRequest.contact_details || 'Customer'},\n\nWe have received your booking request.\n\nBooking ID: ${formattedBookingId}\nContact: ${bookingRequest.contact_details || 'N/A'}\nStatus: ${bookingRequest.status || 'received'}\n\nWe will contact you shortly with next steps.\n\nBest regards,\nRentNRide Team`;
 
@@ -70,6 +72,7 @@ export class BookingRequestController {
           logoSrc: 'cid:logo',
         });
 
+        console.log('=== Calling emailService.sendEmail...');
         await this.emailService.sendEmail(
           bookingRequest.email,
           'Booking Request Received - RentNRide',
@@ -77,7 +80,7 @@ export class BookingRequestController {
           emailHtml,
           { inlineLogoPath: null },
         );
-        console.log('=== Booking request email sent to:', bookingRequest.email);
+        console.log('=== Booking request email sent successfully to:', bookingRequest.email);
       } catch (error) {
         console.error('=== Failed to send booking request email:', error);
       }

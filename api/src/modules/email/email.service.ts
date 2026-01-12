@@ -104,10 +104,12 @@ export class EmailService implements OnModuleInit {
   }
 
   async sendEmail(to: string, subject: string, content: string, html?: string, options?: { inlineLogoPath?: string }): Promise<void> {
+    console.log('=== EmailService.sendEmail called with:', { to, subject, provider: process.env.EMAIL_PROVIDER });
     const provider = (process.env.EMAIL_PROVIDER || 'gmail').toLowerCase();
 
     // If Outlook/outlook provider and Azure credentials present, use Microsoft Graph API with client credentials
     if ((provider === 'outlook' || provider === 'office365') && process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET && process.env.AZURE_TENANT_ID && process.env.MAIL_FROM) {
+      console.log('=== Using Microsoft Graph API for email');
       try {
         const token = await this.getAzureAccessToken();
         const mailFrom = process.env.MAIL_FROM!;
@@ -163,20 +165,22 @@ export class EmailService implements OnModuleInit {
 
         if (!resp.ok) {
           const body = await resp.text();
-          console.error('Microsoft Graph sendMail failed:', resp.status, body);
+          console.error('=== Microsoft Graph sendMail failed:', resp.status, body);
           throw new Error(`Graph sendMail failed: ${resp.status}`);
         }
 
-        console.log('Email sent via Microsoft Graph');
+        console.log('=== Email sent successfully via Microsoft Graph to:', to);
         return;
       } catch (err) {
-        console.error('Error sending email via Microsoft Graph', err);
+        console.error('=== Error sending email via Microsoft Graph:', err);
         // Let fallback attempt proceed below (SMTP/Ethereal) if a transporter exists
       }
     }
 
     // Fallback to SMTP transporter
+    console.log('=== Fallback to SMTP transporter, has transporter:', !!this.transporter);
     if (!this.transporter) {
+      console.error('=== Email transporter is not initialized');
       throw new Error('Email transporter is not initialized. Set EMAIL_USERNAME and EMAIL_PASSWORD, or check logs for test account creation.');
     }
 
@@ -213,14 +217,14 @@ export class EmailService implements OnModuleInit {
       ];
     }
 
-    console.log('Sending email...');
+    console.log('=== Sending email via SMTP...');
     const info = await this.transporter.sendMail(mailOptions);
-    console.log('Email sent:', info.messageId || info);
+    console.log('=== Email sent successfully via SMTP:', info.messageId || info);
 
     // If using Ethereal test account, log the preview URL
     const preview = nodemailer.getTestMessageUrl(info as any);
     if (preview) {
-      console.log('Preview URL (Ethereal):', preview);
+      console.log('=== Preview URL (Ethereal):', preview);
     }
   }
 }
