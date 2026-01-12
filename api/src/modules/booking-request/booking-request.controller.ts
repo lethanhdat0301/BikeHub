@@ -38,6 +38,9 @@ export class BookingRequestController {
   async createBookingRequest(
     @Body() createBookingRequestDto: CreateBookingRequestDto,
   ): Promise<any> {
+    console.log('=== CREATE BOOKING REQUEST STARTED ===');
+    console.log('=== Request payload:', createBookingRequestDto);
+
     const { user_id, ...rest } = createBookingRequestDto;
 
     let bookingRequest;
@@ -52,8 +55,11 @@ export class BookingRequestController {
       bookingRequest = await this.bookingRequestService.create(rest);
     }
 
+    console.log('=== BOOKING REQUEST CREATED:', bookingRequest);
+
     // Return formatted response with Booking ID for customer display
     const formattedBookingId = `BK${String(bookingRequest.id).padStart(6, '0')}`;
+    console.log('=== FORMATTED BOOKING ID:', formattedBookingId);
 
     // Send confirmation email if email provided (send both text and HTML template, do not fail request on email errors)
     console.log('=== Checking email for booking request:', { email: bookingRequest.email });
