@@ -5,7 +5,7 @@ import { MdDirectionsBike } from "react-icons/md";
 import { Reveal } from "../../motion/reveal.component";
 import { IconType } from "react-icons";
 
-import BikeImage from "../../../assets/images/bikes/bikeChoose.jpg";
+import BikeImage from "../../../assets/images/bikes/Whychoose.jpg";
 
 type CardChooseProps = {
   id: number;
