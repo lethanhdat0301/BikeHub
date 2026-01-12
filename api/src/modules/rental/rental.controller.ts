@@ -22,6 +22,7 @@ import { ROLES_ENUM } from '../../shared/constants/global.constants';
 import { RentalService } from './rental.service';
 import { CreateRentalDto, UpdateRentalDto } from './rental.dto';
 import { EmailService } from '../email/email.service';
+import { buildRentalConfirmationHtml } from '../email/templates/rental-confirmation.template';
 import { UserService } from '../user/user.service';
 
 @ApiTags('rentals')
@@ -109,12 +110,53 @@ export class RentalController {
       bookingDate: rental.start_time,
       startDate: rental.start_time,
       endDate: rental.end_time,
-      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'BikeHub',
+      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'RentNRide',
       dealerPhone: rentalDetails?.Bike?.Dealer?.phone || rentalDetails?.Bike?.dealer_contact || 'Contact support',
       pickupLocation: pickup_location || rentalDetails?.Bike?.Park?.location || 'N/A',
       price: price,
       status: rental.status,
     };
+
+    // Send confirmation email (plain-text + HTML template)
+    if (contact_email) {
+      try {
+        console.log('=== Attempting to send confirmation email to:', contact_email);
+
+        const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: $${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
+
+        const emailHtml = buildRentalConfirmationHtml({
+          name: contact_name || 'Customer',
+          bookingId: formattedBookingId,
+          bikeModel: bookingDetails.bikeModel,
+          bikeCode: bookingDetails.bikeCode,
+          startDate: new Date(start_date).toLocaleDateString(),
+          endDate: new Date(end_date).toLocaleDateString(),
+          pickupLocation: bookingDetails.pickupLocation,
+          price: price,
+          dealerName: bookingDetails.dealerName,
+          dealerPhone: bookingDetails.dealerPhone,
+          baseUrl: '/',
+          logoSrc: 'cid:logo',
+        });
+
+        await this.emailService.sendEmail(
+          contact_email,
+          'Booking Confirmation - RentNRide',
+          emailText,
+          emailHtml,
+          { inlineLogoPath: null },
+        );
+        console.log('=== Email sent successfully to:', contact_email);
+      } catch (error) {
+        console.error('=== Failed to send confirmation email:', error);
+        // Don't fail the request if email fails
+      }
+    } else {
+      console.log('=== No contact_email provided, skipping email notification');
+    }
+
+    console.log('=== Returning booking details:', bookingDetails);
+    return bookingDetails;
   }
 
   // ================= HELPER =================
@@ -150,7 +192,7 @@ export class RentalController {
         orderBy: { created_at: 'desc' },
       });
     }
-    
+
     // Dealers see rentals for bikes they own
     if (user.role === ROLES_ENUM.DEALER) {
       return this.rentalService.findAll({
