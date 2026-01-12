@@ -9,8 +9,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
 import { ApiTags } from '@nestjs/swagger';
 import { BookingRequest as BookingRequestModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
@@ -57,68 +55,34 @@ export class BookingRequestController {
     // Return formatted response with Booking ID for customer display
     const formattedBookingId = `BK${String(bookingRequest.id).padStart(6, '0')}`;
 
-    // Send confirmation email (non-blocking for the API response)
-    try {
-      if (bookingRequest.email) {
-        const subject = `Booking request received: ${formattedBookingId}`;
-        const text = `Hi ${bookingRequest.name},\n\n` +
-          `Your booking request (${formattedBookingId}) has been received successfully.\n\n` +
-          `Pickup location: ${bookingRequest.pickup_location}\n` +
-          `Contact method: ${bookingRequest.contact_method}\n\n` +
-          `We will contact you soon to confirm availability.\n\n` +
-          `Thank you,\nRentNRide Team`;
+    // Send confirmation email if email provided (send both text and HTML template, do not fail request on email errors)
+    if (bookingRequest.email) {
+      try {
+        const emailText = `Dear ${bookingRequest.contact_details || 'Customer'},\n\nWe have received your booking request.\n\nBooking ID: ${formattedBookingId}\nContact: ${bookingRequest.contact_details || 'N/A'}\nStatus: ${bookingRequest.status || 'received'}\n\nWe will contact you shortly with next steps.\n\nBest regards,\nRentNRide Team`;
 
-        // Build HTML version — use the shared template to match the posted design
-        const emailLogoUrl = process.env.EMAIL_LOGO_URL;
-        let logoSrc = 'cid:logo';
-        let inlineLogoPath: string | undefined = undefined;
-
-        if (emailLogoUrl) {
-          // Absolute URL -> use directly
-          if (/^https?:\/\//i.test(emailLogoUrl)) {
-            logoSrc = emailLogoUrl;
-          } else {
-            // Try resolving to a local file to attach inline (preferred to avoid mail-proxy rewriting)
-            const candidates = [
-              path.resolve(process.cwd(), emailLogoUrl),
-              path.resolve(process.cwd(), 'frontend', emailLogoUrl),
-              path.resolve(process.cwd(), '..', 'frontend', emailLogoUrl),
-              path.resolve(__dirname, '..', '..', '..', emailLogoUrl),
-            ];
-
-            const found = candidates.find((p) => fs.existsSync(p));
-            if (found) {
-              logoSrc = 'cid:logo';
-              inlineLogoPath = found;
-              // Make the resolved path available for other email codepaths
-              process.env.EMAIL_LOGO_PATH = found;
-              console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
-            } else {
-              // Fallback to public URL assembled from BASE_URL_PROD
-              const base = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD.replace(/\/$/, '') : '';
-              logoSrc = base ? `${base}/${emailLogoUrl.replace(/^\//, '')}` : emailLogoUrl;
-            }
-          }
-        }
-
-        const baseUrl = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD : '/';
-        const html = buildBookingConfirmationHtml({
-          baseUrl: baseUrl,
-          name: bookingRequest.name,
+        const emailHtml = buildBookingConfirmationHtml({
+          name: bookingRequest.contact_details || 'Customer',
           bookingId: formattedBookingId,
-          pickupLocation: bookingRequest.pickup_location,
-          contactMethod: bookingRequest.contact_method,
+          pickupLocation: bookingRequest.pickup_location || '',
+          contactMethod: bookingRequest.contact_method || 'Contact',
           contactDetail: bookingRequest.contact_details || '',
-          serverName: '',
-          daysToDisconnect: 2,
-          logoSrc,
+          serverName: 'RentNRide',
+          logoSrc: 'cid:logo',
         });
 
-        await this.emailService.sendEmail(bookingRequest.email, subject, text, html, { inlineLogoPath });
+        await this.emailService.sendEmail(
+          bookingRequest.email,
+          'Booking Request Received - RentNRide',
+          emailText,
+          emailHtml,
+          { inlineLogoPath: null },
+        );
+        console.log('=== Booking request email sent to:', bookingRequest.email);
+      } catch (error) {
+        console.error('=== Failed to send booking request email:', error);
       }
-    } catch (e) {
-      // Log and continue — do not fail booking creation if email sending fails
-      console.error('Failed to send booking confirmation email:', e);
+    } else {
+      console.log('=== No email provided for booking request, skipping email');
     }
 
     return {
