@@ -52,7 +52,8 @@ export class BookingRequestService {
               select: {
                 id: true,
                 name: true,
-                email: true
+                email: true,
+                phone: true
               }
             }
           },
@@ -62,6 +63,7 @@ export class BookingRequestService {
             id: true,
             name: true,
             phone: true,
+            email: true,
           },
         },
       },
