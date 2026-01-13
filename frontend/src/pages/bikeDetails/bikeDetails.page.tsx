@@ -319,11 +319,6 @@ const getRentalPrice = () => {
     return basePrice;
 };
 
-const getRentalDays = (): number => {
-    const period = getRentalPeriod();
-    return period.days;
-};
-
 const getBasePrice = (): number => {
     if (!bike) return 0;
     const period = getRentalPeriod();
