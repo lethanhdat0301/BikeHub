@@ -42,13 +42,13 @@ const UpdatePassword = () => {
   const validation = () => {
     if (data.oldPassword === "") {
       setErrPassword(true);
-      console.log("old Password empty");
+      // console.log("old Password empty");
     } else {
       setErrPassword(false);
     }
     if (data.newPassword === "") {
       setErrPassword(true);
-      console.log("new Password empty");
+      // console.log("new Password empty");
     } else {
       setErrPassword(false);
     }
@@ -70,7 +70,7 @@ const UpdatePassword = () => {
    */
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(event, "submit");
+    // console.log(event, "submit");
     validation();
     setErrMsg("");
     setIsSubmitting(true);
@@ -79,8 +79,8 @@ const UpdatePassword = () => {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      console.log(response);
-      console.log(JSON.stringify(response?.data));
+      // console.log(response);
+      // console.log(JSON.stringify(response?.data));
       setErrMsg("");
       toast({
         title: "Password updated.",
@@ -91,7 +91,7 @@ const UpdatePassword = () => {
       });
       setErrPassword(false);
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       let errorMessage = error?.response?.data?.message;
       if (typeof errorMessage === 'string')
         errorMessage = error?.response?.data?.message;

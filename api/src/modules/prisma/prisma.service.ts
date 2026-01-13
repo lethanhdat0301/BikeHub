@@ -8,8 +8,7 @@ import { PRISMA_LOG_CONFIG } from './prisma.config';
 @Injectable()
 export class PrismaService
   extends PrismaClient<Prisma.PrismaClientOptions, 'error' | 'query'>
-  implements OnModuleInit, OnModuleDestroy
-{
+  implements OnModuleInit, OnModuleDestroy {
   constructor() {
     super({
       log: PRISMA_LOG_CONFIG,
@@ -27,7 +26,7 @@ export class PrismaService
   }
 
   async onModuleInit() {
-    console.log('DATABASE_URL =', process.env.DATABASE_URL);
+    // console.log('DATABASE_URL =', process.env.DATABASE_URL);
     await this.$connect();
   }
 

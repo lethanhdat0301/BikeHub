@@ -33,7 +33,7 @@ const SearchBikeVietnam: React.FC = () => {
                 setLoading(true);
                 const data = await getAllParks();
                 setParks(data);
-                console.log("🏞️ Parks loaded:", data);
+                // console.log("🏞️ Parks loaded:", data);
             } catch (error) {
                 console.error("❌ Error loading parks:", error);
                 // Nếu API lỗi, có thể dùng mock data
@@ -55,7 +55,7 @@ const SearchBikeVietnam: React.FC = () => {
             return;
         }
 
-        console.log("Searching for bikes:", { parkId, startDate, endDate });
+        // console.log("Searching for bikes:", { parkId, startDate, endDate });
 
         // Navigate to search results with parkId
         const params = new URLSearchParams();

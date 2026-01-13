@@ -13,7 +13,7 @@ const Customers = () => {
         { credentials: "include" }
       );
       const data = await response.json();
-      console.log('Customers data:', data);
+      // console.log('Customers data:', data);
       setTableData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching customers:", error);

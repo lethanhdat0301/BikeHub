@@ -82,7 +82,7 @@ const SearchPage: React.FC = () => {
                 setBikes(limitedData);
                 setFilteredBikes(limitedData);
             } catch (error) {
-                // console.error("❌ Error fetching bikes:", error);
+                console.error("❌ Error fetching bikes:", error);
                 setBikes([]);
                 setFilteredBikes([]);
             } finally {

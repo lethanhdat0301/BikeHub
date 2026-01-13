@@ -15,7 +15,7 @@ const Bookings = () => {
 
             const bookingRequestsData = await bookingRequestsRes.json();
 
-            console.log('📋 Booking requests data:', bookingRequestsData);
+            // console.log('📋 Booking requests data:', bookingRequestsData);
 
             // Format booking requests data
             const formattedData = Array.isArray(bookingRequestsData) ? bookingRequestsData.map(br => {

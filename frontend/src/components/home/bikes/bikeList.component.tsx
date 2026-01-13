@@ -87,7 +87,7 @@ const mockBikes: Bike[] = [
 ];
 
 const BikeList: React.FC = () => {
-    console.log("🔵 BikeList component rendered!");
+    // console.log("🔵 BikeList component rendered!");
 
     const [bikes, setBikes] = useState<Bike[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -99,7 +99,7 @@ const BikeList: React.FC = () => {
         const fetchBikes = async () => {
             try {
                 setLoading(true);
-                console.log("🚴 Đang lấy xe từ database...");
+                // console.log("🚴 Đang lấy xe từ database...");
 
                 let data = await bikeService.getBikesByStatus('available', 20); // Lấy nhiều xe hơn để phân trang
 
@@ -119,7 +119,7 @@ const BikeList: React.FC = () => {
             } catch (err: any) {
                 console.error("❌ Error loading bikes:", err);
                 console.error("❌ Error details:", err.response?.data || err.message);
-                console.log("⚠️ Lỗi khi tải từ API, sử dụng mock data");
+                // console.log("⚠️ Lỗi khi tải từ API, sử dụng mock data");
                 // Nếu có lỗi, dùng mock data
                 setBikes(mockBikes);
                 setError(null);

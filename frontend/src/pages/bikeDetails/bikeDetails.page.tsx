@@ -299,8 +299,8 @@ const BikeDetailsPage: React.FC = () => {
             );
 
             const bookingData = response.data;
-            console.log('=== Booking response received:', bookingData);
-            console.log('=== Booking ID from response:', bookingData?.bookingId);
+            // console.log('=== Booking response received:', bookingData);
+            // console.log('=== Booking ID from response:', bookingData?.bookingId);
 
             // Toast duration and navigate delay - longer on mobile
             const isMobile = window.innerWidth <= 768;

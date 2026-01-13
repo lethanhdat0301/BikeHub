@@ -11,8 +11,8 @@ export class UserService {
   async findUser(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | null> {
-    console.log('==== findUser called with ====', userWhereUniqueInput);
-    console.log('Stack trace:', new Error().stack);
+    // console.log('==== findUser called with ====', userWhereUniqueInput);
+    // console.log('Stack trace:', new Error().stack);
 
     if (!userWhereUniqueInput || (!userWhereUniqueInput.id && !userWhereUniqueInput.email)) {
       console.error('Invalid userWhereUniqueInput:', userWhereUniqueInput);
@@ -121,11 +121,11 @@ export class UserService {
     data: UpdateUser;
   }): Promise<User> {
     let { where, data } = params;
-    console.log("data recieved:", data)
+    // console.log("data recieved:", data)
     const user = await this.prisma.user.findUnique({
       where: where,
     });
-    console.log("user found:", user)
+    // console.log("user found:", user)
     //if request has newPassword, mean we gonna update password
     if (data.hasOwnProperty('newPassword')) {
       const isMatch = await AuthHelpers.verify(
@@ -133,7 +133,7 @@ export class UserService {
         user.password,
       );
       if (!isMatch) {
-        console.log("old password doesn't match")
+        // console.log("old password doesn't match")
         throw new BadRequestException("Old password doesn't match");
       }
       // Hash the new password before saving
@@ -143,12 +143,12 @@ export class UserService {
     } else {
       delete data.password;
     }
-    console.log("data updated:", data)
+    // console.log("data updated:", data)
     const updatedUser = await this.prisma.user.update({
       data,
       where,
     });
-    console.log("user updated:", updatedUser)
+    // console.log("user updated:", updatedUser)
     delete updatedUser.password;
     return updatedUser;
   }
@@ -160,7 +160,7 @@ export class UserService {
     const user = await this.prisma.user.findUnique({
       where,
     });
-    console.log("user found:", user)
+    // console.log("user found:", user)
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -175,7 +175,7 @@ export class UserService {
       where,
     });
     delete deleteduser.password;
-    console.log("user deleted:", deleteduser)
+    // console.log("user deleted:", deleteduser)
     return deleteduser;
   }
 

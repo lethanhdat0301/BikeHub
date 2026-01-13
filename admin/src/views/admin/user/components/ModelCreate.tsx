@@ -32,7 +32,7 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
 
   useEffect(() => {
     const getFields = async (module: string): Promise<string[]> => {
-      console.log("getFields",module)
+      // console.log("getFields",module)
       try {
         // console.log(`${process.env.REACT_APP_API_URL}${module}s${module === "user" ? "" : "/" + module
         //   }/2`)
@@ -85,7 +85,7 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
             "order_id",
           ];
         }
-        console.log("fields", fields);
+        // console.log("fields", fields);
         return fields;
       } catch (error) {
         console.error(error);
@@ -208,7 +208,7 @@ const ModalCreate: React.FC<{ module: string; children: React.ReactNode }> = ({
       let payloadToSend: any = filteredData;
       if (module === 'user') {
         // Whitelist only fields the backend expects for user creation to avoid 400 errors
-        const allowedUserFields = ['name','email','password','role','phone','birthdate'];
+        const allowedUserFields = ['name', 'email', 'password', 'role', 'phone', 'birthdate'];
         payloadToSend = Object.keys(filteredData).filter(k => allowedUserFields.includes(k)).reduce((obj, k) => {
           obj[k] = (filteredData as any)[k];
           return obj;

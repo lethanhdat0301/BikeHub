@@ -43,9 +43,9 @@ const BikeTierPie = () => {
       setLoading(true);
       try {
         const response = await apiClient.get("bikes");
-        console.log("-response------------")
-        console.log(response)
-        console.log("-------------")
+        // console.log("-response------------")
+        // console.log(response)
+        // console.log("-------------")
 
         // Handle both array and object responses
         let bikes: Bike[] = [];

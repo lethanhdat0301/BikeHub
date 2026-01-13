@@ -67,7 +67,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 credentials: "include",
             });
             const data = await response.json();
-            console.log('Dealers fetched:', data);
+            // console.log('Dealers fetched:', data);
             setDealers(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error fetching dealers:", error);
@@ -85,16 +85,16 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 if (selectedBike && updated.start_date && updated.end_date) {
                     const start = new Date(updated.start_date);
                     const end = new Date(updated.end_date);
-                    
+
                     // Check if same day
                     const startDate = start.toDateString();
                     const endDate = end.toDateString();
-                    
+
                     if (startDate === endDate) {
                         // Same day booking - check hours
                         const timeDiffMs = end.getTime() - start.getTime();
                         const hours = Math.ceil(timeDiffMs / (1000 * 60 * 60));
-                        
+
                         if (hours > 3) {
                             // More than 3 hours = charge as 1 full day
                             updated.estimated_price = selectedBike.price;

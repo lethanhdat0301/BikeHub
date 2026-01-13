@@ -2,7 +2,7 @@ import React from 'react';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { OnApproveData } from "@paypal/paypal-js/types/components/buttons";
 
-let BACKEND_URL : any;
+let BACKEND_URL: any;
 if (import.meta.env.VITE_MODE === 'prod') {
   BACKEND_URL = import.meta.env.VITE_BACK_END_PROD;
 }
@@ -20,14 +20,14 @@ interface PayPalButtonProps {
 }
 
 const PayPalButton: React.FC<PayPalButtonProps> = ({ amount, onPaymentSuccess, onPaymentFailure }) => {
-  console.log('Amount in PayPalButton:', amount);
+  // console.log('Amount in PayPalButton:', amount);
 
   const initialOptions = {
     clientId: "AQcmA6Go1uPHGFV5M6rIu44tTpwCleUl_UFLQ6f8CRThz79udi5qArlcUyry9eGoFCOpo0YYzik53b1u",
     currency: "USD",
     intent: "capture",
   };
-  const createOrder = async (amountVlaue : any) => {
+  const createOrder = async (amountVlaue: any) => {
     let payload = {
       intent: "CAPTURE",
       purchase_units: [

@@ -101,7 +101,7 @@ const RequestBookingPage: React.FC = () => {
 
     // Execute reCAPTCHA v3
     if (!executeRecaptcha) {
-      console.log('Execute recaptcha not yet available');
+      // console.log('Execute recaptcha not yet available');
       toast({
         title: "reCAPTCHA Error",
         description: "reCAPTCHA verification is not ready. Please try again.",
@@ -142,7 +142,7 @@ const RequestBookingPage: React.FC = () => {
         }
       }
 
-      console.log("Gửi booking request đến admin...");
+      // console.log("Gửi booking request đến admin...");
 
       // Call API to create booking request
       const response = await bookingRequestService.createBookingRequest({
@@ -154,7 +154,7 @@ const RequestBookingPage: React.FC = () => {
         pickup_location: formData.pickupLocation,
       });
 
-      console.log("Booking request đã được tạo:", response);
+      // console.log("Booking request đã được tạo:", response);
 
       setRequestSent(true);
 
@@ -182,7 +182,7 @@ const RequestBookingPage: React.FC = () => {
       // Reset requestSent after 5 seconds
       setTimeout(() => setRequestSent(false), 5000);
     } catch (error: any) {
-      console.log("🔥 LỖI CHI TIẾT TỪ SERVER:", error.response?.data);
+      // console.log("🔥 LỖI CHI TIẾT TỪ SERVER:", error.response?.data);
 
       console.error("❌ Error submitting booking request:", error);
       toast({

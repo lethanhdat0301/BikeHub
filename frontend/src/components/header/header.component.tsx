@@ -66,7 +66,7 @@ const Header: React.FC = () => {
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
     // TODO: Implement language change logic
-    console.log('Language changed to:', e.target.value);
+    // console.log('Language changed to:', e.target.value);
   };
 
   const location = useLocation();

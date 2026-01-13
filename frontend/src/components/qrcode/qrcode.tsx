@@ -22,7 +22,7 @@ interface Data {
     park_id: number;
 }
 
-const QRCodeComponent = ({ id, size }: { id: number, size?:number }) => {
+const QRCodeComponent = ({ id, size }: { id: number, size?: number }) => {
     const [data, setData] = useState<Data | null>(null);
     const qrCodeRef = useRef(null);
 
@@ -34,7 +34,7 @@ const QRCodeComponent = ({ id, size }: { id: number, size?:number }) => {
             withCredentials: true
         })
             .then(response => {
-                console.log("response.data", response.data)
+                // console.log("response.data", response.data)
                 const { id, user_id, bike_id, start_time, end_time, status, price, qrcode, payment_id, order_id, User, Bike, Park } = response.data;
                 setData({
                     id,

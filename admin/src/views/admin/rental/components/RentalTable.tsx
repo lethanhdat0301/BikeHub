@@ -55,12 +55,12 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                     const contactEmail = row.original.contact_email;
                     const contactPhone = row.original.contact_phone;
 
-                    console.log('Customer data:', {
-                        user,
-                        contactName,
-                        contactEmail,
-                        contactPhone,
-                    });
+                    // console.log('Customer data:', {
+                    //     user,
+                    //     contactName,
+                    //     contactEmail,
+                    //     contactPhone,
+                    // });
 
                     return (
                         <div>
@@ -99,15 +99,15 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                 Cell: ({ row }: any) => {
                     const startTime = row.original.start_time;
                     const endTime = row.original.end_time;
-                    
+
                     if (!startTime || !endTime) {
                         return <p className="text-sm text-gray-500">N/A</p>;
                     }
-                    
+
                     const period = calculateAdminRentalPeriod(startTime, endTime);
                     const start = new Date(startTime);
                     const end = new Date(endTime);
-                    
+
                     return (
                         <div>
                             <p className="text-sm text-navy-700 dark:text-white font-medium">
@@ -131,7 +131,7 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                 Cell: ({ value, row }: any) => {
                     const startTime = row.original.start_time;
                     const endTime = row.original.end_time;
-                    
+
                     if (!startTime || !endTime) {
                         return (
                             <p className="text-sm font-bold text-navy-700 dark:text-white">
@@ -139,9 +139,9 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                             </p>
                         );
                     }
-                    
+
                     const period = calculateAdminRentalPeriod(startTime, endTime);
-                    
+
                     return (
                         <div>
                             <p className="text-sm font-bold text-navy-700 dark:text-white">

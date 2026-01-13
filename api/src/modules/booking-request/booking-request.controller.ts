@@ -38,8 +38,8 @@ export class BookingRequestController {
   async createBookingRequest(
     @Body() createBookingRequestDto: CreateBookingRequestDto,
   ): Promise<any> {
-    console.log('=== CREATE BOOKING REQUEST STARTED ===');
-    console.log('=== Request payload:', createBookingRequestDto);
+    // console.log('=== CREATE BOOKING REQUEST STARTED ===');
+    // console.log('=== Request payload:', createBookingRequestDto);
 
     const { user_id, ...rest } = createBookingRequestDto;
 
@@ -55,16 +55,16 @@ export class BookingRequestController {
       bookingRequest = await this.bookingRequestService.create(rest);
     }
 
-    console.log('=== BOOKING REQUEST CREATED:', bookingRequest);
+    // console.log('=== BOOKING REQUEST CREATED:', bookingRequest);
 
     // Return formatted response with Booking ID for customer display
     const formattedBookingId = `BK${String(bookingRequest.id).padStart(6, '0')}`;
-    console.log('=== FORMATTED BOOKING ID:', formattedBookingId);
+    // console.log('=== FORMATTED BOOKING ID:', formattedBookingId);
 
     // Send confirmation email if email provided (send both text and HTML template, do not fail request on email errors)
-    console.log('=== Checking email for booking request:', { email: bookingRequest.email });
+    // console.log('=== Checking email for booking request:', { email: bookingRequest.email });
     if (bookingRequest.email) {
-      console.log('=== Email found, preparing to send confirmation email...');
+      // console.log('=== Email found, preparing to send confirmation email...');
       try {
         const emailText = `Dear ${bookingRequest.contact_details || 'Customer'},\n\nWe have received your booking request.\n\nBooking ID: ${formattedBookingId}\nContact: ${bookingRequest.contact_details || 'N/A'}\nStatus: ${bookingRequest.status || 'received'}\n\nWe will contact you shortly with next steps.\n\nBest regards,\nRentNRide Team`;
 
@@ -86,7 +86,7 @@ export class BookingRequestController {
         // Handle logo for email
         let logoSrc = 'cid:logo';
         let inlineLogoPath: string | undefined = undefined;
-        
+
         const emailLogoPath = process.env.EMAIL_LOGO_PATH;
         if (emailLogoPath && fs.existsSync(emailLogoPath)) {
           inlineLogoPath = emailLogoPath;
@@ -107,7 +107,7 @@ export class BookingRequestController {
           logoSrc,
         });
 
-        console.log('=== Calling emailService.sendEmail...');
+        // console.log('=== Calling emailService.sendEmail...');
         await this.emailService.sendEmail(
           bookingRequest.email,
           'Booking Request Received - RentNRide',
@@ -115,12 +115,12 @@ export class BookingRequestController {
           emailHtml,
           { inlineLogoPath },
         );
-        console.log('=== Booking request email sent successfully to:', bookingRequest.email);
+        // console.log('=== Booking request email sent successfully to:', bookingRequest.email);
       } catch (error) {
         console.error('=== Failed to send booking request email:', error);
       }
     } else {
-      console.log('=== No email provided for booking request, skipping email');
+      // console.log('=== No email provided for booking request, skipping email');
     }
 
     return {
@@ -210,7 +210,7 @@ export class BookingRequestController {
     @Body() updateBookingRequestDto: UpdateBookingRequestDto,
     @CurrentUser() user: any,
   ): Promise<BookingRequestModel> {
-    console.log('Updating booking request:', id, updateBookingRequestDto);
+    // console.log('Updating booking request:', id, updateBookingRequestDto);
 
     // For dealers, verify they own this booking
     if (user.role === ROLES_ENUM.DEALER) {

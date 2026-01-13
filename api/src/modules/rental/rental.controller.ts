@@ -123,7 +123,7 @@ export class RentalController {
     // Send confirmation email (plain-text + HTML template)
     if (contact_email) {
       try {
-        console.log('=== Attempting to send confirmation email to:', contact_email);
+        // console.log('=== Attempting to send confirmation email to:', contact_email);
 
         const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: $${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
 
@@ -145,7 +145,7 @@ export class RentalController {
         // Handle logo for email
         let logoSrc = 'cid:logo';
         let inlineLogoPath: string | undefined = undefined;
-        
+
         const emailLogoPath = process.env.EMAIL_LOGO_PATH;
         if (emailLogoPath && fs.existsSync(emailLogoPath)) {
           inlineLogoPath = emailLogoPath;
@@ -177,16 +177,16 @@ export class RentalController {
           emailHtml,
           { inlineLogoPath },
         );
-        console.log('=== Email sent successfully to:', contact_email);
+        // console.log('=== Email sent successfully to:', contact_email);
       } catch (error) {
         console.error('=== Failed to send confirmation email:', error);
         // Don't fail the request if email fails
       }
     } else {
-      console.log('=== No contact_email provided, skipping email notification');
+      // console.log('=== No contact_email provided, skipping email notification');
     }
 
-    console.log('=== Returning booking details:', bookingDetails);
+    // console.log('=== Returning booking details:', bookingDetails);
     return bookingDetails;
   }
 
@@ -416,7 +416,7 @@ export class RentalController {
           where: { id: currentRental.bike_id },
           data: { park_id: transfer_park_id }
         });
-        console.log(`Transferred bike ${currentRental.bike_id} to park ${transfer_park_id}`);
+        // console.log(`Transferred bike ${currentRental.bike_id} to park ${transfer_park_id}`);
       }
     }
 
@@ -428,7 +428,7 @@ export class RentalController {
           where: { id: currentRental.bike_id },
           data: { dealer_id: transfer_dealer_id }
         });
-        console.log(`Transferred bike ${currentRental.bike_id} to dealer ${transfer_dealer_id}`);
+        // console.log(`Transferred bike ${currentRental.bike_id} to dealer ${transfer_dealer_id}`);
       }
     }
 
@@ -440,7 +440,7 @@ export class RentalController {
           where: { id: currentRental.bike_id },
           data: { location: current_location }
         });
-        console.log(`Updated bike ${currentRental.bike_id} location to: ${current_location}`);
+        // console.log(`Updated bike ${currentRental.bike_id} location to: ${current_location}`);
       }
     }
 
