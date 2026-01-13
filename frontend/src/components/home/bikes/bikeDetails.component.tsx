@@ -125,7 +125,7 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
                       Price from:
                     </Text>
                     <Text className="text-gray-500 font-medium">
-                      ${bike.price}/hour
+                      {Number(bike?.price).toLocaleString('vi-VN')} VNĐ/hour
                     </Text>
                   </Flex>
                 </Box>

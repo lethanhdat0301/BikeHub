@@ -70,7 +70,7 @@ export function buildRentalConfirmationHtml(opts: RentalTemplateOptions): string
                 </table>
 
                 <p style="margin:8px 0 0 0; color:#6b7280; font-size:13px;">Pickup: <strong>${esc(pickupLocation)}</strong></p>
-                <p style="margin:8px 0 0 0; color:#6b7280; font-size:13px;">Price: <strong>$${esc(price)}</strong></p>
+                <p style="margin:8px 0 0 0; color:#6b7280; font-size:13px;">Price: <strong>${esc(price.toLocaleString('vi-VN'))} VNĐ</strong></p>
 
                 <hr style="border:none; border-top:1px solid #eee; margin:18px 0" />
 

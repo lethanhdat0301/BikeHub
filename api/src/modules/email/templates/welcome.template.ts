@@ -27,7 +27,7 @@ export function buildWelcomeHtml(opts: WelcomeTemplateOptions): string {
       <tr>
         <td style="background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 6px 30px rgba(10,10,10,0.06); padding:28px;">
           <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
-            <img src="${esc(logoSrc)}" alt="BikeHub" style="height:46px; width:auto;" />
+            <img src="${esc(logoSrc)}" alt="RentnRide" style="height:46px; width:auto;" />
             <h1 style="font-size:20px; margin:0; color:#111;">Welcome to BikeHub</h1>
           </div>
 

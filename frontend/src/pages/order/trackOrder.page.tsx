@@ -38,6 +38,9 @@ import {
     FaMotorcycle,
     FaTruck,
     FaMapMarkerAlt,
+    FaPhone,
+    FaEnvelope,
+    FaBuilding,
 } from "react-icons/fa";
 import api from "../../apis/axios";
 import bike1 from "../../assets/images/bikes/bike1.jpg";
@@ -56,6 +59,11 @@ interface Order {
     expectedDelivery: string;
     currentStatus: number;
     totalPrice: number;
+    dealerInfo?: {
+        name: string;
+        phone: string;
+        email: string;
+    };
     trackingSteps: {
         title: string;
         description: string;
@@ -84,6 +92,11 @@ const TrackOrderPage: React.FC = () => {
             expectedDelivery: "2024-12-26 02:00 PM",
             currentStatus: 2,
             totalPrice: 350,
+            dealerInfo: {
+                name: "Phu Quoc Bike Center",
+                phone: "+84 297 123 4567",
+                email: "phuquoc@bikehub.vn"
+            },
             trackingSteps: [
                 {
                     title: "Order Confirmed",
@@ -119,6 +132,11 @@ const TrackOrderPage: React.FC = () => {
             expectedDelivery: "2024-12-26 04:00 PM",
             currentStatus: 1,
             totalPrice: 245,
+            dealerInfo: {
+                name: "Nha Trang Motor Station",
+                phone: "+84 258 987 6543",
+                email: "nhatrang@bikehub.vn"
+            },
             trackingSteps: [
                 {
                     title: "Order Confirmed",
@@ -428,6 +446,51 @@ const TrackOrderPage: React.FC = () => {
                                                     <Text>{order.expectedDelivery}</Text>
                                                 </VStack>
                                             </HStack>
+
+                                            {/* Dealer Information */}
+                                            {order.dealerInfo && (
+                                                <Box>
+                                                    <Text fontWeight="semibold" color="gray.700" mb={3} display="flex" alignItems="center" gap={2}>
+                                                        <Icon as={FaBuilding} color="teal.500" />
+                                                        Dealer Information
+                                                    </Text>
+                                                    <HStack
+                                                        spacing={6}
+                                                        flexWrap="wrap"
+                                                        fontSize="sm"
+                                                        color="gray.600"
+                                                        bg="gray.50"
+                                                        p={4}
+                                                        borderRadius="md"
+                                                    >
+                                                        <VStack align="flex-start" spacing={1}>
+                                                            <Text fontWeight="semibold">Dealer Name</Text>
+                                                            <Text>{order.dealerInfo.name}</Text>
+                                                        </VStack>
+                                                        <VStack align="flex-start" spacing={1}>
+                                                            <Text fontWeight="semibold">Contact Phone</Text>
+                                                            <HStack spacing={1}>
+                                                                <Icon as={FaPhone} color="green.500" boxSize={3} />
+                                                                <Text color="green.600" fontWeight="medium">
+                                                                    {order.dealerInfo.phone}
+                                                                </Text>
+                                                            </HStack>
+                                                        </VStack>
+                                                        <VStack align="flex-start" spacing={1}>
+                                                            <Text fontWeight="semibold">Email</Text>
+                                                            <HStack spacing={1}>
+                                                                <Icon as={FaEnvelope} color="blue.500" boxSize={3} />
+                                                                <Text color="blue.600" fontWeight="medium">
+                                                                    {order.dealerInfo.email}
+                                                                </Text>
+                                                            </HStack>
+                                                        </VStack>
+                                                    </HStack>
+                                                    <Text fontSize="xs" color="orange.600" mt={2} fontStyle="italic">
+                                                        💡 In case you don't receive our email confirmation, please contact the dealer directly using the information above.
+                                                    </Text>
+                                                </Box>
+                                            )}
 
                                             <HStack spacing={2} fontSize="sm">
                                                 <Icon as={FaMapMarkerAlt} color="teal.500" />

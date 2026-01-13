@@ -103,10 +103,7 @@ const SearchBikeVietnam: React.FC = () => {
                             textShadow="2px 2px 8px rgba(0,0,0,0.8)"
                             letterSpacing="-0.02em"
                         >
-                            Rent Easier
-                            <Text as="span" color="cyan.300" display="block">
-                                Ride Further
-                            </Text>
+                            Explore Vietnam Your Way
                         </Heading>
                         <Text
                             fontSize={{ base: "xl", md: "2xl" }}
@@ -116,7 +113,7 @@ const SearchBikeVietnam: React.FC = () => {
                             textShadow="2px 2px 6px rgba(0,0,0,0.8)"
                             lineHeight="1.4"
                         >
-                            Your trusted companion for motorbike adventures in Vietnam with verified quality motorbikes and offer hassle-free delivery services.
+                            Premium Motorbikes, Free Delivery, Seamless Adventures.
                         </Text>
                         {/* <HStack
                             spacing={8}
@@ -317,6 +314,16 @@ const SearchBikeVietnam: React.FC = () => {
                                     Find motorbike
                                 </Button>
                             </Flex>
+
+                            {/* Same-day booking info */}
+                            <Text
+                                fontSize="sm"
+                                color="gray.600"
+                                textAlign="center"
+                                fontStyle="italic"
+                            >
+                                ✨ Rent for 3+ hours and get charged for 1 full day.
+                            </Text>
                         </VStack>
                     </Box>
                 </VStack>

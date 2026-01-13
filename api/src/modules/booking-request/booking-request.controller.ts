@@ -68,14 +68,43 @@ export class BookingRequestController {
       try {
         const emailText = `Dear ${bookingRequest.contact_details || 'Customer'},\n\nWe have received your booking request.\n\nBooking ID: ${formattedBookingId}\nContact: ${bookingRequest.contact_details || 'N/A'}\nStatus: ${bookingRequest.status || 'received'}\n\nWe will contact you shortly with next steps.\n\nBest regards,\nRentNRide Team`;
 
+        // Get the appropriate base URL based on environment
+        const getBaseUrl = () => {
+          if (process.env.NODE_ENV === 'production' && process.env.BASE_URL_PROD) {
+            return process.env.BASE_URL_PROD;
+          } else if (process.env.NODE_ENV === 'development' && process.env.BASE_URL_DEV) {
+            return process.env.BASE_URL_DEV;
+          } else if (process.env.BASE_URL_LOCAL) {
+            return process.env.BASE_URL_LOCAL;
+          } else {
+            return 'http://localhost:3000';
+          }
+        };
+
+        const baseUrl = getBaseUrl().replace(/\/$/, '') + '/'; // Ensure proper trailing slash
+
+        // Handle logo for email
+        let logoSrc = 'cid:logo';
+        let inlineLogoPath: string | undefined = undefined;
+        
+        const emailLogoPath = process.env.EMAIL_LOGO_PATH;
+        if (emailLogoPath && fs.existsSync(emailLogoPath)) {
+          inlineLogoPath = emailLogoPath;
+          logoSrc = 'cid:logo';
+        } else {
+          // Fallback to online logo or remove logo if no file exists
+          logoSrc = process.env.EMAIL_LOGO_URL || '';
+        }
+
         const emailHtml = buildBookingConfirmationHtml({
+          baseUrl,
           name: bookingRequest.contact_details || 'Customer',
           bookingId: formattedBookingId,
           pickupLocation: bookingRequest.pickup_location || '',
           contactMethod: bookingRequest.contact_method || 'Contact',
           contactDetail: bookingRequest.contact_details || '',
           serverName: 'RentNRide',
-          logoSrc: 'cid:logo',
+          logoSrc,
         });
 
         console.log('=== Calling emailService.sendEmail...');
@@ -84,7 +113,7 @@ export class BookingRequestController {
           'Booking Request Received - RentNRide',
           emailText,
           emailHtml,
-          { inlineLogoPath: null },
+          { inlineLogoPath },
         );
         console.log('=== Booking request email sent successfully to:', bookingRequest.email);
       } catch (error) {

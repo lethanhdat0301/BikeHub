@@ -106,7 +106,7 @@ const Dashboard = () => {
         <Widget
           icon={<MdAttachMoney className="h-7 w-7" />}
           title={"Total Revenue"}
-          subtitle={`$${(stats?.totalRevenue ?? 0).toLocaleString()}`}
+          subtitle={`${(stats?.totalRevenue ?? 0).toLocaleString('vi-VN')} VNĐ`}
         />
         {user && user.role === 'admin' && (
           <Widget

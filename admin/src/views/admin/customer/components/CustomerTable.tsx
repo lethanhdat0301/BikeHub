@@ -68,7 +68,7 @@ const CustomerTable: React.FC<Props> = ({ tableContent, loading }) => {
                 accessor: "total_spent",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"}
+                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`
                     </p>
                 ),
             },

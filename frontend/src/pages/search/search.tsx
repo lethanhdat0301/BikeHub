@@ -58,18 +58,18 @@ const SearchPage: React.FC = () => {
         const fetchBikes = async () => {
             setLoading(true);
             try {
-                console.log("🔍 Đang tải xe từ database cho trang search...");
+                // console.log("🔍 Đang tải xe từ database cho trang search...");
 
                 let data;
                 // Nếu có parkId, lọc theo park, nếu không lấy tất cả
                 if (parkId) {
-                    console.log(`🔍 Lọc xe theo park ID: ${parkId}`);
+                    // console.log(`🔍 Lọc xe theo park ID: ${parkId}`);
                     data = await bikeService.getBikesByPark(Number(parkId), 'available');
-                    console.log(`✅ Đã tải ${data.length} xe từ park ${parkId}`);
+                    // console.log(`✅ Đã tải ${data.length} xe từ park ${parkId}`);
                 } else {
                     // Lấy tất cả xe có status available
                     data = await bikeService.getBikesByStatus('available');
-                    console.log(`✅ Đã tải ${data.length} xe available`);
+                    // console.log(`✅ Đã tải ${data.length} xe available`);
                 }
 
                 // Chỉ lấy 12 xe đầu tiên
@@ -78,11 +78,11 @@ const SearchPage: React.FC = () => {
                     image: bike.image || defaultImages[index % defaultImages.length],
                 }));
 
-                console.log(`📊 Hiển thị ${limitedData.length} xe`);
+                // console.log(`📊 Hiển thị ${limitedData.length} xe`);
                 setBikes(limitedData);
                 setFilteredBikes(limitedData);
             } catch (error) {
-                console.error("❌ Error fetching bikes:", error);
+                // console.error("❌ Error fetching bikes:", error);
                 setBikes([]);
                 setFilteredBikes([]);
             } finally {

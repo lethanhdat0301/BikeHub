@@ -276,7 +276,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                             {/* Price */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Price per Day ($) *
+                                    Price per Day (VNĐ) *
                                 </label>
                                 <input
                                     type="number"
