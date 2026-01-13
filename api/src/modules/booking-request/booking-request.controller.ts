@@ -153,7 +153,13 @@ export class BookingRequestController {
       ]
     };
 
-    return this.bookingRequestService.findAll({ where });
+    return this.bookingRequestService.findAll({ 
+      where,
+      include: {
+        Dealer: true,
+        Bike: true
+      }
+    });
   }
 
   // Admin and Dealer - Get all booking requests

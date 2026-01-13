@@ -315,6 +315,14 @@ export class RentalController {
           }
         ]
       },
+      include: {
+        Bike: {
+          include: {
+            Dealer: true
+          }
+        },
+        User: true
+      },
       orderBy: { created_at: 'desc' },
     } as any);
 

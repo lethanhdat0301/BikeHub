@@ -201,6 +201,11 @@ const TrackOrderPage: React.FC = () => {
                     expectedDelivery: booking.start_date ? new Date(booking.start_date).toLocaleString() : 'N/A',
                     currentStatus: booking.status === 'COMPLETED' ? 3 : booking.status === 'APPROVED' ? 2 : 1,
                     totalPrice: booking.estimated_price || 0,
+                    dealerInfo: booking.Dealer ? {
+                        name: booking.Dealer.name,
+                        phone: booking.Dealer.phone || 'N/A',
+                        email: booking.Dealer.email || 'N/A'
+                    } : null,
                     trackingSteps: [
                         {
                             title: "Order Confirmed",
@@ -237,6 +242,11 @@ const TrackOrderPage: React.FC = () => {
                     expectedDelivery: new Date(rental.start_time).toLocaleString(),
                     currentStatus: rental.status === 'completed' ? 3 : rental.status === 'active' ? 2 : 1,
                     totalPrice: rental.price || 0,
+                    dealerInfo: rental.Bike?.Dealer ? {
+                        name: rental.Bike.Dealer.name,
+                        phone: rental.Bike.Dealer.phone || 'N/A',
+                        email: rental.Bike.Dealer.email || 'N/A'
+                    } : null,
                     trackingSteps: [
                         {
                             title: "Order Confirmed",

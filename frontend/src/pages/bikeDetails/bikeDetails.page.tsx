@@ -175,7 +175,8 @@ const BikeDetailsPage: React.FC = () => {
                 }
             }
         } else {
-            if (end <= start) {
+            // For multi-day bookings, validate dates only
+            if (end < start) {
                 toast({
                     title: "Invalid Date",
                     description: "Drop-off date must be after pick-up date",
@@ -398,8 +399,6 @@ const BikeDetailsPage: React.FC = () => {
     }
 
     const bikeImages = bike.images || [bike.image];
-    const days = startDate && endDate ? Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const total = calculateTotal();
 
     return (
         <Box minH="100vh" bg="gray.50" py={8}>
