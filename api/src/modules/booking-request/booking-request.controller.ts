@@ -19,6 +19,7 @@ import { BookingRequestService } from './booking-request.service';
 import { EmailService } from '../email/email.service';
 import { buildBookingConfirmationHtml } from '../email/templates/booking-confirmation.template';
 import { DealerService } from '../dealer/dealer.service';
+import * as fs from 'fs';
 import {
   CreateBookingRequestDto,
   UpdateBookingRequestDto,

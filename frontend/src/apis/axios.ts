@@ -13,12 +13,12 @@ if (mode === 'prod') {
 // console.log('🔧 Mode:', mode);
 // console.log('🔗 Backend URL:', BACKEND_URL);
 // console.log('📦 All env vars:', {
-VITE_MODE: import.meta.env.VITE_MODE,
-  MODE: import.meta.env.MODE,
-    VITE_BACK_END_PROD: import.meta.env.VITE_BACK_END_PROD,
-      VITE_BACK_END_DEV: import.meta.env.VITE_BACK_END_DEV,
-        VITE_BACK_END_LOCAL: import.meta.env.VITE_BACK_END_LOCAL,
-});
+// VITE_MODE: import.meta.env.VITE_MODE,
+//   MODE: import.meta.env.MODE,
+//     VITE_BACK_END_PROD: import.meta.env.VITE_BACK_END_PROD,
+//       VITE_BACK_END_DEV: import.meta.env.VITE_BACK_END_DEV,
+//         VITE_BACK_END_LOCAL: import.meta.env.VITE_BACK_END_LOCAL,
+// });
 
 export default axios.create({
   baseURL: BACKEND_URL,
