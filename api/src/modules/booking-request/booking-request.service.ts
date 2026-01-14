@@ -6,6 +6,60 @@ import { PrismaService } from '../prisma/prisma.service';
 export class BookingRequestService {
   constructor(private prisma: PrismaService) { }
 
+  /**
+   * Parse datetime string to Date object with proper error handling
+   * Handles HTML datetime-local format (YYYY-MM-DDTHH:MM) and converts to ISO format
+   */
+  private parseDateTimeString(dateTimeString: string, fieldName: string): Date {
+    console.log(`Parsing ${fieldName}:`, dateTimeString);
+
+    let dateString = dateTimeString.trim();
+    console.log(`Trimmed ${fieldName}:`, dateString);
+
+    // Basic validation - check if it looks like a datetime string
+    if (!dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?(?:Z)?$/)) {
+      throw new Error(`Invalid ${fieldName} format. Expected YYYY-MM-DDTHH:MM, got: ${dateString}`);
+    }
+
+    // Handle datetime-local format (YYYY-MM-DDTHH:MM)
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      dateString += ':00'; // Add seconds
+      console.log(`Added seconds to ${fieldName}:`, dateString);
+    }
+
+    // Add timezone if missing (has seconds but no timezone)
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
+      dateString += '.000Z'; // Add milliseconds and UTC timezone
+      console.log(`Added timezone to ${fieldName}:`, dateString);
+    }
+
+    // If it already has timezone but no milliseconds, add them
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/)) {
+      dateString = dateString.replace('Z', '.000Z');
+      console.log(`Added milliseconds to ${fieldName}:`, dateString);
+    }
+
+    console.log(`Final transformed ${fieldName}:`, dateString);
+
+    // Try to parse the date
+    const parsedDate = new Date(dateString);
+    console.log(`Parsed ${fieldName} object:`, parsedDate);
+
+    // Validate the date
+    if (isNaN(parsedDate.getTime())) {
+      throw new Error(`Invalid ${fieldName} after processing: ${dateString}`);
+    }
+
+    // Additional validation - check if the date is reasonable (not in the past before 2020, not too far in future)
+    const year = parsedDate.getFullYear();
+    if (year < 2020 || year > 2050) {
+      throw new Error(`Invalid ${fieldName} year: ${year}. Expected between 2020-2050`);
+    }
+
+    console.log(`Final processed ${fieldName}:`, parsedDate.toISOString());
+    return parsedDate;
+  }
+
   async findOne(
     bookingRequestWhereUniqueInput: Prisma.BookingRequestWhereUniqueInput,
   ): Promise<BookingRequest | null> {
@@ -96,63 +150,31 @@ export class BookingRequestService {
       // Handle date fields with better error handling
       if (processedData.start_date && typeof processedData.start_date === 'string') {
         try {
-          console.log('Processing start_date:', processedData.start_date);
-          // Check if string is not empty before parsing
           if (processedData.start_date.trim()) {
-            // Handle datetime-local format (YYYY-MM-DDTHH:MM) by adding seconds if missing
-            let dateString = processedData.start_date.trim();
-            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
-              dateString += ':00'; // Add seconds
-            }
-            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
-              dateString += '.000Z'; // Add milliseconds and UTC timezone
-            }
-
-            console.log('Transformed dateString:', dateString);
-            processedData.start_date = new Date(dateString);
-            // Validate the date
-            if (isNaN(processedData.start_date.getTime())) {
-              throw new Error('Invalid start_date after processing');
-            }
-            console.log('Processed start_date:', processedData.start_date.toISOString());
+            processedData.start_date = this.parseDateTimeString(processedData.start_date, 'start_date');
           } else {
             processedData.start_date = undefined;
             console.log('Empty start_date, setting to undefined');
           }
         } catch (error) {
           console.error('Error parsing start_date:', processedData.start_date, error);
-          throw new Error(`Invalid start_date format: ${processedData.start_date}`);
+          console.error('Error stack:', error.stack);
+          throw new Error(`Invalid start_date format: ${processedData.start_date} - ${error.message}`);
         }
       }
 
       if (processedData.end_date && typeof processedData.end_date === 'string') {
         try {
-          console.log('Processing end_date:', processedData.end_date);
-          // Check if string is not empty before parsing
           if (processedData.end_date.trim()) {
-            // Handle datetime-local format (YYYY-MM-DDTHH:MM) by adding seconds if missing
-            let dateString = processedData.end_date.trim();
-            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
-              dateString += ':00'; // Add seconds
-            }
-            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
-              dateString += '.000Z'; // Add milliseconds and UTC timezone
-            }
-
-            console.log('Transformed end dateString:', dateString);
-            processedData.end_date = new Date(dateString);
-            // Validate the date
-            if (isNaN(processedData.end_date.getTime())) {
-              throw new Error('Invalid end_date after processing');
-            }
-            console.log('Processed end_date:', processedData.end_date.toISOString());
+            processedData.end_date = this.parseDateTimeString(processedData.end_date, 'end_date');
           } else {
             processedData.end_date = undefined;
             console.log('Empty end_date, setting to undefined');
           }
         } catch (error) {
           console.error('Error parsing end_date:', processedData.end_date, error);
-          throw new Error(`Invalid end_date format: ${processedData.end_date}`);
+          console.error('Error stack:', error.stack);
+          throw new Error(`Invalid end_date format: ${processedData.end_date} - ${error.message}`);
         }
       }
 
