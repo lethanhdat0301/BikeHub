@@ -43,13 +43,13 @@ const UpdateInfoPers = () => {
   const validation = () => {
     if (data.email === "") {
       setErrEmail(true);
-      console.log("email empty");
+      // console.log("email empty");
     } else {
       setErrEmail(false);
     }
     if (data.name === "") {
       setErrName(true);
-      console.log("name empty");
+      // console.log("name empty");
     } else {
       setErrName(false);
     }
@@ -72,8 +72,8 @@ const UpdateInfoPers = () => {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      console.log(response);
-      console.log(JSON.stringify(response?.data));
+      // console.log(response);
+      // console.log(JSON.stringify(response?.data));
       setErrMsg("");
       toast({
         title: "Information updated.",
@@ -93,7 +93,7 @@ const UpdateInfoPers = () => {
       });
       setData({ ...data, birthdate: newBirthdate });
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       let errorMessage = error?.response?.data?.message;
       if (typeof errorMessage === 'string')
         errorMessage = error?.response?.data?.message;

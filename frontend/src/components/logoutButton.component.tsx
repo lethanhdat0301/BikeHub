@@ -16,7 +16,7 @@ function LogoutButton({ children }: { children: React.ReactNode }) {
         });
       }
       navigate("/login");
-      console.log("Logout successful");
+      // console.log("Logout successful");
       logout();
     } catch (error) {
       console.error("Logout failed:", error);

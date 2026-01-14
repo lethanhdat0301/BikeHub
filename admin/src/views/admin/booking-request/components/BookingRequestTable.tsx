@@ -110,7 +110,7 @@ const BookingRequestTable: React.FC<Props> = ({ tableContent, loading, onRefresh
                 accessor: "estimated_price",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        {value ? `$${Number(value).toFixed(2)}` : "N/A"}
+                        {value ? `$${Number(value).toLocaleString('vi-VN')} VNĐ` : "N/A"}
                     </p>
                 ),
             },

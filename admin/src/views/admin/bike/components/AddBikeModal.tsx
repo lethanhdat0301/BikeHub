@@ -84,14 +84,14 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
 
     const fetchDealers = async () => {
         try {
-            console.log('Fetching dealers from:', `${process.env.REACT_APP_API_URL}users/dealers`);
+            // console.log('Fetching dealers from:', `${process.env.REACT_APP_API_URL}users/dealers`);
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}users/dealers`,
                 { credentials: "include" }
             );
-            console.log('Dealers response status:', response.status);
+            // console.log('Dealers response status:', response.status);
             const data = await response.json();
-            console.log('Dealers data received:', data);
+            // console.log('Dealers data received:', data);
             setDealers(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error fetching dealers:", error);
@@ -276,7 +276,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                             {/* Price */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Price per Day ($) *
+                                    Price per Day (VNĐ) *
                                 </label>
                                 <input
                                     type="number"

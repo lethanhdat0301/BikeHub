@@ -46,23 +46,8 @@ export async function seedUsers(prisma: PrismaClient) {
     });
     dealers.push(dealer);
   }
-
-  // 3. Tạo 20 Khách hàng (Users) ngẫu nhiên
+  // 3. Khai báo user
   const users: User[] = [];
-  for (let i = 0; i < 20; i++) {
-    const user = await prisma.user.create({
-      data: {
-        name: faker.person.fullName(),
-        email: faker.internet.email(),
-        password, // password chung là 123456
-        role: 'user',
-        phone: faker.phone.number(),
-        image: faker.image.avatar(),
-        birthdate: faker.date.past({ years: 30 }),
-      },
-    });
-    users.push(user);
-  }
 
   return { dealers, users };
 }

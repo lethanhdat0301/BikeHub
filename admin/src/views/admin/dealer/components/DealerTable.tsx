@@ -177,7 +177,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "total_revenue",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"}
+                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`
                     </p>
                 ),
             },
@@ -186,7 +186,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "platform_fee",
                 Cell: ({ value }: any) => (
                     <p className="text-sm text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"} per month
+                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ per month`
                     </p>
                 ),
             },
@@ -195,7 +195,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "current_debt",
                 Cell: ({ value }: any) => (
                     <p className={`text-sm font-bold ${value > 0 ? "text-red-500" : "text-green-500"}`}>
-                        ${value?.toFixed(2) || "0.00"}
+                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`
                     </p>
                 ),
             },

@@ -54,15 +54,15 @@ const Dashboard = () => {
             rental.status && ['active', 'ongoing', 'confirmed'].includes(rental.status.toLowerCase())
           ).length : 0;
 
-        console.log('Dashboard stats:', {
-          users: Array.isArray(users) ? users.length : 0,
-          parks: Array.isArray(parks) ? parks.length : 0,
-          bikes: Array.isArray(bikes) ? bikes.length : 0,
-          rentals: Array.isArray(rentals) ? rentals.length : 0,
-          totalRevenue,
-          activeRentals,
-          userRole: user?.role
-        });
+        // console.log('Dashboard stats:', {
+        //   users: Array.isArray(users) ? users.length : 0,
+        //   parks: Array.isArray(parks) ? parks.length : 0,
+        //   bikes: Array.isArray(bikes) ? bikes.length : 0,
+        //   rentals: Array.isArray(rentals) ? rentals.length : 0,
+        //   totalRevenue,
+        //   activeRentals,
+        //   userRole: user?.role
+        // });
 
         setStats({
           users,
@@ -106,7 +106,7 @@ const Dashboard = () => {
         <Widget
           icon={<MdAttachMoney className="h-7 w-7" />}
           title={"Total Revenue"}
-          subtitle={`$${(stats?.totalRevenue ?? 0).toLocaleString()}`}
+          subtitle={`${(stats?.totalRevenue ?? 0).toLocaleString('vi-VN')} VNĐ`}
         />
         {user && user.role === 'admin' && (
           <Widget

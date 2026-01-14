@@ -45,7 +45,7 @@ const SwiperBikes = () => {
     const parkId = event.target.value;
     setSelectedParkId(parkId);
   };
-  console.log("--- ", swiperRef.current?.isEnd)
+  // console.log("--- ", swiperRef.current?.isEnd)
   return (
     <Box
       id="weOffer"

@@ -235,7 +235,7 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
                                     .filter((b) => b.status === "available")
                                     .map((bike) => (
                                         <option key={bike.id} value={bike.id}>
-                                            {bike.model} - {bike.license_plate} (${bike.price}/day)
+                                            {bike.model} - {bike.license_plate} ({bike.price}VNĐ/day)
                                         </option>
                                     ))}
                             </Select>

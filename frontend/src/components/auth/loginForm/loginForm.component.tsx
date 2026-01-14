@@ -86,7 +86,7 @@ const LoginForm: React.FC = () => {
       });
 
       const userRes = response?.data?.user;
-      console.log("userRes", userRes);
+      // console.log("userRes", userRes);
       login({
         id: userRes.id,
         name: userRes?.name,

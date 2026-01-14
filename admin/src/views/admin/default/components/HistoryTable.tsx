@@ -112,9 +112,9 @@ export default function HistoryTable() {
         const rentalsResponse = await axios.get(`${process.env.REACT_APP_API_URL}rentals/list`, {
           withCredentials: true,
         });
-        console.log("-response------------")
-        console.log(rentalsResponse)
-        console.log("-------------")
+        // console.log("-response------------")
+        // console.log(rentalsResponse)
+        // console.log("-------------")
         const rentals: Rental[] = rentalsResponse.data;
 
         // Sort rentals by date and take the last 5

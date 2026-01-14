@@ -39,7 +39,7 @@ const RentalsTable = () => {
       }
 
       const rData = await response.json();
-      console.log('Rentals data:', rData);
+      // console.log('Rentals data:', rData);
 
       const rentalsList = Array.isArray(rData) ? rData : [];
 

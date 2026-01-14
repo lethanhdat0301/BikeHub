@@ -5,7 +5,7 @@ import { MdDirectionsBike } from "react-icons/md";
 import { Reveal } from "../../motion/reveal.component";
 import { IconType } from "react-icons";
 
-import BikeImage from "../../../assets/images/bikes/Whychoose.png";
+import BikeImage from "../../../assets/images/bikes/Whychoose.jpg";
 
 type CardChooseProps = {
   id: number;
@@ -133,7 +133,7 @@ const WhyChoose = () => {
             </Text>
           </Box>
         </Reveal> */}
-        <Box className=" w-full flex md:flex-row flex-col justify-evenly gap-5 ">
+        <Box className=" w-full flex md:flex-row flex-col justify-evenly gap-5 items-center">
           <Box className="flex-1 text-center">
             <Image
               src={BikeImage}
@@ -142,7 +142,7 @@ const WhyChoose = () => {
               mt={10}
             />
           </Box>
-          <Box className="flex flex-1 flex-col gap-4 md:justify-start items-center">
+          <Box className="flex flex-1 flex-col gap-4 justify-center items-center">
             {data.map((item) => (
               <CardChoose
                 key={item.id}

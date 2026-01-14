@@ -117,7 +117,7 @@ export class AuthService {
             logoSrc = 'cid:logo';
             inlineLogoPath = found;
             process.env.EMAIL_LOGO_PATH = found;
-            console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
+            // console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
           } else {
             const base = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD.replace(/\/$/, '') : '';
             logoSrc = base ? `${base}/${emailLogoUrl.replace(/^\//, '')}` : emailLogoUrl;
@@ -165,8 +165,8 @@ export class AuthService {
       where: { email: details.email },
     });
     if (!user) {
-      console.log("new user")
-      console.log(details)
+      // console.log("new user")
+      // console.log(details)
       newUser = await this.prisma.user.create({ data: details });
 
       // Send styled welcome email (try inline logo attachment if local file exists)
@@ -189,7 +189,7 @@ export class AuthService {
             logoSrc = 'cid:logo';
             inlineLogoPath = found;
             process.env.EMAIL_LOGO_PATH = found;
-            console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
+            // console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
           } else {
             const base = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD.replace(/\/$/, '') : '';
             logoSrc = base ? `${base}/${emailLogoUrl.replace(/^\//, '')}` : emailLogoUrl;

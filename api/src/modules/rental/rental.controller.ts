@@ -25,6 +25,7 @@ import { EmailService } from '../email/email.service';
 import { buildRentalConfirmationHtml } from '../email/templates/rental-confirmation.template';
 import { UserService } from '../user/user.service';
 import { PrismaService } from '../prisma/prisma.service';
+import * as fs from 'fs';
 
 @ApiTags('rentals')
 @Controller('/rentals')
@@ -112,7 +113,7 @@ export class RentalController {
       bookingDate: rental.start_time,
       startDate: rental.start_time,
       endDate: rental.end_time,
-      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'RentNRide',
+      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'RentnRide',
       dealerPhone: rentalDetails?.Bike?.Dealer?.phone || rentalDetails?.Bike?.dealer_contact || 'Contact support',
       pickupLocation: pickup_location || rentalDetails?.Bike?.Park?.location || 'N/A',
       price: price,
@@ -122,9 +123,37 @@ export class RentalController {
     // Send confirmation email (plain-text + HTML template)
     if (contact_email) {
       try {
-        console.log('=== Attempting to send confirmation email to:', contact_email);
+        // console.log('=== Attempting to send confirmation email to:', contact_email);
 
         const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: $${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
+
+        // Get the appropriate base URL based on environment
+        const getBaseUrl = () => {
+          if (process.env.NODE_ENV === 'production' && process.env.BASE_URL_PROD) {
+            return process.env.BASE_URL_PROD;
+          } else if (process.env.NODE_ENV === 'development' && process.env.BASE_URL_DEV) {
+            return process.env.BASE_URL_DEV;
+          } else if (process.env.BASE_URL_LOCAL) {
+            return process.env.BASE_URL_LOCAL;
+          } else {
+            return 'http://localhost:3000';
+          }
+        };
+
+        const baseUrl = getBaseUrl().replace(/\/$/, '') + '/'; // Ensure proper trailing slash
+
+        // Handle logo for email
+        let logoSrc = 'cid:logo';
+        let inlineLogoPath: string | undefined = undefined;
+
+        const emailLogoPath = process.env.EMAIL_LOGO_PATH;
+        if (emailLogoPath && fs.existsSync(emailLogoPath)) {
+          inlineLogoPath = emailLogoPath;
+          logoSrc = 'cid:logo';
+        } else {
+          // Fallback to online logo or remove logo if no file exists
+          logoSrc = process.env.EMAIL_LOGO_URL || '';
+        }
 
         const emailHtml = buildRentalConfirmationHtml({
           name: contact_name || 'Customer',
@@ -137,8 +166,8 @@ export class RentalController {
           price: price,
           dealerName: bookingDetails.dealerName,
           dealerPhone: bookingDetails.dealerPhone,
-          baseUrl: '/',
-          logoSrc: 'cid:logo',
+          baseUrl,
+          logoSrc,
         });
 
         await this.emailService.sendEmail(
@@ -146,18 +175,18 @@ export class RentalController {
           'Booking Confirmation - RentNRide',
           emailText,
           emailHtml,
-          { inlineLogoPath: null },
+          { inlineLogoPath },
         );
-        console.log('=== Email sent successfully to:', contact_email);
+        // console.log('=== Email sent successfully to:', contact_email);
       } catch (error) {
         console.error('=== Failed to send confirmation email:', error);
         // Don't fail the request if email fails
       }
     } else {
-      console.log('=== No contact_email provided, skipping email notification');
+      // console.log('=== No contact_email provided, skipping email notification');
     }
 
-    console.log('=== Returning booking details:', bookingDetails);
+    // console.log('=== Returning booking details:', bookingDetails);
     return bookingDetails;
   }
 
@@ -286,6 +315,14 @@ export class RentalController {
           }
         ]
       },
+      include: {
+        Bike: {
+          include: {
+            Dealer: true
+          }
+        },
+        User: true
+      },
       orderBy: { created_at: 'desc' },
     } as any);
 
@@ -387,7 +424,7 @@ export class RentalController {
           where: { id: currentRental.bike_id },
           data: { park_id: transfer_park_id }
         });
-        console.log(`Transferred bike ${currentRental.bike_id} to park ${transfer_park_id}`);
+        // console.log(`Transferred bike ${currentRental.bike_id} to park ${transfer_park_id}`);
       }
     }
 
@@ -399,7 +436,7 @@ export class RentalController {
           where: { id: currentRental.bike_id },
           data: { dealer_id: transfer_dealer_id }
         });
-        console.log(`Transferred bike ${currentRental.bike_id} to dealer ${transfer_dealer_id}`);
+        // console.log(`Transferred bike ${currentRental.bike_id} to dealer ${transfer_dealer_id}`);
       }
     }
 
@@ -411,7 +448,7 @@ export class RentalController {
           where: { id: currentRental.bike_id },
           data: { location: current_location }
         });
-        console.log(`Updated bike ${currentRental.bike_id} location to: ${current_location}`);
+        // console.log(`Updated bike ${currentRental.bike_id} location to: ${current_location}`);
       }
     }
 

@@ -17,12 +17,15 @@ import {
     Badge,
     Divider,
     Icon,
+    Alert,
+    AlertIcon,
 } from "@chakra-ui/react";
 import { FaArrowLeft, FaCheckCircle, FaUsers, FaGasPump, FaBolt } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import bikeService from "../../services/bikeService";
 import api from "../../apis/axios";
+import { calculateRentalPeriod, calculateRentalPrice, calculateDiscount } from "../../utils/rentalCalculations";
 
 const BikeDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -37,6 +40,8 @@ const BikeDetailsPage: React.FC = () => {
 
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [startTime, setStartTime] = useState("09:00");
+    const [endTime, setEndTime] = useState("18:00");
     const [referrerPhone, setReferrerPhone] = useState("");
     const [currentImageIndex] = useState(0);
 
@@ -125,15 +130,62 @@ const BikeDetailsPage: React.FC = () => {
             return;
         }
 
-        if (end <= start) {
-            toast({
-                title: "Invalid Date",
-                description: "Drop-off date must be after pick-up date",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
+        // Additional validation for same day bookings
+        if (startDate === endDate) {
+            if (!startTime || !endTime) {
+                toast({
+                    title: "Time Required",
+                    description: "Please select start and end times for same-day rental",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+
+            if (startHour > endHour || (startHour === endHour && startMinute >= endMinute)) {
+                toast({
+                    title: "Invalid Time",
+                    description: "End time must be after start time",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+
+            // Check if same day booking is for today and time is in the past
+            if (startDate === today.toISOString().split('T')[0]) {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+
+                if (startHour < currentHour || (startHour === currentHour && startMinute <= currentMinute)) {
+                    toast({
+                        title: "Invalid Time",
+                        description: "Start time cannot be in the past",
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+            }
+        } else {
+            // For multi-day bookings, validate dates only
+            if (end < start) {
+                toast({
+                    title: "Invalid Date",
+                    description: "Drop-off date must be after pick-up date",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
         }
 
         setIsSubmitting(true);
@@ -210,11 +262,23 @@ const BikeDetailsPage: React.FC = () => {
                 }
             }
 
-            // Calculate total days and price (with discount)
-            const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-            const basePrice = days * bike.price;
-            const discount = calculateDiscount(days);
-            const totalPrice = basePrice * (1 - discount);
+            // Calculate rental period and validate
+            const period = calculateRentalPeriod(startDate, endDate, startTime, endTime);
+
+            if (period.days === 0 && period.hours === 0) {
+                toast({
+                    title: "Invalid rental period",
+                    description: period.displayText,
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Calculate total price
+            const totalPrice = getRentalPrice();
 
             // Create rental request
             const response = await api.post(
@@ -236,8 +300,6 @@ const BikeDetailsPage: React.FC = () => {
             );
 
             const bookingData = response.data;
-            console.log('=== Booking response received:', bookingData);
-            console.log('=== Booking ID from response:', bookingData?.bookingId);
 
             // Toast duration and navigate delay - longer on mobile
             const isMobile = window.innerWidth <= 768;
@@ -282,43 +344,42 @@ const BikeDetailsPage: React.FC = () => {
         }
     };
 
-    const calculateDiscount = (days: number): number => {
-        if (days >= 30) return 0.20; // 20% discount for 30+ days
-        if (days >= 7) return 0.10; // 10% discount for 7+ days
-        return 0; // No discount for less than 7 days
+    const getRentalPeriod = () => {
+        return calculateRentalPeriod(startDate, endDate, startTime, endTime);
     };
 
     const getRentalDays = (): number => {
-        if (!startDate || !endDate) return 0;
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-        return days > 0 ? days : 0;
+        const period = getRentalPeriod();
+        return period.days;
+    };
+
+    const getRentalPrice = () => {
+        if (!bike) return 0;
+        const period = getRentalPeriod();
+        const basePrice = calculateRentalPrice(period, bike.price);
+
+        // Apply discount for multi-day rentals
+        if (period.days > 0 && !period.isHourlyRental) {
+            const discount = calculateDiscount(period.days);
+            return basePrice * (1 - discount);
+        }
+
+        return basePrice;
     };
 
     const getBasePrice = (): number => {
-        const days = getRentalDays();
-        return days * bike.price;
+        if (!bike) return 0;
+        const period = getRentalPeriod();
+        return calculateRentalPrice(period, bike.price);
     };
 
     const getDiscountPercentage = (): number => {
-        const days = getRentalDays();
-        return calculateDiscount(days) * 100;
+        const period = getRentalPeriod();
+        return calculateDiscount(period.days) * 100;
     };
 
     const calculateTotal = () => {
-        if (!startDate || !endDate) return 0;
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (days <= 0) return 0;
-
-        const basePrice = days * bike.price;
-        const discount = calculateDiscount(days);
-        const discountedPrice = basePrice * (1 - discount);
-
-        return discountedPrice;
+        return getRentalPrice();
     };
 
     if (loading) {
@@ -338,8 +399,6 @@ const BikeDetailsPage: React.FC = () => {
     }
 
     const bikeImages = bike.images || [bike.image];
-    const days = startDate && endDate ? Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const total = calculateTotal();
 
     return (
         <Box minH="100vh" bg="gray.50" py={8}>
@@ -577,6 +636,53 @@ const BikeDetailsPage: React.FC = () => {
                                     </HStack>
                                 </FormControl>
 
+                                {/* Time picker for same day rentals */}
+                                {startDate && endDate && startDate === endDate && (
+                                    <FormControl isRequired>
+                                        <FormLabel fontWeight="semibold">Time Range (Same Day Rental)</FormLabel>
+                                        <HStack spacing={2}>
+                                            <Input
+                                                type="time"
+                                                value={startTime}
+                                                onChange={(e) => setStartTime(e.target.value)}
+                                            />
+                                            <Text>to</Text>
+                                            <Input
+                                                type="time"
+                                                value={endTime}
+                                                onChange={(e) => setEndTime(e.target.value)}
+                                            />
+                                        </HStack>
+                                        <Alert status="info" mt={2}>
+                                            <AlertIcon />
+                                            <Text fontSize="sm">
+                                                {(() => {
+                                                    const period = getRentalPeriod();
+                                                    if (period.hours > 3) {
+                                                        return `${period.hours} hours rental will be charged as 1 full day (${bike.price.toLocaleString('vi-VN')} VNĐ)`;
+                                                    }
+                                                    const hourlyRate = Math.ceil(bike.price / 8);
+                                                    return `${period.hours} hours rental: ${hourlyRate.toLocaleString('vi-VN')} VNĐ/hour`;
+                                                })()}
+                                            </Text>
+                                        </Alert>
+                                    </FormControl>
+                                )}
+
+                                {/* Rental period display */}
+                                {startDate && endDate && (
+                                    <Box p={3} bg="gray.50" borderRadius="md">
+                                        <Text fontSize="sm" color="gray.600" fontWeight="semibold">
+                                            Rental Period: {getRentalPeriod().displayText}
+                                        </Text>
+                                        {getRentalPeriod().days > 0 && getDiscountPercentage() > 0 && (
+                                            <Text fontSize="sm" color="green.600">
+                                                {getDiscountPercentage()}% discount applied for long-term rental
+                                            </Text>
+                                        )}
+                                    </Box>
+                                )}
+
                                 {/* Contact Info - always show */}
                                 <FormControl isRequired>
                                     <FormLabel fontWeight="semibold">Your Name</FormLabel>
@@ -634,11 +740,11 @@ const BikeDetailsPage: React.FC = () => {
                                 <Divider />
 
                                 {/* Pricing Summary */}
-                                {getRentalDays() > 0 && (
+                                {(getRentalDays() > 0 || getRentalPeriod().hours > 0) && (
                                     <>
                                         <HStack justify="space-between">
                                             <Text>Rental Duration</Text>
-                                            <Text fontWeight="semibold">{getRentalDays()} day{getRentalDays() > 1 ? 's' : ''}</Text>
+                                            <Text fontWeight="semibold">{getRentalPeriod().displayText}</Text>
                                         </HStack>
                                         <HStack justify="space-between">
                                             <Text>Base Price</Text>
@@ -647,7 +753,7 @@ const BikeDetailsPage: React.FC = () => {
                                                 textDecoration={getDiscountPercentage() > 0 ? "line-through" : "none"}
                                                 color={getDiscountPercentage() > 0 ? "gray.500" : "inherit"}
                                             >
-                                                {getBasePrice().toLocaleString()} VNĐ
+                                                {getBasePrice().toLocaleString('vi-VN')} VNĐ
                                             </Text>
                                         </HStack>
 
@@ -660,7 +766,7 @@ const BikeDetailsPage: React.FC = () => {
                                                     </Text>
                                                 </HStack>
                                                 <Text color="green.600" fontWeight="bold">
-                                                    -{(getBasePrice() - total).toLocaleString()} VNĐ
+                                                    -{(getBasePrice() - calculateTotal()).toLocaleString('vi-VN')} VNĐ
                                                 </Text>
                                             </HStack>
                                         )}
@@ -675,11 +781,11 @@ const BikeDetailsPage: React.FC = () => {
                                 <HStack justify="space-between">
                                     <Heading as="h4" size="md">Total</Heading>
                                     <Heading as="h4" size="md" color="teal.600">
-                                        {total.toLocaleString()} VNĐ
+                                        {calculateTotal().toLocaleString('vi-VN')} VNĐ
                                     </Heading>
                                 </HStack>
 
-                                {getRentalDays() === 0 && (
+                                {getRentalDays() === 0 && getRentalPeriod().hours === 0 && (
                                     <Text fontSize="xs" color="gray.500" textAlign="center">
                                         Select dates to see pricing
                                     </Text>

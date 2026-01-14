@@ -22,7 +22,7 @@ export class RentalService {
         },
       },
     });
-    console.log("data", data)
+    // console.log("data", data)
     if (data?.User) {
       delete data.User.password;
     }
@@ -178,7 +178,7 @@ export class RentalService {
       },
     });
 
-    console.log(`Found ${rentalsToFix.length} rentals with missing contact info`);
+    // console.log(`Found ${rentalsToFix.length} rentals with missing contact info`);
 
     for (const rental of rentalsToFix) {
       if (rental.booking_request_id) {
@@ -197,7 +197,7 @@ export class RentalService {
               pickup_location: bookingRequest.pickup_location,
             },
           });
-          console.log(`Fixed rental ${rental.id} with booking request ${rental.booking_request_id}`);
+          // console.log(`Fixed rental ${rental.id} with booking request ${rental.booking_request_id}`);
         }
       }
     }

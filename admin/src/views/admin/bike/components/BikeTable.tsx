@@ -84,7 +84,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "price",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"}
+                        `${(value || 0).toLocaleString('vi-VN')} VNĐ`
                     </p>
                 ),
             },

@@ -29,9 +29,9 @@ const TopCustomers = () => {
       setLoading(true);
       try {
         const rentalsResponse = await apiClient.get("rentals/list");
-        console.log("-response rentalsResponse------------")
-        console.log(rentalsResponse.data)
-        console.log("-------------")
+        // console.log("-response rentalsResponse------------")
+        // console.log(rentalsResponse.data)
+        // console.log("-------------")
 
         // Handle both array and object responses
         let rentals: Rental[] = [];

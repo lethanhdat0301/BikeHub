@@ -41,7 +41,7 @@ export class BikeController {
     // Debugging: log current user and return counts in non-production for traceability
     if (process.env.NODE_ENV !== 'production') {
       try {
-        console.log('GET /bikes requested by user:', user ? { id: user.id, role: user.role } : null);
+        // console.log('GET /bikes requested by user:', user ? { id: user.id, role: user.role } : null);
       } catch (e) {
         // ignore
       }
@@ -49,12 +49,12 @@ export class BikeController {
 
     if (user && user.role === ROLES_ENUM.DEALER) {
       const bikes = await this.bikeService.findByDealer(user.id);
-      if (process.env.NODE_ENV !== 'production') console.log('Returning bikes for dealer:', bikes.length);
+      // if (process.env.NODE_ENV !== 'production') console.log('Returning bikes for dealer:', bikes.length);
       return bikes;
     }
 
     const all = await this.bikeService.findAll({});
-    if (process.env.NODE_ENV !== 'production') console.log('Returning all bikes:', all.length);
+    // if (process.env.NODE_ENV !== 'production') console.log('Returning all bikes:', all.length);
     return all;
   }
 

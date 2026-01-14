@@ -3,6 +3,7 @@ import { useTable, usePagination, useSortBy } from "react-table";
 import { MdAdd, MdEdit, MdDelete, MdCheckCircle } from "react-icons/md";
 import UpdateRentalModal from "./UpdateRentalModal";
 import DealerUpdateRentalModal from "./DealerUpdateRentalModal";
+import { calculateAdminRentalPeriod } from "../../../../utils/adminRentalCalculations";
 
 type Props = {
     tableContent: any[];
@@ -54,12 +55,12 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                     const contactEmail = row.original.contact_email;
                     const contactPhone = row.original.contact_phone;
 
-                    console.log('Customer data:', {
-                        user,
-                        contactName,
-                        contactEmail,
-                        contactPhone,
-                    });
+                    // console.log('Customer data:', {
+                    //     user,
+                    //     contactName,
+                    //     contactEmail,
+                    //     contactPhone,
+                    // });
 
                     return (
                         <div>
@@ -96,14 +97,30 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                 Header: "Period",
                 accessor: "start_time",
                 Cell: ({ row }: any) => {
-                    const start = new Date(row.original.start_time);
-                    const end = row.original.end_time ? new Date(row.original.end_time) : null;
+                    const startTime = row.original.start_time;
+                    const endTime = row.original.end_time;
+
+                    if (!startTime || !endTime) {
+                        return <p className="text-sm text-gray-500">N/A</p>;
+                    }
+
+                    const period = calculateAdminRentalPeriod(startTime, endTime);
+                    const start = new Date(startTime);
+                    const end = new Date(endTime);
+
                     return (
                         <div>
-                            <p className="text-sm text-navy-700 dark:text-white">
-                                {start.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                                {end && ` - ${end.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
+                            <p className="text-sm text-navy-700 dark:text-white font-medium">
+                                {period.displayText}
                             </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {start.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                {" - "}
+                                {end.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </p>
+                            {period.isHourlyRental && (
+                                <p className="text-xs text-blue-600 font-medium">Hourly Rate</p>
+                            )}
                         </div>
                     );
                 },
@@ -111,11 +128,38 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
             {
                 Header: "Price",
                 accessor: "price",
-                Cell: ({ value }: any) => (
-                    <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        `${(value || 0).toLocaleString('vi-VN')} VNĐ`
-                    </p>
-                ),
+                Cell: ({ value, row }: any) => {
+                    const startTime = row.original.start_time;
+                    const endTime = row.original.end_time;
+
+                    if (!startTime || !endTime) {
+                        return (
+                            <p className="text-sm font-bold text-navy-700 dark:text-white">
+                                {(value || 0).toLocaleString('vi-VN')} VNĐ
+                            </p>
+                        );
+                    }
+
+                    const period = calculateAdminRentalPeriod(startTime, endTime);
+
+                    return (
+                        <div>
+                            <p className="text-sm font-bold text-navy-700 dark:text-white">
+                                {(value || 0).toLocaleString('vi-VN')} VNĐ
+                            </p>
+                            {period.isHourlyRental && period.hours > 0 && (
+                                <p className="text-xs text-gray-500">
+                                    {Math.ceil(value / period.hours).toLocaleString('vi-VN')} VNĐ/h
+                                </p>
+                            )}
+                            {period.days > 0 && !period.isHourlyRental && (
+                                <p className="text-xs text-gray-500">
+                                    {Math.ceil(value / period.days).toLocaleString('vi-VN')} VNĐ/day
+                                </p>
+                            )}
+                        </div>
+                    );
+                },
             },
             {
                 Header: "Status",

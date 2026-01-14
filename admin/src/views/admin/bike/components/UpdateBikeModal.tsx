@@ -146,7 +146,7 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
                                 </FormControl>
 
                                 <FormControl isRequired flex={1}>
-                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>Price/Day ($)*</FormLabel>
+                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>Price/Day (VNĐ)*</FormLabel>
                                     <NumberInput value={formData.price} onChange={(_, val) => setFormData({ ...formData, price: val })} min={0}>
                                         <NumberInputField fontSize="sm" />
                                     </NumberInput>

@@ -52,7 +52,8 @@ export class BookingRequestService {
               select: {
                 id: true,
                 name: true,
-                email: true
+                email: true,
+                phone: true
               }
             }
           },
@@ -62,6 +63,7 @@ export class BookingRequestService {
             id: true,
             name: true,
             phone: true,
+            email: true,
           },
         },
       },
@@ -105,15 +107,15 @@ export class BookingRequestService {
       updatedBooking.end_date &&
       updatedBooking.estimated_price
     ) {
-      console.log('==== Creating rental from booking request ====');
-      console.log('BookingRequest data:', {
-        id: updatedBooking.id,
-        name: updatedBooking.name,
-        email: updatedBooking.email,
-        contact_details: updatedBooking.contact_details,
-        pickup_location: updatedBooking.pickup_location,
-        user_id: updatedBooking.user_id,
-      });
+      // console.log('==== Creating rental from booking request ====');
+      // console.log('BookingRequest data:', {
+      //   id: updatedBooking.id,
+      //   name: updatedBooking.name,
+      //   email: updatedBooking.email,
+      //   contact_details: updatedBooking.contact_details,
+      //   pickup_location: updatedBooking.pickup_location,
+      //   user_id: updatedBooking.user_id,
+      // });
 
       await this.prisma.rental.create({
         data: {
@@ -132,7 +134,7 @@ export class BookingRequestService {
         },
       });
 
-      console.log('==== Rental created successfully ====');
+      // console.log('==== Rental created successfully ====');
 
       // Update bike status to rented
       await this.prisma.bike.update({

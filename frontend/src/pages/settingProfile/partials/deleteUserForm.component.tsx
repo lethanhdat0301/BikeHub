@@ -42,7 +42,7 @@ const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
     try {
       const response = await axios.delete(`/users/delete/${user?.id}`, { data: { password }, withCredentials: true, });
       // Handle success response
-      console.log(response);
+      // console.log(response);
       toast({
         title: "Account deleted",
         description: "Your account has been deleted.",
@@ -52,7 +52,7 @@ const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
       });
       logout();
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       let errorMessage = error?.response?.data?.message;
       if (typeof errorMessage === "string") {
         errorMessage = error?.response?.data?.message;

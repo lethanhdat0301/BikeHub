@@ -53,7 +53,7 @@ const ReferrerTable: React.FC<Props> = ({ tableContent, loading }) => {
                 accessor: "total_earnings",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        {value?.toLocaleString() || "0"} đ
+                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`
                     </p>
                 ),
             },

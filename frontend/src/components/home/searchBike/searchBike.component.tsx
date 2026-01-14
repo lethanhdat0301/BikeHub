@@ -41,7 +41,7 @@
 //                 setParks(data);
 //                 console.log("🏞️ Parks loaded:", data);
 //             } catch (error) {
-//                 console.error("❌ Error loading parks:", error);
+console.error("❌ Error loading parks:", error);
 //                 // Nếu API lỗi, có thể dùng mock data
 //                 setParks([
 //                     { id: 1, name: "Phu Quoc Park", location: "Phu Quoc", created_at: new Date(), updated_at: new Date() },

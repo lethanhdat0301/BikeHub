@@ -56,19 +56,19 @@ const RegisterForm: React.FC = () => {
   const validation = () => {
     if (data.email === "") {
       setErrEmail(true);
-      console.log("pass empty");
+      // console.log("pass empty");
     } else {
       setErrEmail(false);
     }
     if (data.name === "") {
       setErrName(true);
-      console.log("name empty");
+      // console.log("name empty");
     } else {
       setErrName(false);
     }
     if (data.password === "") {
       setErrPassword(true);
-      console.log("email empty");
+      // console.log("email empty");
     } else {
       setErrPassword(false);
     }
@@ -100,8 +100,8 @@ const RegisterForm: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      console.log(response);
-      console.log(JSON.stringify(response?.data));
+      // console.log(response);
+      // console.log(JSON.stringify(response?.data));
       setData({ email: "", password: "", name: "", birthdate: "", phone: "" });
       setErrMsg("");
       navigate("/login");
@@ -113,7 +113,7 @@ const RegisterForm: React.FC = () => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       let errorMessage = error?.response?.data?.message;
       if (typeof errorMessage === "string")
         errorMessage = error?.response?.data?.message;
@@ -135,10 +135,10 @@ const RegisterForm: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-    console.log(data);
-    console.log(errName, errEmail, errPassword);
-    console.log(user);
-    console.log(errMsg);
+    // console.log(data);
+    // console.log(errName, errEmail, errPassword);
+    // console.log(user);
+    // console.log(errMsg);
     setIsSubmitting(false);
   };
 
