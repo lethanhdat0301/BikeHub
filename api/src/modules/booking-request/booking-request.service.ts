@@ -172,7 +172,7 @@ export class BookingRequestService {
               throw new Error(`Invalid start_date: ${processedData.start_date}`);
             }
             processedData.start_date = dateObj;
-            console.log('Successfully processed start_date:', processedData.start_date.toISOString());
+            console.log('Successfully processed start_date:', (processedData.start_date as Date).toISOString());
           } else {
             processedData.start_date = undefined;
           }
@@ -203,7 +203,7 @@ export class BookingRequestService {
               throw new Error(`Invalid end_date: ${processedData.end_date}`);
             }
             processedData.end_date = dateObj;
-            console.log('Successfully processed end_date:', processedData.end_date.toISOString());
+            console.log('Successfully processed end_date:', (processedData.end_date as Date).toISOString());
           } else {
             processedData.end_date = undefined;
           }
@@ -215,21 +215,22 @@ export class BookingRequestService {
 
       console.log('Processed data:', JSON.stringify(processedData, null, 2));
 
-      // Validate foreign keys exist before updating
-      if (processedData.dealer_id) {
-        console.log('Checking dealer_id exists:', processedData.dealer_id);
-        const dealerExists = await this.prisma.dealer.findUnique({ where: { id: Number(processedData.dealer_id) } });
+      // Validate foreign keys exist before updating (use original data for IDs)
+      const dataAny = data as any; // Type cast to bypass Prisma type restrictions
+      if (dataAny.dealer_id) {
+        console.log('Checking dealer_id exists:', dataAny.dealer_id);
+        const dealerExists = await this.prisma.dealer.findUnique({ where: { id: Number(dataAny.dealer_id) } });
         if (!dealerExists) {
-          throw new Error(`Dealer with ID ${processedData.dealer_id} does not exist`);
+          throw new Error(`Dealer with ID ${dataAny.dealer_id} does not exist`);
         }
         console.log('Dealer validation passed');
       }
 
-      if (processedData.bike_id) {
-        console.log('Checking bike_id exists:', processedData.bike_id);
-        const bikeExists = await this.prisma.bike.findUnique({ where: { id: Number(processedData.bike_id) } });
+      if (dataAny.bike_id) {
+        console.log('Checking bike_id exists:', dataAny.bike_id);
+        const bikeExists = await this.prisma.bike.findUnique({ where: { id: Number(dataAny.bike_id) } });
         if (!bikeExists) {
-          throw new Error(`Bike with ID ${processedData.bike_id} does not exist`);
+          throw new Error(`Bike with ID ${dataAny.bike_id} does not exist`);
         }
         console.log('Bike validation passed');
       }
@@ -297,12 +298,12 @@ export class BookingRequestService {
       console.error('Error message:', error.message);
       console.error('Error details:', error);
       console.error('Stack trace:', error.stack);
-      
+
       // Prisma-specific error handling
       if (error.code) {
         console.error('Prisma error code:', error.code);
         console.error('Prisma error meta:', error.meta);
-        
+
         // Common Prisma error codes
         switch (error.code) {
           case 'P2002':
@@ -315,7 +316,7 @@ export class BookingRequestService {
             throw new Error(`Database error (${error.code}): ${error.message}`);
         }
       }
-      
+
       // Re-throw với message chi tiết hơn
       throw new Error(`Booking update failed: ${error.message}`);
     }
