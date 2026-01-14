@@ -147,56 +147,101 @@ export class BookingRequestService {
       // Process date fields if they exist
       const processedData = { ...data };
 
-      // Handle date fields - Frontend now sends ISO strings, simpler processing
+      // ROBUST datetime processing - handle both ISO strings và datetime-local formats
       if (processedData.start_date && typeof processedData.start_date === 'string') {
         try {
+          console.log('Processing start_date:', processedData.start_date);
           if (processedData.start_date.trim()) {
-            console.log('Processing start_date (ISO string):', processedData.start_date);
-            processedData.start_date = new Date(processedData.start_date);
-            // Validate the date
-            if (isNaN(processedData.start_date.getTime())) {
-              throw new Error('Invalid start_date after parsing ISO string');
+            // Try direct ISO parse first, fallback to datetime-local format
+            let dateObj;
+            if (processedData.start_date.includes('Z') || processedData.start_date.includes('+')) {
+              // Already ISO format
+              dateObj = new Date(processedData.start_date);
+            } else {
+              // Datetime-local format, need to add timezone
+              let dateString = processedData.start_date.trim();
+              if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+                dateString += ':00.000Z';
+              } else if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
+                dateString += '.000Z';
+              }
+              dateObj = new Date(dateString);
             }
-            console.log('Processed start_date:', processedData.start_date.toISOString());
+
+            if (isNaN(dateObj.getTime())) {
+              throw new Error(`Invalid start_date: ${processedData.start_date}`);
+            }
+            processedData.start_date = dateObj;
+            console.log('Successfully processed start_date:', processedData.start_date.toISOString());
           } else {
             processedData.start_date = undefined;
-            console.log('Empty start_date, setting to undefined');
           }
         } catch (error) {
-          console.error('Error parsing start_date:', processedData.start_date, error);
-          console.error('Error stack:', error.stack);
-          throw new Error(`Invalid start_date format: ${processedData.start_date} - ${error.message}`);
+          console.error('CRITICAL: start_date processing failed:', error);
+          throw new Error(`start_date error: ${error.message}`);
         }
       }
 
       if (processedData.end_date && typeof processedData.end_date === 'string') {
         try {
+          console.log('Processing end_date:', processedData.end_date);
           if (processedData.end_date.trim()) {
-            console.log('Processing end_date (ISO string):', processedData.end_date);
-            processedData.end_date = new Date(processedData.end_date);
-            // Validate the date
-            if (isNaN(processedData.end_date.getTime())) {
-              throw new Error('Invalid end_date after parsing ISO string');
+            let dateObj;
+            if (processedData.end_date.includes('Z') || processedData.end_date.includes('+')) {
+              dateObj = new Date(processedData.end_date);
+            } else {
+              let dateString = processedData.end_date.trim();
+              if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+                dateString += ':00.000Z';
+              } else if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
+                dateString += '.000Z';
+              }
+              dateObj = new Date(dateString);
             }
-            console.log('Processed end_date:', processedData.end_date.toISOString());
+
+            if (isNaN(dateObj.getTime())) {
+              throw new Error(`Invalid end_date: ${processedData.end_date}`);
+            }
+            processedData.end_date = dateObj;
+            console.log('Successfully processed end_date:', processedData.end_date.toISOString());
           } else {
             processedData.end_date = undefined;
-            console.log('Empty end_date, setting to undefined');
           }
         } catch (error) {
-          console.error('Error parsing end_date:', processedData.end_date, error);
-          console.error('Error stack:', error.stack);
-          throw new Error(`Invalid end_date format: ${processedData.end_date} - ${error.message}`);
+          console.error('CRITICAL: end_date processing failed:', error);
+          throw new Error(`end_date error: ${error.message}`);
         }
       }
 
       console.log('Processed data:', JSON.stringify(processedData, null, 2));
+
+      // Validate foreign keys exist before updating
+      if (processedData.dealer_id) {
+        console.log('Checking dealer_id exists:', processedData.dealer_id);
+        const dealerExists = await this.prisma.dealer.findUnique({ where: { id: Number(processedData.dealer_id) } });
+        if (!dealerExists) {
+          throw new Error(`Dealer with ID ${processedData.dealer_id} does not exist`);
+        }
+        console.log('Dealer validation passed');
+      }
+
+      if (processedData.bike_id) {
+        console.log('Checking bike_id exists:', processedData.bike_id);
+        const bikeExists = await this.prisma.bike.findUnique({ where: { id: Number(processedData.bike_id) } });
+        if (!bikeExists) {
+          throw new Error(`Bike with ID ${processedData.bike_id} does not exist`);
+        }
+        console.log('Bike validation passed');
+      }
 
       // Get current booking request to check status change
       console.log('Finding current booking...');
       const currentBooking = await this.prisma.bookingRequest.findUnique({
         where,
       });
+      if (!currentBooking) {
+        throw new Error(`Booking with ID ${where.id} does not exist`);
+      }
       console.log('Current booking found:', currentBooking ? 'Yes' : 'No');
 
       console.log('Updating booking in database...');
@@ -207,7 +252,7 @@ export class BookingRequestService {
           User: true,
         },
       });
-      // console.log('Database update successful');
+      console.log('Database update successful');
 
       // If status changed to APPROVED and all required fields are present, create rental
       if (
@@ -248,9 +293,31 @@ export class BookingRequestService {
       return updatedBooking;
     } catch (error) {
       console.error('=== BOOKING REQUEST SERVICE UPDATE ERROR ===');
+      console.error('Error type:', error.constructor.name);
+      console.error('Error message:', error.message);
       console.error('Error details:', error);
       console.error('Stack trace:', error.stack);
-      throw error;
+      
+      // Prisma-specific error handling
+      if (error.code) {
+        console.error('Prisma error code:', error.code);
+        console.error('Prisma error meta:', error.meta);
+        
+        // Common Prisma error codes
+        switch (error.code) {
+          case 'P2002':
+            throw new Error(`Unique constraint violation: ${error.meta?.target || 'unknown field'}`);
+          case 'P2003':
+            throw new Error(`Foreign key constraint violation: ${error.meta?.field_name || 'unknown field'}`);
+          case 'P2025':
+            throw new Error(`Record not found: ${error.meta?.cause || 'unknown record'}`);
+          default:
+            throw new Error(`Database error (${error.code}): ${error.message}`);
+        }
+      }
+      
+      // Re-throw với message chi tiết hơn
+      throw new Error(`Booking update failed: ${error.message}`);
     }
   }
 
