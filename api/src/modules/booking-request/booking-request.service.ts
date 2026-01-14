@@ -86,9 +86,9 @@ export class BookingRequestService {
     const { data, where } = params;
 
     try {
-      // console.log('=== BOOKING REQUEST SERVICE UPDATE START ===');
-      // console.log('Where clause:', JSON.stringify(where, null, 2));
-      // console.log('Original data:', JSON.stringify(data, null, 2));
+      console.log('=== BOOKING REQUEST SERVICE UPDATE START ===');
+      console.log('Where clause:', JSON.stringify(where, null, 2));
+      console.log('Original data:', JSON.stringify(data, null, 2));
 
       // Process date fields if they exist
       const processedData = { ...data };
@@ -96,7 +96,7 @@ export class BookingRequestService {
       // Handle date fields with better error handling
       if (processedData.start_date && typeof processedData.start_date === 'string') {
         try {
-          // console.log('Processing start_date:', processedData.start_date);
+          console.log('Processing start_date:', processedData.start_date);
           // Check if string is not empty before parsing
           if (processedData.start_date.trim()) {
             // Handle datetime-local format (YYYY-MM-DDTHH:MM) by adding seconds if missing
@@ -108,15 +108,16 @@ export class BookingRequestService {
               dateString += '.000Z'; // Add milliseconds and UTC timezone
             }
 
+            console.log('Transformed dateString:', dateString);
             processedData.start_date = new Date(dateString);
             // Validate the date
             if (isNaN(processedData.start_date.getTime())) {
               throw new Error('Invalid start_date after processing');
             }
-            // console.log('Processed start_date:', processedData.start_date.toISOString());
+            console.log('Processed start_date:', processedData.start_date.toISOString());
           } else {
             processedData.start_date = undefined;
-            // console.log('Empty start_date, setting to undefined');
+            console.log('Empty start_date, setting to undefined');
           }
         } catch (error) {
           console.error('Error parsing start_date:', processedData.start_date, error);
@@ -126,7 +127,7 @@ export class BookingRequestService {
 
       if (processedData.end_date && typeof processedData.end_date === 'string') {
         try {
-          // console.log('Processing end_date:', processedData.end_date);
+          console.log('Processing end_date:', processedData.end_date);
           // Check if string is not empty before parsing
           if (processedData.end_date.trim()) {
             // Handle datetime-local format (YYYY-MM-DDTHH:MM) by adding seconds if missing
@@ -138,15 +139,16 @@ export class BookingRequestService {
               dateString += '.000Z'; // Add milliseconds and UTC timezone
             }
 
+            console.log('Transformed end dateString:', dateString);
             processedData.end_date = new Date(dateString);
             // Validate the date
             if (isNaN(processedData.end_date.getTime())) {
               throw new Error('Invalid end_date after processing');
             }
-            // console.log('Processed end_date:', processedData.end_date.toISOString());
+            console.log('Processed end_date:', processedData.end_date.toISOString());
           } else {
             processedData.end_date = undefined;
-            // console.log('Empty end_date, setting to undefined');
+            console.log('Empty end_date, setting to undefined');
           }
         } catch (error) {
           console.error('Error parsing end_date:', processedData.end_date, error);
@@ -154,16 +156,16 @@ export class BookingRequestService {
         }
       }
 
-      // console.log('Processed data:', JSON.stringify(processedData, null, 2));
+      console.log('Processed data:', JSON.stringify(processedData, null, 2));
 
       // Get current booking request to check status change
-      // console.log('Finding current booking...');
+      console.log('Finding current booking...');
       const currentBooking = await this.prisma.bookingRequest.findUnique({
         where,
       });
-      // console.log('Current booking:', currentBooking ? 'Found' : 'Not found');
+      console.log('Current booking found:', currentBooking ? 'Yes' : 'No');
 
-      // console.log('Updating booking in database...');
+      console.log('Updating booking in database...');
       const updatedBooking = await this.prisma.bookingRequest.update({
         data: processedData,
         where,
