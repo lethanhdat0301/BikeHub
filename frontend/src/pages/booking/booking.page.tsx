@@ -113,21 +113,21 @@ const RequestBookingPage: React.FC = () => {
       return;
     }
 
-    let recaptchaToken: string;
-    try {
-      recaptchaToken = await executeRecaptcha('booking_request');
-    } catch (error) {
-      console.error('reCAPTCHA error:', error);
-      toast({
-        title: "reCAPTCHA Error",
-        description: "Failed to verify reCAPTCHA. Please try again.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setIsSubmitting(false);
-      return;
-    }
+    // let recaptchaToken: string;
+    // try {
+    //   recaptchaToken = await executeRecaptcha('booking_request');
+    // } catch (error) {
+    //   console.error('reCAPTCHA error:', error);
+    //   toast({
+    //     title: "reCAPTCHA Error",
+    //     description: "Failed to verify reCAPTCHA. Please try again.",
+    //     status: "error",
+    //     duration: 3000,
+    //     isClosable: true,
+    //   });
+    //   setIsSubmitting(false);
+    //   return;
+    // }
 
     try {
       // Get user_id if logged in

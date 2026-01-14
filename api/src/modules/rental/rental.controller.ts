@@ -497,5 +497,4 @@ export class RentalController {
   async fixMissingContactInfo(): Promise<any> {
     return this.rentalService.fixMissingContactInfo();
   }
-
 }
