@@ -126,31 +126,55 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
     const handleUpdateBooking = async () => {
         setLoading(true);
         try {
+            // Validate data before sending
+            if (formData.bike_id && formData.dealer_id) {
+                const selectedBike = bikes.find(bike => bike.id === Number(formData.bike_id));
+                if (selectedBike && selectedBike.dealer_id !== Number(formData.dealer_id)) {
+                    alert(`Error: Selected bike does not belong to the selected dealer.\nBike dealer: ${selectedBike.dealer_id}, Selected dealer: ${formData.dealer_id}`);
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            const requestBody = {
+                dealer_id: formData.dealer_id ? Number(formData.dealer_id) : null,
+                bike_id: formData.bike_id ? Number(formData.bike_id) : null,
+                start_date: formData.start_date ? formData.start_date : null,
+                end_date: formData.end_date ? formData.end_date : null,
+                pickup_location: formData.pickup_location || null,
+                status: formData.status,
+                estimated_price: formData.estimated_price ? Number(formData.estimated_price) : null,
+            };
+
+            console.log("=== UPDATING BOOKING ===");
+            console.log("Booking ID:", booking.id);
+            console.log("Request body:", requestBody);
+            console.log("Selected bike info:", bikes.find(bike => bike.id === Number(formData.bike_id)));
+            console.log("Selected dealer info:", dealers.find(dealer => dealer.id === Number(formData.dealer_id)));
+
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
                 {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
-                    body: JSON.stringify({
-                        dealer_id: formData.dealer_id ? Number(formData.dealer_id) : null,
-                        bike_id: formData.bike_id ? Number(formData.bike_id) : null,
-                        start_date: formData.start_date ? new Date(formData.start_date).toISOString() : undefined,
-                        end_date: formData.end_date ? new Date(formData.end_date).toISOString() : undefined,
-                        pickup_location: formData.pickup_location || undefined,
-                        status: formData.status,
-                        estimated_price: formData.estimated_price ? Number(formData.estimated_price) : undefined,
-                    }),
+                    body: JSON.stringify(requestBody),
                 }
             );
 
             if (response.ok) {
+                console.log("Booking updated successfully!");
                 alert("Booking updated successfully!");
                 onClose();
                 onSuccess(); // Call onSuccess after closing to refresh the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to update booking: ${errorData.message || "Unknown error"}`);
+                console.error("=== UPDATE BOOKING ERROR ===");
+                console.error("Response status:", response.status);
+                console.error("Response statusText:", response.statusText);
+                console.error("Full error response:", errorData);
+                console.error("Request body sent:", requestBody);
+                alert(`Failed to update booking: ${errorData.message || "Unknown error"}\nStatus: ${response.status}\nDetails: ${JSON.stringify(errorData, null, 2)}`);
             }
         } catch (error) {
             console.error("Error updating booking:", error);

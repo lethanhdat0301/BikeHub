@@ -85,65 +85,137 @@ export class BookingRequestService {
   }): Promise<BookingRequest> {
     const { data, where } = params;
 
-    // Get current booking request to check status change
-    const currentBooking = await this.prisma.bookingRequest.findUnique({
-      where,
-    });
+    try {
+      // console.log('=== BOOKING REQUEST SERVICE UPDATE START ===');
+      // console.log('Where clause:', JSON.stringify(where, null, 2));
+      // console.log('Original data:', JSON.stringify(data, null, 2));
 
-    const updatedBooking = await this.prisma.bookingRequest.update({
-      data,
-      where,
-      include: {
-        User: true,
-      },
-    });
+      // Process date fields if they exist
+      const processedData = { ...data };
 
-    // If status changed to APPROVED and all required fields are present, create rental
-    if (
-      currentBooking?.status !== 'APPROVED' &&
-      updatedBooking.status === 'APPROVED' &&
-      updatedBooking.bike_id &&
-      updatedBooking.start_date &&
-      updatedBooking.end_date &&
-      updatedBooking.estimated_price
-    ) {
-      // console.log('==== Creating rental from booking request ====');
-      // console.log('BookingRequest data:', {
-      //   id: updatedBooking.id,
-      //   name: updatedBooking.name,
-      //   email: updatedBooking.email,
-      //   contact_details: updatedBooking.contact_details,
-      //   pickup_location: updatedBooking.pickup_location,
-      //   user_id: updatedBooking.user_id,
-      // });
+      // Handle date fields with better error handling
+      if (processedData.start_date && typeof processedData.start_date === 'string') {
+        try {
+          // console.log('Processing start_date:', processedData.start_date);
+          // Check if string is not empty before parsing
+          if (processedData.start_date.trim()) {
+            // Handle datetime-local format (YYYY-MM-DDTHH:MM) by adding seconds if missing
+            let dateString = processedData.start_date.trim();
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+              dateString += ':00'; // Add seconds
+            }
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
+              dateString += '.000Z'; // Add milliseconds and UTC timezone
+            }
 
-      await this.prisma.rental.create({
-        data: {
-          user_id: updatedBooking.user_id,
-          bike_id: updatedBooking.bike_id,
-          booking_request_id: updatedBooking.id, // Link to original booking
-          start_time: updatedBooking.start_date,
-          end_time: updatedBooking.end_date,
-          status: 'ONGOING',
-          price: updatedBooking.estimated_price,
-          // Transfer customer contact information from booking
-          contact_name: updatedBooking.name,
-          contact_email: updatedBooking.email,
-          contact_phone: updatedBooking.contact_details,
-          pickup_location: updatedBooking.pickup_location,
+            processedData.start_date = new Date(dateString);
+            // Validate the date
+            if (isNaN(processedData.start_date.getTime())) {
+              throw new Error('Invalid start_date after processing');
+            }
+            // console.log('Processed start_date:', processedData.start_date.toISOString());
+          } else {
+            processedData.start_date = undefined;
+            // console.log('Empty start_date, setting to undefined');
+          }
+        } catch (error) {
+          console.error('Error parsing start_date:', processedData.start_date, error);
+          throw new Error(`Invalid start_date format: ${processedData.start_date}`);
+        }
+      }
+
+      if (processedData.end_date && typeof processedData.end_date === 'string') {
+        try {
+          // console.log('Processing end_date:', processedData.end_date);
+          // Check if string is not empty before parsing
+          if (processedData.end_date.trim()) {
+            // Handle datetime-local format (YYYY-MM-DDTHH:MM) by adding seconds if missing
+            let dateString = processedData.end_date.trim();
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+              dateString += ':00'; // Add seconds
+            }
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
+              dateString += '.000Z'; // Add milliseconds and UTC timezone
+            }
+
+            processedData.end_date = new Date(dateString);
+            // Validate the date
+            if (isNaN(processedData.end_date.getTime())) {
+              throw new Error('Invalid end_date after processing');
+            }
+            // console.log('Processed end_date:', processedData.end_date.toISOString());
+          } else {
+            processedData.end_date = undefined;
+            // console.log('Empty end_date, setting to undefined');
+          }
+        } catch (error) {
+          console.error('Error parsing end_date:', processedData.end_date, error);
+          throw new Error(`Invalid end_date format: ${processedData.end_date}`);
+        }
+      }
+
+      // console.log('Processed data:', JSON.stringify(processedData, null, 2));
+
+      // Get current booking request to check status change
+      // console.log('Finding current booking...');
+      const currentBooking = await this.prisma.bookingRequest.findUnique({
+        where,
+      });
+      // console.log('Current booking:', currentBooking ? 'Found' : 'Not found');
+
+      // console.log('Updating booking in database...');
+      const updatedBooking = await this.prisma.bookingRequest.update({
+        data: processedData,
+        where,
+        include: {
+          User: true,
         },
       });
+      // console.log('Database update successful');
 
-      // console.log('==== Rental created successfully ====');
+      // If status changed to APPROVED and all required fields are present, create rental
+      if (
+        currentBooking?.status !== 'APPROVED' &&
+        updatedBooking.status === 'APPROVED' &&
+        updatedBooking.bike_id &&
+        updatedBooking.start_date &&
+        updatedBooking.end_date &&
+        updatedBooking.estimated_price
+      ) {
+        // console.log('Creating rental from approved booking...');
+        await this.prisma.rental.create({
+          data: {
+            user_id: updatedBooking.user_id,
+            bike_id: updatedBooking.bike_id,
+            booking_request_id: updatedBooking.id,
+            start_time: updatedBooking.start_date,
+            end_time: updatedBooking.end_date,
+            status: 'ongoing',
+            price: updatedBooking.estimated_price,
+            contact_name: updatedBooking.name,
+            contact_email: updatedBooking.email,
+            contact_phone: updatedBooking.contact_details,
+            pickup_location: updatedBooking.pickup_location,
+          },
+        });
+        // console.log('Rental created successfully');
 
-      // Update bike status to rented
-      await this.prisma.bike.update({
-        where: { id: updatedBooking.bike_id },
-        data: { status: 'rented' },
-      });
+        // Update bike status to rented
+        await this.prisma.bike.update({
+          where: { id: updatedBooking.bike_id },
+          data: { status: 'rented' },
+        });
+        // console.log('Bike status updated to rented');
+      }
+
+      // console.log('=== BOOKING REQUEST SERVICE UPDATE SUCCESS ===');
+      return updatedBooking;
+    } catch (error) {
+      console.error('=== BOOKING REQUEST SERVICE UPDATE ERROR ===');
+      console.error('Error details:', error);
+      console.error('Stack trace:', error.stack);
+      throw error;
     }
-
-    return updatedBooking;
   }
 
   async delete(where: Prisma.BookingRequestWhereUniqueInput): Promise<BookingRequest> {

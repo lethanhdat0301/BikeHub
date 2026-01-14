@@ -211,23 +211,50 @@ export class BookingRequestController {
     @Body() updateBookingRequestDto: UpdateBookingRequestDto,
     @CurrentUser() user: any,
   ): Promise<BookingRequestModel> {
-    // console.log('Updating booking request:', id, updateBookingRequestDto);
+    try {
+      console.log('=== UPDATE BOOKING REQUEST START ===');
+      console.log('Booking ID:', id);
+      console.log('User:', { id: user?.id, role: user?.role });
+      console.log('Request body:', JSON.stringify(updateBookingRequestDto, null, 2));
 
-    // For dealers, verify they own this booking
-    if (user.role === ROLES_ENUM.DEALER) {
-      const dealer = await this.dealerService.findDealerByUserId(user.id);
-      if (dealer) {
-        const booking = await this.bookingRequestService.findOne({ id: Number(id) });
-        if (booking && booking.dealer_id !== dealer.id) {
-          throw new Error('You can only update your own bookings');
+      const bookingId = Number(id);
+      if (isNaN(bookingId)) {
+        console.error('Invalid booking ID:', id);
+        throw new Error('Invalid booking ID');
+      }
+
+      // For dealers, verify they own this booking
+      if (user.role === ROLES_ENUM.DEALER) {
+        const dealer = await this.dealerService.findDealerByUserId(user.id);
+        if (dealer) {
+          const booking = await this.bookingRequestService.findOne({ id: bookingId });
+          if (booking && booking.dealer_id !== dealer.id) {
+            console.error('Dealer access denied. Booking dealer_id:', booking.dealer_id, 'User dealer_id:', dealer.id);
+            throw new Error('You can only update your own bookings');
+          }
         }
       }
-    }
 
-    return this.bookingRequestService.update({
-      where: { id: Number(id) },
-      data: updateBookingRequestDto,
-    });
+      // Validate bike belongs to dealer if both are specified
+      if (updateBookingRequestDto.dealer_id && updateBookingRequestDto.bike_id) {
+        console.log('Validating bike belongs to dealer...');
+        // Add validation logic here if needed
+      }
+
+      console.log('Calling service update...');
+      const result = await this.bookingRequestService.update({
+        where: { id: bookingId },
+        data: updateBookingRequestDto,
+      });
+      
+      console.log('=== UPDATE BOOKING REQUEST SUCCESS ===');
+      return result;
+    } catch (error) {
+      console.error('=== UPDATE BOOKING REQUEST ERROR ===');
+      console.error('Error details:', error);
+      console.error('Stack trace:', error.stack);
+      throw error;
+    }
   }
 
   // New endpoint specifically for dealer actions (accept/reject)

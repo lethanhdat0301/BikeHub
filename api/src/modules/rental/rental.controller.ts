@@ -125,7 +125,7 @@ export class RentalController {
       try {
         // console.log('=== Attempting to send confirmation email to:', contact_email);
 
-        const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: $${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
+        const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: ${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
 
         // Get the appropriate base URL based on environment
         const getBaseUrl = () => {
