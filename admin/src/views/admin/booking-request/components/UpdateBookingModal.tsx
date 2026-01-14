@@ -139,8 +139,10 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             const requestBody = {
                 dealer_id: formData.dealer_id ? Number(formData.dealer_id) : null,
                 bike_id: formData.bike_id ? Number(formData.bike_id) : null,
-                start_date: formData.start_date ? formData.start_date : null,
-                end_date: formData.end_date ? formData.end_date : null,
+                // 👇 SỬA QUAN TRỌNG: Convert sang ISO String để tránh lỗi timezone
+                // Local: '2026-01-15T03:10' -> Server hiểu UTC: '2026-01-15T03:10:00.000Z'
+                start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
+                end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
                 pickup_location: formData.pickup_location || null,
                 status: formData.status,
                 estimated_price: formData.estimated_price ? Number(formData.estimated_price) : null,

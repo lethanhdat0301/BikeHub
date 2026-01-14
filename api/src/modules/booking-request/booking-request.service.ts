@@ -147,11 +147,17 @@ export class BookingRequestService {
       // Process date fields if they exist
       const processedData = { ...data };
 
-      // Handle date fields with better error handling
+      // Handle date fields - Frontend now sends ISO strings, simpler processing
       if (processedData.start_date && typeof processedData.start_date === 'string') {
         try {
           if (processedData.start_date.trim()) {
-            processedData.start_date = this.parseDateTimeString(processedData.start_date, 'start_date');
+            console.log('Processing start_date (ISO string):', processedData.start_date);
+            processedData.start_date = new Date(processedData.start_date);
+            // Validate the date
+            if (isNaN(processedData.start_date.getTime())) {
+              throw new Error('Invalid start_date after parsing ISO string');
+            }
+            console.log('Processed start_date:', processedData.start_date.toISOString());
           } else {
             processedData.start_date = undefined;
             console.log('Empty start_date, setting to undefined');
@@ -166,7 +172,13 @@ export class BookingRequestService {
       if (processedData.end_date && typeof processedData.end_date === 'string') {
         try {
           if (processedData.end_date.trim()) {
-            processedData.end_date = this.parseDateTimeString(processedData.end_date, 'end_date');
+            console.log('Processing end_date (ISO string):', processedData.end_date);
+            processedData.end_date = new Date(processedData.end_date);
+            // Validate the date
+            if (isNaN(processedData.end_date.getTime())) {
+              throw new Error('Invalid end_date after parsing ISO string');
+            }
+            console.log('Processed end_date:', processedData.end_date.toISOString());
           } else {
             processedData.end_date = undefined;
             console.log('Empty end_date, setting to undefined');
