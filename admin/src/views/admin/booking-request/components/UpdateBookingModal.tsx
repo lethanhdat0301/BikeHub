@@ -136,13 +136,43 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 }
             }
 
+            // Safer date conversion with error handling
+            let start_date_iso = null;
+            let end_date_iso = null;
+            
+            try {
+                if (formData.start_date) {
+                    console.log("Converting start_date:", formData.start_date);
+                    const startDate = new Date(formData.start_date);
+                    if (isNaN(startDate.getTime())) {
+                        throw new Error("Invalid start_date: " + formData.start_date);
+                    }
+                    start_date_iso = startDate.toISOString();
+                    console.log("start_date converted to:", start_date_iso);
+                }
+                
+                if (formData.end_date) {
+                    console.log("Converting end_date:", formData.end_date);
+                    const endDate = new Date(formData.end_date);
+                    if (isNaN(endDate.getTime())) {
+                        throw new Error("Invalid end_date: " + formData.end_date);
+                    }
+                    end_date_iso = endDate.toISOString();
+                    console.log("end_date converted to:", end_date_iso);
+                }
+            } catch (dateError) {
+                console.error("Date conversion error:", dateError);
+                alert("Lỗi chuyển đổi ngày tháng: " + dateError.message);
+                return;
+            }
+
             const requestBody = {
                 dealer_id: formData.dealer_id ? Number(formData.dealer_id) : null,
                 bike_id: formData.bike_id ? Number(formData.bike_id) : null,
                 // 👇 SỬA QUAN TRỌNG: Convert sang ISO String để tránh lỗi timezone
                 // Local: '2026-01-15T03:10' -> Server hiểu UTC: '2026-01-15T03:10:00.000Z'
-                start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
-                end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
+                start_date: start_date_iso,
+                end_date: end_date_iso,
                 pickup_location: formData.pickup_location || null,
                 status: formData.status,
                 estimated_price: formData.estimated_price ? Number(formData.estimated_price) : null,
@@ -150,7 +180,10 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
             console.log("=== UPDATING BOOKING ===");
             console.log("Booking ID:", booking.id);
-            console.log("Request body:", requestBody);
+            console.log("Form data raw:", JSON.stringify(formData, null, 2));
+            console.log("Request body:", JSON.stringify(requestBody, null, 2));
+            console.log("start_date conversion:", formData.start_date, "=>", requestBody.start_date);
+            console.log("end_date conversion:", formData.end_date, "=>", requestBody.end_date);
             console.log("Selected bike info:", bikes.find(bike => bike.id === Number(formData.bike_id)));
             console.log("Selected dealer info:", dealers.find(dealer => dealer.id === Number(formData.dealer_id)));
 
