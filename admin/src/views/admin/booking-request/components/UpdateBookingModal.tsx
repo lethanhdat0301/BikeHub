@@ -147,7 +147,8 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 }
             } catch (dateError) {
                 console.error("Date conversion error:", dateError);
-                alert("Lỗi chuyển đổi ngày tháng: " + dateError.message);
+                const errorMessage = dateError instanceof Error ? dateError.message : String(dateError);
+                alert("Lỗi chuyển đổi ngày tháng: " + errorMessage);
                 return;
             }
 
