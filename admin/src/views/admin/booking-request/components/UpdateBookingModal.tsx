@@ -126,11 +126,63 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
     const handleUpdateBooking = async () => {
         setLoading(true);
         try {
-            // Validate data before sending
-            if (formData.bike_id && formData.dealer_id) {
-                const selectedBike = bikes.find(bike => bike.id === Number(formData.bike_id));
-                if (selectedBike && selectedBike.dealer_id !== Number(formData.dealer_id)) {
-                    alert(`Error: Selected bike does not belong to the selected dealer.\nBike dealer: ${selectedBike.dealer_id}, Selected dealer: ${formData.dealer_id}`);
+            console.log("=== STARTING BOOKING UPDATE ===");
+            console.log("Booking ID:", booking.id);
+            console.log("Current booking status:", booking.status);
+            console.log("Form data:", formData);
+
+            // Enhanced validation before sending
+            if (!formData.dealer_id || !formData.bike_id) {
+                alert("Please select both dealer and bike");
+                setLoading(false);
+                return;
+            }
+
+            if (!formData.start_date || !formData.end_date) {
+                alert("Please provide both start and end dates");
+                setLoading(false);
+                return;
+            }
+
+            // Validate bike belongs to dealer
+            const selectedBike = bikes.find(bike => bike.id === Number(formData.bike_id));
+            const selectedDealer = dealers.find(dealer => dealer.id === Number(formData.dealer_id));
+
+            if (!selectedBike) {
+                alert(`Error: Selected bike (ID: ${formData.bike_id}) not found in available bikes list`);
+                setLoading(false);
+                return;
+            }
+
+            if (!selectedDealer) {
+                alert(`Error: Selected dealer (ID: ${formData.dealer_id}) not found in dealers list`);
+                setLoading(false);
+                return;
+            }
+
+            if (selectedBike.dealer_id !== Number(formData.dealer_id)) {
+                alert(`Error: Bike "${selectedBike.model} - ${selectedBike.license_plate}" belongs to dealer ID ${selectedBike.dealer_id}, but you selected dealer ID ${formData.dealer_id} (${selectedDealer.name})`);
+                setLoading(false);
+                return;
+            }
+
+            // Validate dates
+            const startDate = new Date(formData.start_date);
+            const endDate = new Date(formData.end_date);
+
+            if (startDate >= endDate) {
+                alert("End date must be after start date");
+                setLoading(false);
+                return;
+            }
+
+            // Check if dates are in the past (with some tolerance)
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+            if (startDate < yesterday && booking.status === 'PENDING') {
+                const confirmPastDate = confirm("Start date is in the past. Are you sure you want to proceed?");
+                if (!confirmPastDate) {
                     setLoading(false);
                     return;
                 }
@@ -139,7 +191,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             // Safer date conversion with error handling
             let start_date_iso = null;
             let end_date_iso = null;
-            
+
             try {
                 if (formData.start_date) {
                     console.log("Converting start_date:", formData.start_date);
@@ -150,7 +202,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                     start_date_iso = startDate.toISOString();
                     console.log("start_date converted to:", start_date_iso);
                 }
-                
+
                 if (formData.end_date) {
                     console.log("Converting end_date:", formData.end_date);
                     const endDate = new Date(formData.end_date);
@@ -187,6 +239,37 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             console.log("Selected bike info:", bikes.find(bike => bike.id === Number(formData.bike_id)));
             console.log("Selected dealer info:", dealers.find(dealer => dealer.id === Number(formData.dealer_id)));
 
+            console.log("=== SENDING UPDATE REQUEST ===");
+            console.log("URL:", `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`);
+            console.log("Method: PUT");
+            console.log("Headers: Content-Type: application/json, credentials: include");
+            console.log("Request body:", JSON.stringify(requestBody, null, 2));
+
+            // Test API connection first
+            try {
+                const testResponse = await fetch(
+                    `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
+                    {
+                        method: "GET",
+                        credentials: "include",
+                    }
+                );
+                console.log("✅ GET test successful, status:", testResponse.status);
+
+                if (!testResponse.ok) {
+                    const testError = await testResponse.json();
+                    console.error("❌ GET test failed:", testError);
+                    alert(`Cannot access booking ${booking.id}. Status: ${testResponse.status}\nError: ${testError.message}`);
+                    setLoading(false);
+                    return;
+                }
+            } catch (testError) {
+                console.error("❌ Connection test failed:", testError);
+                alert(`Connection test failed: ${testError.message}\nPlease check your internet connection and try again.`);
+                setLoading(false);
+                return;
+            }
+
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
                 {
@@ -198,18 +281,48 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             );
 
             if (response.ok) {
-                console.log("Booking updated successfully!");
+                const responseData = await response.json();
+                console.log("✅ Booking updated successfully!");
+                console.log("Response data:", responseData);
                 alert("Booking updated successfully!");
                 onClose();
                 onSuccess(); // Call onSuccess after closing to refresh the table
             } else {
-                const errorData = await response.json();
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (parseError) {
+                    console.error("Could not parse error response as JSON:", parseError);
+                    errorData = { message: "Could not parse server response" };
+                }
+
                 console.error("=== UPDATE BOOKING ERROR ===");
+                console.error("Booking ID:", booking.id);
                 console.error("Response status:", response.status);
                 console.error("Response statusText:", response.statusText);
+                console.error("Response headers:", Object.fromEntries(response.headers.entries()));
                 console.error("Full error response:", errorData);
                 console.error("Request body sent:", requestBody);
-                alert(`Failed to update booking: ${errorData.message || "Unknown error"}\nStatus: ${response.status}\nDetails: ${JSON.stringify(errorData, null, 2)}`);
+                console.error("Request URL:", `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`);
+
+                // Detailed error message for user
+                let errorMessage = `❌ Failed to update booking ID ${booking.id}\n`;
+                errorMessage += `Status: ${response.status} ${response.statusText}\n`;
+                errorMessage += `Message: ${errorData.message || "Unknown error"}\n`;
+
+                if (errorData.details) {
+                    errorMessage += `Details: ${JSON.stringify(errorData.details, null, 2)}\n`;
+                }
+
+                // Add debugging info for specific errors
+                if (response.status === 500) {
+                    errorMessage += `\n🔍 Debug Info:\n`;
+                    errorMessage += `- Check if bike ${requestBody.bike_id} belongs to dealer ${requestBody.dealer_id}\n`;
+                    errorMessage += `- Verify booking ${booking.id} exists and is editable\n`;
+                    errorMessage += `- Check server logs for detailed error\n`;
+                }
+
+                alert(errorMessage);
             }
         } catch (error) {
             console.error("Error updating booking:", error);
@@ -360,6 +473,26 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                         </div>
                     </div>
                 </div>
+
+                {/* Debug Info (only show in development) */}
+                {process.env.NODE_ENV === 'development' && (
+                    <div className="px-6 py-3 bg-gray-100 border-t border-gray-200">
+                        <details className="text-xs">
+                            <summary className="cursor-pointer font-medium text-gray-600 hover:text-gray-800">
+                                🔍 Debug Info (Click to expand)
+                            </summary>
+                            <div className="mt-2 space-y-1 text-gray-500">
+                                <div><strong>Booking ID:</strong> {booking?.id}</div>
+                                <div><strong>Current Status:</strong> {booking?.status}</div>
+                                <div><strong>Available Bikes for Dealer:</strong> {getFilteredBikes().length}</div>
+                                <div><strong>Selected Bike:</strong> {formData.bike_id ? `${bikes.find(b => b.id === Number(formData.bike_id))?.model} (ID: ${formData.bike_id})` : 'None'}</div>
+                                <div><strong>Selected Dealer:</strong> {formData.dealer_id ? `${dealers.find(d => d.id === Number(formData.dealer_id))?.name} (ID: ${formData.dealer_id})` : 'None'}</div>
+                                <div><strong>API URL:</strong> {process.env.REACT_APP_API_URL}</div>
+                                <div><strong>Date Range:</strong> {formData.start_date} → {formData.end_date}</div>
+                            </div>
+                        </details>
+                    </div>
+                )}
 
                 {/* Footer Buttons */}
                 <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
