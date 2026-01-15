@@ -240,10 +240,11 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                     }
                 } else if ('code' in error && error.code === 'ERR_NETWORK') {
                     // Network error
+                    const networkError = error as any;
                     console.error("Network error details:", {
-                        message: error.message,
-                        code: error.code,
-                        config: error.config
+                        message: networkError.message,
+                        code: networkError.code,
+                        config: networkError.config
                     });
                     errorMessage = `❌ Network Error: Cannot connect to server\n\nPossible causes:\n- API server is not running\n- Wrong API URL: ${process.env.REACT_APP_API_URL}\n- CORS issues\n- Internet connection problems\n\nPlease check if the API server is running and accessible.`;
                 } else if ('message' in error) {
