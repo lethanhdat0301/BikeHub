@@ -83,7 +83,7 @@ export function buildBookingConfirmationHtml(opts: BookingTemplateOptions): stri
 
             <tr>
               <td style="padding:14px 24px; font-size:12px; color:#9aa0a6; background:#fafafa;">
-                RentNRide, <a href="https://frontend-289273895966.asia-southeast1.run.app/" style="color:#9aa0a6; text-decoration:underline;">https://frontend-289273895966.asia-southeast1.run.app/</a>, +1 234 567 890
+                RentNRide, <a href="https://rentnride.travel/" style="color:#9aa0a6; text-decoration:underline;">https://rentnride.travel/</a>, +84 388 817 935
               </td>
             </tr>
           </table>
