@@ -12,6 +12,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
     const [loading, setLoading] = useState(false);
     const [bikes, setBikes] = useState<any[]>([]);
     const [dealers, setDealers] = useState<any[]>([]);
+    const [showPastDateConfirm, setShowPastDateConfirm] = useState(false);
 
     // State cho form cập nhật booking
     const [formData, setFormData] = useState({
@@ -67,7 +68,6 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 credentials: "include",
             });
             const data = await response.json();
-            // console.log('Dealers fetched:', data);
             setDealers(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error fetching dealers:", error);
@@ -123,94 +123,27 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
         return bikes.filter(bike => bike.dealer_id === Number(formData.dealer_id));
     };
 
-    const handleUpdateBooking = async () => {
-        setLoading(true);
+    const performUpdate = async () => {
         try {
-            console.log("=== STARTING BOOKING UPDATE ===");
-            console.log("Booking ID:", booking.id);
-            console.log("Current booking status:", booking.status);
-            console.log("Form data:", formData);
-
-            // Enhanced validation before sending
-            if (!formData.dealer_id || !formData.bike_id) {
-                alert("Please select both dealer and bike");
-                setLoading(false);
-                return;
-            }
-
-            if (!formData.start_date || !formData.end_date) {
-                alert("Please provide both start and end dates");
-                setLoading(false);
-                return;
-            }
-
-            // Validate bike belongs to dealer
-            const selectedBike = bikes.find(bike => bike.id === Number(formData.bike_id));
-            const selectedDealer = dealers.find(dealer => dealer.id === Number(formData.dealer_id));
-
-            if (!selectedBike) {
-                alert(`Error: Selected bike (ID: ${formData.bike_id}) not found in available bikes list`);
-                setLoading(false);
-                return;
-            }
-
-            if (!selectedDealer) {
-                alert(`Error: Selected dealer (ID: ${formData.dealer_id}) not found in dealers list`);
-                setLoading(false);
-                return;
-            }
-
-            if (selectedBike.dealer_id !== Number(formData.dealer_id)) {
-                alert(`Error: Bike "${selectedBike.model} - ${selectedBike.license_plate}" belongs to dealer ID ${selectedBike.dealer_id}, but you selected dealer ID ${formData.dealer_id} (${selectedDealer.name})`);
-                setLoading(false);
-                return;
-            }
-
-            // Validate dates
-            const startDate = new Date(formData.start_date);
-            const endDate = new Date(formData.end_date);
-
-            if (startDate >= endDate) {
-                alert("End date must be after start date");
-                setLoading(false);
-                return;
-            }
-
-            // Check if dates are in the past (with some tolerance)
-            const now = new Date();
-            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-            if (startDate < yesterday && booking.status === 'PENDING') {
-                const confirmPastDate = confirm("Start date is in the past. Are you sure you want to proceed?");
-                if (!confirmPastDate) {
-                    setLoading(false);
-                    return;
-                }
-            }
-
             // Safer date conversion with error handling
             let start_date_iso = null;
             let end_date_iso = null;
 
             try {
                 if (formData.start_date) {
-                    console.log("Converting start_date:", formData.start_date);
                     const startDate = new Date(formData.start_date);
                     if (isNaN(startDate.getTime())) {
                         throw new Error("Invalid start_date: " + formData.start_date);
                     }
                     start_date_iso = startDate.toISOString();
-                    console.log("start_date converted to:", start_date_iso);
                 }
 
                 if (formData.end_date) {
-                    console.log("Converting end_date:", formData.end_date);
                     const endDate = new Date(formData.end_date);
                     if (isNaN(endDate.getTime())) {
                         throw new Error("Invalid end_date: " + formData.end_date);
                     }
                     end_date_iso = endDate.toISOString();
-                    console.log("end_date converted to:", end_date_iso);
                 }
             } catch (dateError) {
                 console.error("Date conversion error:", dateError);
@@ -221,8 +154,6 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             const requestBody = {
                 dealer_id: formData.dealer_id ? Number(formData.dealer_id) : null,
                 bike_id: formData.bike_id ? Number(formData.bike_id) : null,
-                // 👇 SỬA QUAN TRỌNG: Convert sang ISO String để tránh lỗi timezone
-                // Local: '2026-01-15T03:10' -> Server hiểu UTC: '2026-01-15T03:10:00.000Z'
                 start_date: start_date_iso,
                 end_date: end_date_iso,
                 pickup_location: formData.pickup_location || null,
@@ -232,43 +163,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
             console.log("=== UPDATING BOOKING ===");
             console.log("Booking ID:", booking.id);
-            console.log("Form data raw:", JSON.stringify(formData, null, 2));
             console.log("Request body:", JSON.stringify(requestBody, null, 2));
-            console.log("start_date conversion:", formData.start_date, "=>", requestBody.start_date);
-            console.log("end_date conversion:", formData.end_date, "=>", requestBody.end_date);
-            console.log("Selected bike info:", bikes.find(bike => bike.id === Number(formData.bike_id)));
-            console.log("Selected dealer info:", dealers.find(dealer => dealer.id === Number(formData.dealer_id)));
-
-            console.log("=== SENDING UPDATE REQUEST ===");
-            console.log("URL:", `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`);
-            console.log("Method: PUT");
-            console.log("Headers: Content-Type: application/json, credentials: include");
-            console.log("Request body:", JSON.stringify(requestBody, null, 2));
-
-            // Test API connection first
-            try {
-                const testResponse = await fetch(
-                    `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
-                    {
-                        method: "GET",
-                        credentials: "include",
-                    }
-                );
-                console.log("✅ GET test successful, status:", testResponse.status);
-
-                if (!testResponse.ok) {
-                    const testError = await testResponse.json();
-                    console.error("❌ GET test failed:", testError);
-                    alert(`Cannot access booking ${booking.id}. Status: ${testResponse.status}\nError: ${testError.message}`);
-                    setLoading(false);
-                    return;
-                }
-            } catch (testError) {
-                console.error("❌ Connection test failed:", testError);
-                alert(`Connection test failed: ${testError.message}\nPlease check your internet connection and try again.`);
-                setLoading(false);
-                return;
-            }
 
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
@@ -283,53 +178,93 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             if (response.ok) {
                 const responseData = await response.json();
                 console.log("✅ Booking updated successfully!");
-                console.log("Response data:", responseData);
                 alert("Booking updated successfully!");
                 onClose();
-                onSuccess(); // Call onSuccess after closing to refresh the table
+                onSuccess();
             } else {
                 let errorData;
                 try {
                     errorData = await response.json();
                 } catch (parseError) {
-                    console.error("Could not parse error response as JSON:", parseError);
                     errorData = { message: "Could not parse server response" };
                 }
 
                 console.error("=== UPDATE BOOKING ERROR ===");
-                console.error("Booking ID:", booking.id);
                 console.error("Response status:", response.status);
-                console.error("Response statusText:", response.statusText);
-                console.error("Response headers:", Object.fromEntries(response.headers.entries()));
                 console.error("Full error response:", errorData);
-                console.error("Request body sent:", requestBody);
-                console.error("Request URL:", `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`);
 
-                // Detailed error message for user
-                let errorMessage = `❌ Failed to update booking ID ${booking.id}\n`;
-                errorMessage += `Status: ${response.status} ${response.statusText}\n`;
-                errorMessage += `Message: ${errorData.message || "Unknown error"}\n`;
-
-                if (errorData.details) {
-                    errorMessage += `Details: ${JSON.stringify(errorData.details, null, 2)}\n`;
-                }
-
-                // Add debugging info for specific errors
-                if (response.status === 500) {
-                    errorMessage += `\n🔍 Debug Info:\n`;
-                    errorMessage += `- Check if bike ${requestBody.bike_id} belongs to dealer ${requestBody.dealer_id}\n`;
-                    errorMessage += `- Verify booking ${booking.id} exists and is editable\n`;
-                    errorMessage += `- Check server logs for detailed error\n`;
-                }
-
-                alert(errorMessage);
+                alert(`❌ Failed to update booking\nStatus: ${response.status}\nMessage: ${errorData.message || "Unknown error"}`);
             }
         } catch (error) {
             console.error("Error updating booking:", error);
+            alert("An error occurred while updating booking");
+        }
+    };
+
+    const handleUpdateBooking = async () => {
+        setLoading(true);
+        try {
+            // Enhanced validation before sending
+            if (!formData.dealer_id || !formData.bike_id) {
+                alert("Please select both dealer and bike");
+                return;
+            }
+
+            if (!formData.start_date || !formData.end_date) {
+                alert("Please provide both start and end dates");
+                return;
+            }
+
+            // Validate bike belongs to dealer
+            const selectedBike = bikes.find(bike => bike.id === Number(formData.bike_id));
+            const selectedDealer = dealers.find(dealer => dealer.id === Number(formData.dealer_id));
+
+            if (!selectedBike || !selectedDealer) {
+                alert("Error: Selected bike or dealer not found");
+                return;
+            }
+
+            if (selectedBike.dealer_id !== Number(formData.dealer_id)) {
+                alert(`Error: Bike "${selectedBike.model}" does not belong to selected dealer "${selectedDealer.name}"`);
+                return;
+            }
+
+            // Validate dates
+            const startDate = new Date(formData.start_date);
+            const endDate = new Date(formData.end_date);
+
+            if (startDate >= endDate) {
+                alert("End date must be after start date");
+                return;
+            }
+
+            // Check if dates are in the past
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+            if (startDate < yesterday && booking.status === 'PENDING') {
+                setShowPastDateConfirm(true);
+                return;
+            }
+
+            await performUpdate();
+        } catch (error) {
+            console.error("Error in handleUpdateBooking:", error);
             alert("An error occurred");
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePastDateConfirm = async () => {
+        setShowPastDateConfirm(false);
+        setLoading(true);
+        await performUpdate();
+        setLoading(false);
+    };
+
+    const handlePastDateCancel = () => {
+        setShowPastDateConfirm(false);
     };
 
     if (!isOpen) return null;
@@ -350,14 +285,12 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                     </button>
                 </div>
 
-                {/* Form Fields - Scrollable */}
+                {/* Form Fields */}
                 <div className="px-6 py-4 max-h-[70vh] overflow-y-auto bg-white">
                     <div className="grid grid-cols-2 gap-4">
                         {/* Dealer */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                Dealer
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Dealer</label>
                             <select
                                 name="dealer_id"
                                 value={formData.dealer_id}
@@ -375,9 +308,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
                         {/* Bike */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                Motorbike
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Motorbike</label>
                             <select
                                 name="bike_id"
                                 value={formData.bike_id}
@@ -396,59 +327,50 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                             </select>
                         </div>
 
-                        {/* Start Date */}
+                        {/* Dates */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                Start Date
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Start Date</label>
                             <input
                                 type="datetime-local"
                                 name="start_date"
                                 value={formData.start_date}
                                 onChange={handleInputChange}
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
-                        {/* End Date */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                End Date
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">End Date</label>
                             <input
                                 type="datetime-local"
                                 name="end_date"
                                 value={formData.end_date}
                                 onChange={handleInputChange}
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
                         {/* Pickup Location */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                Pickup Location
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Pickup Location</label>
                             <input
                                 type="text"
                                 name="pickup_location"
                                 value={formData.pickup_location}
                                 onChange={handleInputChange}
                                 placeholder="Enter pickup location"
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
-                        {/* Status */}
+                        {/* Status & Price */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                Status
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Status</label>
                             <select
                                 name="status"
                                 value={formData.status}
                                 onChange={handleInputChange}
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="PENDING">Pending</option>
                                 <option value="APPROVED">Approved</option>
@@ -457,40 +379,42 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                             </select>
                         </div>
 
-                        {/* Estimated Price */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                Estimated Price (VNĐ)
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Estimated Price (VNĐ)</label>
                             <input
                                 type="number"
                                 name="estimated_price"
                                 value={formData.estimated_price}
                                 onChange={handleInputChange}
-                                placeholder="0"
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Debug Info (only show in development) */}
-                {process.env.NODE_ENV === 'development' && (
-                    <div className="px-6 py-3 bg-gray-100 border-t border-gray-200">
-                        <details className="text-xs">
-                            <summary className="cursor-pointer font-medium text-gray-600 hover:text-gray-800">
-                                🔍 Debug Info (Click to expand)
-                            </summary>
-                            <div className="mt-2 space-y-1 text-gray-500">
-                                <div><strong>Booking ID:</strong> {booking?.id}</div>
-                                <div><strong>Current Status:</strong> {booking?.status}</div>
-                                <div><strong>Available Bikes for Dealer:</strong> {getFilteredBikes().length}</div>
-                                <div><strong>Selected Bike:</strong> {formData.bike_id ? `${bikes.find(b => b.id === Number(formData.bike_id))?.model} (ID: ${formData.bike_id})` : 'None'}</div>
-                                <div><strong>Selected Dealer:</strong> {formData.dealer_id ? `${dealers.find(d => d.id === Number(formData.dealer_id))?.name} (ID: ${formData.dealer_id})` : 'None'}</div>
-                                <div><strong>API URL:</strong> {process.env.REACT_APP_API_URL}</div>
-                                <div><strong>Date Range:</strong> {formData.start_date} → {formData.end_date}</div>
+                {/* Past Date Confirmation Modal */}
+                {showPastDateConfirm && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 rounded-xl">
+                        <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-3">⚠️ Past Date Warning</h3>
+                            <p className="text-gray-600 mb-4">
+                                The start date is in the past. Are you sure you want to proceed?
+                            </p>
+                            <div className="flex gap-3 justify-end">
+                                <button
+                                    onClick={handlePastDateCancel}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handlePastDateConfirm}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700"
+                                >
+                                    Proceed Anyway
+                                </button>
                             </div>
-                        </details>
+                        </div>
                     </div>
                 )}
 
@@ -498,14 +422,14 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
                     <button
                         onClick={onClose}
-                        className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                        className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleUpdateBooking}
                         disabled={loading}
-                        className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                     >
                         {loading ? "Updating..." : "Update"}
                     </button>
