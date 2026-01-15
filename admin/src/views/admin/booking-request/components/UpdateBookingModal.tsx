@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdClose } from "react-icons/md";
+import bookingRequestService from "../../../../services/bookingRequestService";
 
 type Props = {
     isOpen: boolean;
@@ -44,10 +45,16 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
         }
     }, [isOpen, booking]);
 
-    // Helper để format date sang yyyy-MM-ddThh:mm (cho input datetime-local)
+    // 🔧 FIX: Helper để format date sang yyyy-MM-ddThh:mm KHÔNG chuyển đổi timezone
     const formatDateForInput = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toISOString().slice(0, 16);
+        // Lấy thời gian địa phương để tránh lệch timezone
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
     const fetchBikes = async () => {
@@ -78,6 +85,13 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
         const { name, value } = e.target;
         setFormData((prev) => {
             const updated = { ...prev, [name]: value };
+
+            // 🔧 FIX: Reset bike_id when dealer changes to prevent mismatched pairs
+            if (name === 'dealer_id') {
+                updated.bike_id = ""; // Reset bike selection
+                updated.estimated_price = 0; // Reset price
+                return updated;
+            }
 
             // Auto-calculate price when bike or dates change
             if (name === 'bike_id' || name === 'start_date' || name === 'end_date') {
@@ -166,39 +180,40 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             console.log("Booking ID:", booking.id);
             console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
-            const response = await fetch(
-                `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
-                {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify(requestBody),
-                }
-            );
+            // 🔧 FIX: Use proper authentication via service instead of raw fetch
+            const response = await bookingRequestService.updateBookingRequest(booking.id, requestBody);
 
-            if (response.ok) {
-                const responseData = await response.json();
-                console.log("✅ Booking updated successfully!");
-                alert("Booking updated successfully!");
-                onClose();
-                onSuccess();
-            } else {
-                let errorData;
-                try {
-                    errorData = await response.json();
-                } catch (parseError) {
-                    errorData = { message: "Could not parse server response" };
-                }
-
-                console.error("=== UPDATE BOOKING ERROR ===");
-                console.error("Response status:", response.status);
-                console.error("Full error response:", errorData);
-
-                alert(`❌ Failed to update booking\nStatus: ${response.status}\nMessage: ${errorData.message || "Unknown error"}`);
-            }
+            console.log("✅ Booking updated successfully!");
+            console.log("Response data:", response);
+            alert("Booking updated successfully!");
+            onClose();
+            onSuccess();
         } catch (error) {
+            console.error("=== UPDATE BOOKING ERROR ===");
             console.error("Error updating booking:", error);
-            alert("An error occurred while updating booking");
+
+            // Handle different error types from axios/service
+            let errorMessage = "An error occurred while updating booking";
+
+            if (error && typeof error === 'object') {
+                if ('response' in error && error.response) {
+                    // Axios error with response
+                    const axiosError = error as any;
+                    const status = axiosError.response?.status;
+                    const data = axiosError.response?.data;
+
+                    errorMessage = `❌ Failed to update booking\nStatus: ${status}\nMessage: ${data?.message || "Unknown error"}`;
+
+                    if (status === 500) {
+                        errorMessage += `\n\n🔍 Debug Info:\n- Check if bike belongs to selected dealer\n- Verify booking exists and is editable\n- Check server logs for detailed error`;
+                    }
+                } else if ('message' in error) {
+                    // Regular Error object
+                    errorMessage = `❌ Error: ${error.message}`;
+                }
+            }
+
+            alert(errorMessage);
         }
     };
 
