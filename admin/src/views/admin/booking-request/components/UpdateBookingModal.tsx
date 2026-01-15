@@ -59,8 +59,18 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
     const fetchBikes = async () => {
         try {
+            // Get token for authentication
+            const token = localStorage.getItem("token") || localStorage.getItem("accessToken") || localStorage.getItem("user_token");
+            const headers: HeadersInit = {
+                "Content-Type": "application/json",
+            };
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+
             const response = await fetch(`${process.env.REACT_APP_API_URL}bikes`, {
                 credentials: "include",
+                headers,
             });
             const data = await response.json();
             setBikes(Array.isArray(data) ? data : []);
@@ -71,8 +81,18 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
 
     const fetchDealers = async () => {
         try {
+            // Get token for authentication
+            const token = localStorage.getItem("token") || localStorage.getItem("accessToken") || localStorage.getItem("user_token");
+            const headers: HeadersInit = {
+                "Content-Type": "application/json",
+            };
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+
             const response = await fetch(`${process.env.REACT_APP_API_URL}users/dealers`, {
                 credentials: "include",
+                headers,
             });
             const data = await response.json();
             setDealers(Array.isArray(data) ? data : []);
@@ -179,6 +199,8 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
             console.log("=== UPDATING BOOKING ===");
             console.log("Booking ID:", booking.id);
             console.log("Request body:", JSON.stringify(requestBody, null, 2));
+            console.log("API URL from env:", process.env.REACT_APP_API_URL);
+            console.log("Service URL will be:", process.env.REACT_APP_API_URL || "http://localhost:3300/api/v1/");
 
             // 🔧 FIX: Use proper authentication via service instead of raw fetch
             const response = await bookingRequestService.updateBookingRequest(booking.id, requestBody);
@@ -191,6 +213,8 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
         } catch (error) {
             console.error("=== UPDATE BOOKING ERROR ===");
             console.error("Error updating booking:", error);
+            console.error("Error type:", typeof error);
+            console.error("Error constructor:", error?.constructor?.name);
 
             // Handle different error types from axios/service
             let errorMessage = "An error occurred while updating booking";
@@ -202,11 +226,26 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                     const status = axiosError.response?.status;
                     const data = axiosError.response?.data;
 
+                    console.error("Axios response error:", {
+                        status,
+                        data,
+                        headers: axiosError.response?.headers,
+                        config: axiosError.config
+                    });
+
                     errorMessage = `❌ Failed to update booking\nStatus: ${status}\nMessage: ${data?.message || "Unknown error"}`;
 
                     if (status === 500) {
                         errorMessage += `\n\n🔍 Debug Info:\n- Check if bike belongs to selected dealer\n- Verify booking exists and is editable\n- Check server logs for detailed error`;
                     }
+                } else if ('code' in error && error.code === 'ERR_NETWORK') {
+                    // Network error
+                    console.error("Network error details:", {
+                        message: error.message,
+                        code: error.code,
+                        config: error.config
+                    });
+                    errorMessage = `❌ Network Error: Cannot connect to server\n\nPossible causes:\n- API server is not running\n- Wrong API URL: ${process.env.REACT_APP_API_URL}\n- CORS issues\n- Internet connection problems\n\nPlease check if the API server is running and accessible.`;
                 } else if ('message' in error) {
                     // Regular Error object
                     errorMessage = `❌ Error: ${error.message}`;
