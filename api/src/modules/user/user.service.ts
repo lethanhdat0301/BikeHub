@@ -3,6 +3,7 @@ import { Injectable, UnauthorizedException, NotFoundException, BadRequestExcepti
 import { AuthHelpers } from '../../shared/helpers/auth.helpers';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUser } from './../auth/auth.dto';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class UserService {
@@ -195,7 +196,7 @@ export class UserService {
 
     const registeredCustomers = users.map(user => {
       const totalRentals = user.Rental.length;
-      const totalSpent = user.Rental.reduce((sum, rental) => sum + rental.price, 0);
+      const totalSpent = user.Rental.reduce((sum, rental) => sum.plus(rental.price), new Decimal(0));
       const lastRental = user.Rental.length > 0
         ? user.Rental.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
         : null;

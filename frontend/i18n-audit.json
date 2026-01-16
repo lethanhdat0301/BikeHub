@@ -1,0 +1,212 @@
+[
+  {
+    "file": "src/components/header/header.component.tsx",
+    "line": 423,
+    "snippet": "<Text color=\"red.400\">Logout</Text>",
+    "suggestedKey": "header.logout",
+    "notes": "Header menu label (user menu). High priority. Already present in en/ru JSON, replace with t('header.logout').",
+    "priority": "high"
+  },
+  {
+    "file": "src/pages/booking/booking.page.tsx",
+    "line": 261,
+    "snippet": "Request sent to admin successfully!",
+    "suggestedKey": "booking.requestSuccess",
+    "notes": "Success toast/text after sending booking request. High priority.",
+    "priority": "high"
+  },
+  {
+    "file": "src/pages/booking/booking.page.tsx",
+    "line": 338,
+    "snippet": "<Text ...>Phone</Text>",
+    "suggestedKey": "booking.contact.phone",
+    "notes": "Contact labels near phone icons. Medium priority.",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/booking/booking.page.tsx",
+    "line": 344,
+    "snippet": "<Text ...>WhatsApp</Text>",
+    "suggestedKey": "booking.contact.whatsapp",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/booking/booking.page.tsx",
+    "line": 350,
+    "snippet": "<Text ...>Telegram</Text>",
+    "suggestedKey": "booking.contact.telegram",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/auth/signup.page.tsx",
+    "line": 58,
+    "snippet": "<p ...>or</p>",
+    "suggestedKey": "auth.or",
+    "notes": "Small text between social login and form. Low priority.",
+    "priority": "low"
+  },
+  {
+    "file": "src/pages/search/search.tsx",
+    "line": 190,
+    "snippet": "<Heading size=\"md\">Filters</Heading>",
+    "suggestedKey": "search.filters",
+    "priority": "high"
+  },
+  {
+    "file": "src/pages/search/search.tsx",
+    "line": 251,
+    "snippet": "<Checkbox value=\"Electric Scooter\">Electric Scooter</Checkbox>",
+    "suggestedKey": "search.filter.type.electricScooter",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/search/search.tsx",
+    "line": 252,
+    "snippet": "<Checkbox value=\"Scooter\">Automatic Scooter</Checkbox>",
+    "suggestedKey": "search.filter.type.automaticScooter",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/search/search.tsx",
+    "line": 253,
+    "snippet": "<Checkbox value=\"Manual Bike\">Manual Bike</Checkbox>",
+    "suggestedKey": "search.filter.type.manualBike",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/settingProfile/partials/updatePasswordForm.component.tsx",
+    "line": 131,
+    "snippet": "<FormLabel>Old Password</FormLabel>",
+    "suggestedKey": "profile.oldPassword",
+    "priority": "high"
+  },
+  {
+    "file": "src/pages/settingProfile/partials/updatePasswordForm.component.tsx",
+    "line": 150,
+    "snippet": "<FormErrorMessage>error Password</FormErrorMessage>",
+    "suggestedKey": "profile.error.password",
+    "priority": "high",
+    "notes": "Fix grammar when adding translation (e.g., 'Incorrect password')."
+  },
+  {
+    "file": "src/pages/settingProfile/partials/updateInfoForm.component.tsx",
+    "line": 133,
+    "snippet": "<FormLabel>Full Name</FormLabel>",
+    "suggestedKey": "profile.fullName",
+    "priority": "high"
+  },
+  {
+    "file": "src/pages/settingProfile/partials/updateInfoForm.component.tsx",
+    "line": 142,
+    "snippet": "<FormErrorMessage>Name is messing</FormErrorMessage>",
+    "suggestedKey": "profile.error.name",
+    "priority": "high",
+    "notes": "Message contains typo; recommend 'Name is missing' or similar in all languages."
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 388,
+    "snippet": "<Text>Loading...</Text>",
+    "suggestedKey": "bike.loading",
+    "priority": "high"
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 396,
+    "snippet": "<Text>Motorbike not found</Text>",
+    "suggestedKey": "bike.notFound",
+    "priority": "high"
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 466,
+    "snippet": "<Text fontSize=\"sm\">{bike.seats || 2} Seats</Text>",
+    "suggestedKey": "bike.seats",
+    "priority": "medium",
+    "notes": "Use pluralization where appropriate."
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 470,
+    "snippet": "<Text fontSize=\"sm\" ...>{bike.fuel_type || 'Gasoline'}</Text>",
+    "suggestedKey": "bike.fuelType.gasoline",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 474,
+    "snippet": "<Text fontSize=\"sm\">{bike.transmission || 'Automatic'}</Text>",
+    "suggestedKey": "bike.transmission.automatic",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 501,
+    "snippet": "<Text fontSize=\"sm\">Recently serviced</Text>",
+    "suggestedKey": "bike.feature.recentlyServiced",
+    "priority": "low"
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 505,
+    "snippet": "<Text fontSize=\"sm\">Professionally cleaned</Text>",
+    "suggestedKey": "bike.feature.professionallyCleaned",
+    "priority": "low"
+  },
+  {
+    "file": "src/pages/bikeDetails/bikeDetails.page.tsx",
+    "line": 510,
+    "snippet": "<Text fontSize=\"sm\">Eco-friendly</Text>",
+    "suggestedKey": "bike.feature.ecoFriendly",
+    "priority": "low"
+  },
+  {
+    "file": "src/pages/booking/PaymentSuccess.page.tsx",
+    "line": 32,
+    "snippet": "<Heading ...>CONGRATS, ENJOY YOUR RIDE!</Heading>",
+    "suggestedKey": "booking.paymentSuccess.title",
+    "priority": "medium"
+  },
+  {
+    "file": "src/components/qrcode/qrcode.tsx",
+    "line": 82,
+    "snippet": "<Button ...>Save QR Code</Button>",
+    "suggestedKey": "qrcode.save",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/return/return.page.tsx",
+    "line": 306,
+    "snippet": "placeholder=\"Booking ID, Phone Number, or License Plate\"",
+    "suggestedKey": "return.searchPlaceholder",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/return/return.page.tsx",
+    "line": 504,
+    "snippet": "placeholder=\"Share your experience with this motorbike...\"",
+    "suggestedKey": "return.reviewPlaceholder",
+    "priority": "medium"
+  },
+  {
+    "file": "src/pages/order/trackOrder.page.tsx",
+    "line": 356,
+    "snippet": "placeholder=\"Booking ID, Phone Number, or License Plate\"",
+    "suggestedKey": "order.trackPlaceholder",
+    "priority": "medium"
+  },
+  {
+    "file": "src/components/auth/loginForm/loginForm.component.tsx",
+    "line": 192,
+    "snippet": "<Checkbox colorScheme=\"teal\">Remember me</Checkbox>",
+    "suggestedKey": "auth.rememberMe",
+    "priority": "low"
+  },
+  {
+    "file": "src/components/home/bikes/swiperBikes.component.tsx",
+    "line": 101,
+    "snippet": "<option value=\"all\">All Parks</option>",
+    "suggestedKey": "home.bikes.filter.allParks",
+    "priority": "low"
+  }
+]

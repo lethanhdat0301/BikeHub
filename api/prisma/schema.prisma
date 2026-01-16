@@ -7,47 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Bike {
-  id              Int      @id @default(autoincrement())
-  model           String   
-  status          String   
-  lock            Boolean
-  location        String   // Vị trí đỗ
-  price           Float    // Giá xe trên 1 ngày
-  park_id         Int
-  Park            Park     @relation(fields: [park_id], references: [id])
-  // New: link bike to a dealer (User)
-  dealer_id       Int?
-  Dealer          User?    @relation("DealerBikes", fields: [dealer_id], references: [id])
-  Rental          Rental[]
-  BookingRequest  BookingRequest[] @relation("BookingBike")
-  image           String?
-  description     String?  // Mô tả chi tiết về xe
-  
-  rating          Float?   @default(0)
-  review_count    Int?     @default(0)
-  
-  dealer_name     String?
-  dealer_contact  String?
-  
-  seats           Int?
-  fuel_type       String?
-  transmission    String?
-  
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-}
-
-model Park {
-  id         Int      @id @default(autoincrement())
-  name       String
-  location   String
-  Bike       Bike[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  image      String?
-}
-
 model User {
   id             Int              @id @default(autoincrement())
   name           String
@@ -56,47 +15,115 @@ model User {
   role           String           @default("user")
   status         String           @default("active")
   Rental         Rental[]
-  // Parks          Park[]           @relation("DealerParks")
   BookingRequest BookingRequest[]
-  // Bikes relation for dealers
+
+  dealerInfo     DealerInfo?
+
   Bikes          Bike[]           @relation("DealerBikes")
+  
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
-  birthdate      DateTime
+  birthdate      DateTime?        // optional
   phone          String?
   image          String?
 }
 
+model DealerInfo {
+  user_id Int @id
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  name              String
+  email             String   @unique
+  phone             String?
+  telegram          String?
+  location          String?
+  status            String   @default("Active")
+  total_revenue     Decimal  @default("0")
+  platform_fee      Decimal  @default("0")
+  current_debt      Decimal  @default("0")
+  last_payment_date DateTime?
+  vehicle_count     Int      @default(0)
+  image             String?
+
+  BookingRequest    BookingRequest[] @relation("BookingDealer")
+
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+}
+
+model Park {
+  id         Int      @id @default(autoincrement())
+  name       String
+  location   String
+  Bikes      Bike[]
+  image      String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Bike {
+  id              Int      @id @default(autoincrement())
+  model           String
+  status          String
+  lock            Boolean
+  location        String   // Vị trí đỗ
+  price           Decimal  // Giá xe trên 1 ngày - dùng Decimal
+
+  park_id         Int
+  Park            Park     @relation(fields: [park_id], references: [id])
+
+  dealer_id       Int?     // <-- trỏ tới User.id (dealer user)
+  Dealer          User?    @relation("DealerBikes", fields: [dealer_id], references: [id])
+
+  Rental          Rental[]
+  BookingRequest  BookingRequest[] @relation("BookingBike")
+  image           String?
+  description     String?  // Mô tả chi tiết về xe
+
+  rating          Float?   @default(0)
+  review_count    Int?     @default(0)
+
+  seats           Int?
+  fuel_type       String?
+  transmission    String?
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
 model Rental {
-  id                  Int              @id @default(dbgenerated("nextval('booking_id_seq')"))
+  id                  Int              @id @default(autoincrement())  // changed
   booking_code        String?          @unique
-  user_id             Int?
-  bike_id             Int
-  booking_request_id  Int?             // Link to original booking request
   start_time          DateTime
   end_time            DateTime?
   status              String
-  price               Float
+  price               Decimal
+
+  user_id             Int?
   User                User?            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  bike_id             Int
   Bike                Bike             @relation(fields: [bike_id], references: [id], onDelete: Cascade)
+
+  booking_request_id  Int?             // Link to original booking request
   BookingRequest      BookingRequest?  @relation(fields: [booking_request_id], references: [id], onDelete: SetNull)
+
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
   qrcode              String?
   payment_id          String?
   order_id            String?
-  
-  // Contact info for guests who don't login
+
   contact_name        String?
   contact_email       String?
   contact_phone       String?
-  pickup_location     String? // Địa điểm khách muốn nhận xe (địa chỉ cụ thể)
+  pickup_location     String?
 }
 
 model BookingRequest {
-  id              Int      @id @default(dbgenerated("nextval('booking_id_seq')"))
+  id              Int      @id @default(autoincrement())  // changed
   booking_code    String?  @unique
-  user_id         Int?
   name            String
   email           String
   contact_method  String
@@ -104,36 +131,23 @@ model BookingRequest {
   pickup_location String
   status          String   @default("PENDING")
   admin_notes     String?
-  dealer_id       Int?
-  bike_id         Int?
   start_date      DateTime?
   end_date        DateTime?
-  estimated_price Float?
+  estimated_price Decimal?
+
+  user_id         Int?
   User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  bike_id         Int?
   Bike            Bike?    @relation("BookingBike", fields: [bike_id], references: [id], onDelete: SetNull)
-  Dealer          Dealer?  @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
+
+  dealer_id       Int?
+  Dealer          DealerInfo?  @relation("BookingDealer", fields: [dealer_id], references: [user_id], onDelete: SetNull)
+
   Rental          Rental[] // One booking request can have multiple rentals (though usually just one)
+
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
-}
-
-model Dealer {
-  id                Int      @id @default(autoincrement())
-  name              String
-  email             String   @unique
-  phone             String?
-  telegram          String?
-  location          String?
-  status            String   @default("Active") // Active or Inactive
-  total_revenue     Float    @default(0)
-  platform_fee      Float    @default(0)
-  current_debt      Float    @default(0)
-  last_payment_date DateTime?
-  vehicle_count     Int      @default(0)
-  image             String?
-  BookingRequest    BookingRequest[] @relation("BookingDealer")
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
 }
 
 model Referrer {
@@ -141,10 +155,11 @@ model Referrer {
   name               String
   phone              String?
   email              String?
-  total_earnings     Float    @default(0)
+  total_earnings     Decimal  @default("0")
   referral_count     Int      @default(0)
   last_referral_date DateTime?
   image              String?
+
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 }

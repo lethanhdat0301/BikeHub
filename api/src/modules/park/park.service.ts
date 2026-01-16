@@ -13,7 +13,7 @@ export class ParkService {
     return this.prisma.park.findUnique({
       where,
       include: {
-        Bike: true,
+        Bikes: true,
       },
     });
   }
@@ -22,11 +22,10 @@ export class ParkService {
     return this.prisma.park.findFirst();
   }
 
-
   async findOpenParks(): Promise<Park[]> {
     return this.prisma.park.findMany({
       where: {
-        Bike: {
+        Bikes: {
           some: {
             status: 'available',
           },
@@ -40,12 +39,12 @@ export class ParkService {
       where: {
         OR: [
           {
-            Bike: {
+            Bikes: {
               none: {},
             },
           },
           {
-            Bike: {
+            Bikes: {
               none: {
                 status: 'available',
               },
@@ -72,7 +71,7 @@ export class ParkService {
         created_at: 'desc',
       },
       include: {
-        Bike: true,
+        Bikes: true,
       },
     });
   }

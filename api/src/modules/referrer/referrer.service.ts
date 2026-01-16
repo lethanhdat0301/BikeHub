@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class ReferrerService {
@@ -64,7 +65,11 @@ export class ReferrerService {
                     select: {
                         id: true,
                         model: true,
-                        dealer_name: true,
+                        Dealer: {
+                            select: {
+                                name: true,
+                            },
+                        },
                     },
                 },
             },
@@ -73,14 +78,14 @@ export class ReferrerService {
 
         // Calculate totals
         const totalReferrals = referralRentals.length;
-        const totalEarnings = referralRentals.reduce((sum, rental) => sum + rental.price, 0);
-        const estimatedCommission = totalEarnings * 0.1; // Assuming 10% commission
+        const totalEarnings = referralRentals.reduce((sum, rental) => sum.plus(rental.price), new Decimal(0));
+        const estimatedCommission = totalEarnings.times(0.1); // Assuming 10% commission
 
         return {
             referrer,
             totalReferrals,
-            totalEarnings,
-            estimatedCommission,
+            totalEarnings: totalEarnings.toString(),
+            estimatedCommission: estimatedCommission.toString(),
             referralHistory: referralRentals.map(rental => ({
                 id: rental.id,
                 bookingId: rental.booking_code || `BK${String(rental.booking_request_id || rental.id).padStart(6, '0')}`,
@@ -89,8 +94,8 @@ export class ReferrerService {
                 customerPhone: rental.User ? rental.User.phone : rental.contact_phone,
                 bikeModel: rental.Bike?.model || 'N/A',
                 bikeId: rental.Bike?.id || rental.bike_id,
-                rentalPrice: rental.price,
-                estimatedCommission: rental.price * 0.1,
+                rentalPrice: rental.price.toString(),
+                estimatedCommission: rental.price.times(0.1).toString(),
                 startDate: rental.start_time,
                 endDate: rental.end_time,
                 status: rental.status,

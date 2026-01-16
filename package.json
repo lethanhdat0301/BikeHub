@@ -29,6 +29,7 @@
     "monorepo"
   ],
   "dependencies": {
+    "decimal.js": "^10.6.0",
     "reflect-metadata": "0.1.14"
   },
   "prisma": {
