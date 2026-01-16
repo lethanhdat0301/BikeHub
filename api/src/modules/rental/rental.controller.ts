@@ -35,7 +35,6 @@ export class RentalController {
     private rentalService: RentalService,
     private emailService: EmailService,
     private userService: UserService,
-    private prisma: PrismaService,
   ) { }
 
   // ================= PUBLIC ENDPOINT =================
@@ -117,7 +116,7 @@ export class RentalController {
       bookingDate: rental.start_time,
       startDate: rental.start_time,
       endDate: rental.end_time,
-      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'RentnRide',
+      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'BikeHub',
       dealerPhone: rentalDetails?.Bike?.Dealer?.phone || rentalDetails?.Bike?.dealer_contact || 'Contact support',
       pickupLocation: pickup_location || rentalDetails?.Bike?.Park?.location || 'N/A',
       price: price,
@@ -227,7 +226,7 @@ export class RentalController {
         orderBy: { created_at: 'desc' },
       });
     }
-
+    
     // Dealers see rentals for bikes they own
     if (user.role === ROLES_ENUM.DEALER) {
       return this.rentalService.findAll({
@@ -403,7 +402,7 @@ export class RentalController {
   ): Promise<RentalModel> {
     await this.checkDealerOwnRental(id, user);
 
-    const { user_id, bike_id, transfer_park_id, transfer_dealer_id, current_location, ...rest } = dto;
+    const { user_id, bike_id, ...rest } = dto;
 
     if (
       user.role !== ROLES_ENUM.ADMIN &&
@@ -476,7 +475,6 @@ export class RentalController {
 
   @Get('bookings')
   async getBookings() {
-    // This endpoint returns rentals (confirmed bookings), not booking requests
     return this.rentalService.getBookingsWithDetails();
   }
 

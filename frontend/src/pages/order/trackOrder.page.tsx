@@ -333,21 +333,13 @@ const TrackOrderPage: React.FC = () => {
             console.error("Error searching orders:", error);
             if (!silentRefresh) {
                 toast({
-                    title: t('booking.successTitle'),
-                    description: t('trackOrder.ordersFound', { count: foundOrders.length }),
-                    status: "success",
+                    title: t('booking.errors.errorTitle'),
+                    description: t('booking.errors.errorDescription'),
+                    status: "error",
                     duration: 3000,
                     isClosable: true,
                 });
             }
-        } catch (error) {
-            toast({
-                title: t('booking.errors.errorTitle'),
-                description: t('booking.errors.errorDescription'),
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
         } finally {
             setIsSearching(false);
         }

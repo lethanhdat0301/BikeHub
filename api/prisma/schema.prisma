@@ -95,21 +95,10 @@ model Rental {
 
 model BookingRequest {
   id              Int      @id @default(dbgenerated("nextval('booking_id_seq')"))
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  booking_code    String?  @unique
-  user_id         Int?
-=======
-=======
->>>>>>> Stashed changes
 
   user_id         Int?     @unique
   User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
   
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   name            String
   email           String
   contact_method  String
