@@ -142,6 +142,7 @@ export class RentalService {
 
     return rentals.map(rental => ({
       id: rental.id,
+      bookingId: rental.booking_code || `BK${String(rental.id).padStart(6, '0')}`,
       customer_name: rental.User ? rental.User.name : rental.contact_name || 'Guest',
       customer_phone: rental.User ? rental.User.phone : rental.contact_phone || 'N/A',
       vehicle_model: rental.Bike?.model || 'N/A',

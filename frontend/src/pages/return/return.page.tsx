@@ -147,7 +147,7 @@ const ReturnPage: React.FC = () => {
 
                     return {
                         id: rental.id,
-                        bookingId: `BK${String(rental.booking_request_id || rental.id).padStart(6, '0')}`,
+                        bookingId: rental.booking_code || `BK${String(rental.booking_request_id || rental.id).padStart(6, '0')}`,
                         bikeName: rental.Bike?.model || 'N/A',
                         bikeModel: rental.Bike?.transmission || 'N/A',
                         bikeImage: rental.Bike?.image || bike1,

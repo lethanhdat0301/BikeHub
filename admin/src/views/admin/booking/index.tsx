@@ -26,7 +26,7 @@ const Bookings = () => {
                 return {
                     ...br,
                     type: 'booking-request',
-                    bookingId: `BK${String(br.id).padStart(6, '0')}`,
+                    bookingId: br.booking_code || `BK${String(br.id).padStart(6, '0')}`,
                     customer_name: br.name,
                     customer_phone: br.contact_details,
                     vehicle_model: br.Bike?.model || 'Pending Assignment',

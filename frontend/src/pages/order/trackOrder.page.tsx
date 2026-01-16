@@ -215,7 +215,7 @@ const TrackOrderPage: React.FC = () => {
             const foundOrders = [
                 ...foundBookings.map((booking: any) => ({
                     id: booking.id,
-                    bookingId: `BK${String(booking.id).padStart(6, '0')}`,
+                    bookingId: booking.booking_code || `BK${String(booking.id).padStart(6, '0')}`,
                     bikeName: booking.Bike?.model || 'N/A',
                     bikeModel: booking.Bike?.transmission || 'N/A',
                     bikeImage: booking.Bike?.image || bike1,
@@ -256,7 +256,7 @@ const TrackOrderPage: React.FC = () => {
                 })),
                 ...foundRentals.map((rental: any) => ({
                     id: rental.id,
-                    bookingId: `BK${String(rental.id).padStart(6, '0')}`,
+                    bookingId: rental.booking_code || `BK${String(rental.id).padStart(6, '0')}`,
                     bikeName: rental.Bike?.model || 'N/A',
                     bikeModel: rental.Bike?.transmission || 'N/A',
                     bikeImage: rental.Bike?.image || bike1,

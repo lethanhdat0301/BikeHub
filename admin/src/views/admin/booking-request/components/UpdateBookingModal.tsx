@@ -331,7 +331,7 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
                     <h2 className="text-xl font-bold text-gray-800">
-                        Update Booking Request - {booking?.id ? `BK${String(booking.id).padStart(6, '0')}` : ''}
+                        Update Booking Request - {booking.booking_code || `BK${String(booking.id).padStart(6, '0')}`}
                     </h2>
                     <button
                         onClick={onClose}

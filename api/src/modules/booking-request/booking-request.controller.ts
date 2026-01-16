@@ -19,6 +19,7 @@ import { BookingRequestService } from './booking-request.service';
 import { EmailService } from '../email/email.service';
 import { buildBookingConfirmationHtml } from '../email/templates/booking-confirmation.template';
 import { DealerService } from '../dealer/dealer.service';
+import { generateBookingCode } from '../../ultis/ultis';
 import * as fs from 'fs';
 import {
   CreateBookingRequestDto,
@@ -44,22 +45,29 @@ export class BookingRequestController {
 
     const { user_id, ...rest } = createBookingRequestDto;
 
+    const newBookingCode = generateBookingCode();
+
     let bookingRequest;
+    const dataToSave = {
+      ...rest,
+      booking_code: newBookingCode,
+    };
+
     if (user_id) {
       bookingRequest = await this.bookingRequestService.create({
-        ...rest,
+        ...dataToSave,
         User: {
           connect: { id: user_id },
         },
       });
     } else {
-      bookingRequest = await this.bookingRequestService.create(rest);
+      bookingRequest = await this.bookingRequestService.create(dataToSave);
     }
 
     // console.log('=== BOOKING REQUEST CREATED:', bookingRequest);
 
     // Return formatted response with Booking ID for customer display
-    const formattedBookingId = `BK${String(bookingRequest.id).padStart(6, '0')}`;
+    const formattedBookingId = bookingRequest.booking_code;
     // console.log('=== FORMATTED BOOKING ID:', formattedBookingId);
 
     // Send confirmation email if email provided (send both text and HTML template, do not fail request on email errors)
@@ -246,7 +254,7 @@ export class BookingRequestController {
         where: { id: bookingId },
         data: updateBookingRequestDto,
       });
-      
+
       console.log('=== UPDATE BOOKING REQUEST SUCCESS ===');
       return result;
     } catch (error) {

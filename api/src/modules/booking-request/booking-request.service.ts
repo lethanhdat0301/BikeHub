@@ -278,6 +278,7 @@ export class BookingRequestService {
             contact_email: updatedBooking.email,
             contact_phone: updatedBooking.contact_details,
             pickup_location: updatedBooking.pickup_location,
+            booking_code: updatedBooking.booking_code,
           },
         });
         // console.log('Rental created successfully');
