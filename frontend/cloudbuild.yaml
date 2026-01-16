@@ -30,3 +30,4 @@ availableSecrets:
 
 substitutions:
   _VITE_BACK_END_PROD: 'https://api.rentnride.travel/api/v1/'
+  _VITE_RECAPTCHA_SITE_KEY: ''
