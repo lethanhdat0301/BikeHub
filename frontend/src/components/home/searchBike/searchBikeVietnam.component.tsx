@@ -206,7 +206,7 @@ const SearchBikeVietnam: React.FC = () => {
                                     >
                                         {parks.map((park) => (
                                             <option key={park.id} value={park.id.toString()}>
-                                                {park.name} - {park.location}
+                                                {park.name}
                                             </option>
                                         ))}
                                     </Select>

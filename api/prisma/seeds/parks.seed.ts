@@ -14,31 +14,31 @@ export async function seedParks(prisma: PrismaClient, dealers: User[]) {
 
   const parksData = [
     {
-      name: 'Phu Quoc Island Station',
+      name: 'Phu Quoc Island',
       location: 'Phu Quoc Island, Kien Giang Province',
       dealer_id: pqDealer.id,
       image: 'https://picsum.photos/800/600?random=1'
     },
     {
-      name: 'Nha Trang Central Station',
+      name: 'Nha Trang Central',
       location: 'Nha Trang City, Khanh Hoa Province',
       dealer_id: ntDealer.id,
       image: 'https://picsum.photos/800/600?random=2'
     },
     {
-      name: 'Ha Giang Loop Station',
+      name: 'Ha Giang Loop',
       location: 'Ha Giang City, Ha Giang Province',
       dealer_id: hgDealer.id,
       image: 'https://picsum.photos/800/600?random=3'
     },
     {
-      name: 'Ho Chi Minh City Station',
+      name: 'Ho Chi Minh City',
       location: 'District 1, Ho Chi Minh City',
       dealer_id: hcmDealer.id,
       image: 'https://picsum.photos/800/600?random=4'
     },
     {
-      name: 'Da Nang Coastal Station',
+      name: 'Da Nang Coastal',
       location: 'Da Nang City, Central Vietnam',
       dealer_id: dnDealer.id,
       image: 'https://picsum.photos/800/600?random=5'
