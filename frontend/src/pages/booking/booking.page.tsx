@@ -24,9 +24,34 @@ import {
 import { FaPhone, FaWhatsapp, FaTelegram, FaCheckCircle, FaEnvelope } from "react-icons/fa";
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import bookingRequestService from "../../services/bookingRequestService";
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 
 const RequestBookingPage: React.FC = () => {
   const toast = useToast();
+  const { t } = useTranslation();
+
+  // Debug: verify i18n language and key availability using the initialized i18n instance
+  try {
+    const currentLang = i18n.language;
+    const resources = Object.keys(i18n.options?.resources || {});
+    const hasKeyCurrent = i18n.exists?.('booking.pageTitle', { lng: currentLang });
+    const hasKeyEn = i18n.exists?.('booking.pageTitle', { lng: 'en' });
+    // eslint-disable-next-line no-console
+    console.log('[i18n-debug] booking.page', {
+      language: currentLang,
+      resources,
+      supportedLngs: i18n.options?.supportedLngs,
+      languages: i18n.languages,
+      hasKeyCurrent,
+      hasKeyEn,
+      enValue: (i18n.getDataByLanguage('en') as any)?.translation?.booking?.pageTitle,
+      tResult: t('booking.pageTitle'),
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('[i18n-debug] could not inspect i18n', err);
+  }
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({
     name: "",
@@ -107,8 +132,8 @@ const RequestBookingPage: React.FC = () => {
     // Validate required fields
     if (!formData.name || !formData.email || !formData.contactDetails || !formData.pickupLocation) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
+        title: t('booking.errors.requiredFieldsTitle'),
+        description: t('booking.errors.requiredFieldsDescription'),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -120,8 +145,8 @@ const RequestBookingPage: React.FC = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
+        title: t('booking.errors.invalidEmailTitle'),
+        description: t('booking.errors.invalidEmailDescription'),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -132,8 +157,8 @@ const RequestBookingPage: React.FC = () => {
     // Validate terms agreement
     if (!agreedToTerms) {
       toast({
-        title: "Terms Required",
-        description: "Please read and agree to the Terms & Conditions and Rental Guidelines",
+        title: t('booking.errors.termsRequiredTitle'),
+        description: t('booking.errors.termsRequiredDescription'),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -147,8 +172,8 @@ const RequestBookingPage: React.FC = () => {
     if (!executeRecaptcha) {
       // console.log('Execute recaptcha not yet available');
       toast({
-        title: "reCAPTCHA Error",
-        description: "reCAPTCHA verification is not ready. Please try again.",
+        title: t('booking.errors.recaptchaTitle'),
+        description: t('booking.errors.recaptchaDescription'),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -202,9 +227,11 @@ const RequestBookingPage: React.FC = () => {
 
       setRequestSent(true);
 
+      const respAny: any = response as any;
+      const bookingIdStr = respAny?.data?.bookingId || respAny?.bookingId || 'BK' + String(respAny?.data?.id || respAny?.id).padStart(6, '0');
       toast({
-        title: "Request Sent Successfully! 🎉",
-        description: `Booking ID: ${response.data?.bookingId || response.bookingId || 'BK' + String(response.data?.id || response.id).padStart(6, '0')}. Your booking request has been sent to admin. We'll contact you soon!`,
+        title: t('booking.successTitle'),
+        description: t('booking.successDescription', { bookingId: bookingIdStr }),
         status: "success",
         // duration: 10000,
         duration: null,
@@ -230,8 +257,8 @@ const RequestBookingPage: React.FC = () => {
 
       console.error("❌ Error submitting booking request:", error);
       toast({
-        title: "Error",
-        description: error.response?.data?.message || "Something went wrong. Please try again.",
+        title: t('booking.errors.errorTitle'),
+        description: error.response?.data?.message || t('booking.errors.errorDescription'),
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -255,11 +282,11 @@ const RequestBookingPage: React.FC = () => {
   const getContactPlaceholder = () => {
     switch (formData.contactMethod) {
       case "whatsapp":
-        return "Enter your WhatsApp number";
+        return t('booking.contact.placeholder.whatsapp');
       case "telegram":
-        return "Enter your Telegram username";
+        return t('booking.contact.placeholder.telegram');
       default:
-        return "Enter your phone number";
+        return t('booking.contact.placeholder.phone');
     }
   };
 
@@ -281,7 +308,7 @@ const RequestBookingPage: React.FC = () => {
               color="teal.700"
               mb={3}
             >
-              Motorcycle Booking Request
+              {t('booking.pageTitle')}
             </Heading>
             <Text
               fontSize={{ base: "sm", md: "lg" }}
@@ -289,8 +316,7 @@ const RequestBookingPage: React.FC = () => {
               maxW="2xl"
               px={{ base: 2, md: 0 }}
             >
-              Don't want to browse? Just tell us what you need and we'll get
-              back to you with the best options.
+              {t('booking.pageDescription')}
             </Text>
             {requestSent && (
               <Badge
@@ -302,7 +328,7 @@ const RequestBookingPage: React.FC = () => {
               >
                 <HStack spacing={2} flexWrap="wrap" justifyContent="center">
                   <FaCheckCircle />
-                  <Text fontSize={{ base: "xs", md: "sm" }}>Request sent to admin successfully!</Text>
+                  <Text fontSize={{ base: "xs", md: "sm" }}>{t('booking.requestSuccess')}</Text>
                 </HStack>
               </Badge>
             )}
@@ -322,11 +348,11 @@ const RequestBookingPage: React.FC = () => {
               {/* Name */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Name or Nickname
+                  {t('booking.form.nameLabel')}
                 </FormLabel>
                 <Input
                   type="text"
-                  placeholder="Enter your name"
+                  placeholder={t('booking.form.namePlaceholder')}
                   value={formData.name}
                   onChange={(e) => {
                     const newFormData = { ...formData, name: e.target.value };
@@ -342,7 +368,7 @@ const RequestBookingPage: React.FC = () => {
               {/* Email for Notifications */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Email (For Notifications)
+                  {t('booking.form.emailLabel')}
                 </FormLabel>
                 <InputGroup size={{ base: "md", md: "lg" }}>
                   <InputLeftAddon bg="teal.50" color="teal.600">
@@ -350,7 +376,7 @@ const RequestBookingPage: React.FC = () => {
                   </InputLeftAddon>
                   <Input
                     type="email"
-                    placeholder="your.email@example.com"
+                    placeholder={t('booking.form.emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => {
                       const newFormData = { ...formData, email: e.target.value };
@@ -362,14 +388,14 @@ const RequestBookingPage: React.FC = () => {
                   />
                 </InputGroup>
                 <FormHelperText fontSize="xs" color="gray.500">
-                  We'll send booking confirmations and updates to this email
+                  {t('booking.form.emailHint')}
                 </FormHelperText>
               </FormControl>
 
               {/* Preferred Contact */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Preferred Contact Method
+                  {t('booking.form.contactMethodLabel')}
                 </FormLabel>
                 <RadioGroup
                   value={formData.contactMethod}
@@ -382,19 +408,19 @@ const RequestBookingPage: React.FC = () => {
                     <Radio value="phone" colorScheme="teal" size={{ base: "sm", md: "md" }}>
                       <HStack spacing={2}>
                         <FaPhone size={14} />
-                        <Text fontSize={{ base: "sm", md: "md" }}>Phone</Text>
+                        <Text fontSize={{ base: "sm", md: "md" }}>{t('booking.contact.phone')}</Text>
                       </HStack>
                     </Radio>
                     <Radio value="whatsapp" colorScheme="teal" size={{ base: "sm", md: "md" }}>
                       <HStack spacing={2}>
                         <FaWhatsapp size={14} />
-                        <Text fontSize={{ base: "sm", md: "md" }}>WhatsApp</Text>
+                        <Text fontSize={{ base: "sm", md: "md" }}>{t('booking.contact.whatsapp')}</Text>
                       </HStack>
                     </Radio>
                     <Radio value="telegram" colorScheme="teal" size={{ base: "sm", md: "md" }}>
                       <HStack spacing={2}>
                         <FaTelegram size={14} />
-                        <Text fontSize={{ base: "sm", md: "md" }}>Telegram</Text>
+                        <Text fontSize={{ base: "sm", md: "md" }}>{t('booking.contact.telegram')}</Text>
                       </HStack>
                     </Radio>
                   </Stack>
@@ -404,7 +430,7 @@ const RequestBookingPage: React.FC = () => {
               {/* Contact Details */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Your Contact Details
+                  {t('booking.yourContactDetails')}
                 </FormLabel>
                 <InputGroup size={{ base: "md", md: "lg" }}>
                   <InputLeftAddon bg="teal.50" color="teal.600">
@@ -431,11 +457,11 @@ const RequestBookingPage: React.FC = () => {
               {/* Pickup Location */}
               <FormControl isRequired>
                 <FormLabel fontWeight="semibold" color="gray.700" fontSize={{ base: "sm", md: "md" }}>
-                  Pickup Location
+                  {t('booking.form.pickupLabel')}
                 </FormLabel>
                 <Input
                   type="text"
-                  placeholder="Enter your preferred pickup location (e.g., Downtown, Beach Area, etc.)"
+                  placeholder={t('booking.form.pickupPlaceholder')}
                   value={formData.pickupLocation}
                   onChange={(e) => {
                     const newFormData = {
@@ -450,7 +476,7 @@ const RequestBookingPage: React.FC = () => {
                   focusBorderColor="teal.500"
                 />
                 <FormHelperText fontSize="xs" color="gray.500">
-                  Please specify where you'd like to pick up the motorcycle
+                  {t('booking.form.pickupHelper')}
                 </FormHelperText>
               </FormControl>
 
@@ -463,7 +489,7 @@ const RequestBookingPage: React.FC = () => {
                   size={{ base: "sm", md: "md" }}
                 >
                   <Text fontSize={{ base: "xs", md: "sm" }} color="gray.700">
-                    I have read and agree to the{" "}
+                    {t('booking.agreeText1')}{" "}
                     <Link
                       href="/terms"
                       color="teal.600"
@@ -471,9 +497,9 @@ const RequestBookingPage: React.FC = () => {
                       isExternal
                       _hover={{ textDecoration: "underline" }}
                     >
-                      Terms & Conditions
+                      {t('booking.termsLink')}
                     </Link>
-                    {" "}and{" "}
+                    {" "}{t('booking.agreeText2')}{" "}
                     <Link
                       href="/rental-guide"
                       color="teal.600"
@@ -481,12 +507,12 @@ const RequestBookingPage: React.FC = () => {
                       isExternal
                       _hover={{ textDecoration: "underline" }}
                     >
-                      Rental Guidelines
+                      {t('booking.rentalGuideLink')}
                     </Link>
                   </Text>
                 </Checkbox>
                 <FormHelperText fontSize="xs" color="gray.500" ml={6}>
-                  Required before submitting your booking request
+                  {t('booking.termsRequiredDescription')}
                 </FormHelperText>
               </FormControl>
 
@@ -499,7 +525,7 @@ const RequestBookingPage: React.FC = () => {
                 fontSize={{ base: "sm", md: "md" }}
                 fontWeight="bold"
                 isLoading={isSubmitting}
-                loadingText="Sending..."
+                loadingText={t('booking.sending')}
                 isDisabled={!agreedToTerms}
                 _hover={{
                   transform: "translateY(-2px)",
@@ -509,7 +535,7 @@ const RequestBookingPage: React.FC = () => {
                 mt={{ base: 2, md: 4 }}
                 w="full"
               >
-                Send Request
+                {t('booking.submit')}
               </Button>
             </VStack>
           </Box>
@@ -523,8 +549,7 @@ const RequestBookingPage: React.FC = () => {
             textAlign="center"
           >
             <Text color="teal.700" fontSize={{ base: "xs", md: "sm" }} px={{ base: 2, md: 0 }}>
-              💡 Your request will be sent to our admin team. We typically respond within 24 hours with personalized
-              motorcycle recommendations based on your needs.
+              {t('booking.addlInfo')}
             </Text>
           </Box>
         </VStack>

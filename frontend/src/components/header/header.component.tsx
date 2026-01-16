@@ -317,6 +317,8 @@ const Header: React.FC = () => {
       >
         <option value="en">{t('lang.en')}</option>
         <option value="ru">{t('lang.ru')}</option>
+        <option value="vi">{t('lang.vi')}</option>
+        <option value="de">{t('lang.de')}</option>
       </Select>
 
 
@@ -390,7 +392,7 @@ const Header: React.FC = () => {
                         className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
                       >
                         <Text fontWeight={500} fontSize={16}>
-                          Profile
+                          {t('header.profile')}
                         </Text>
                       </Link>
                     </MenuItem>
@@ -406,7 +408,7 @@ const Header: React.FC = () => {
                         className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
                       >
                         <Text fontWeight={500} fontSize={16}>
-                          Settings
+                          {t('header.settings')}
                         </Text>
                       </Link>
                     </MenuItem>
@@ -419,7 +421,7 @@ const Header: React.FC = () => {
                     >
                       <LogoutButton>
                         <TbLogout className="mr-2 text-red-500" />
-                        <Text color="red.400">Logout</Text>
+                        <Text color="red.400">{t('header.logout')}</Text>
                       </LogoutButton>
                     </MenuItem>
                   </MenuList>

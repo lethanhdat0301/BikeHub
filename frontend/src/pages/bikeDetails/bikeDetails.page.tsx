@@ -23,6 +23,7 @@ import {
 import { FaArrowLeft, FaCheckCircle, FaUsers, FaGasPump, FaBolt } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useTranslation } from 'react-i18next';
 import bikeService from "../../services/bikeService";
 import api from "../../apis/axios";
 import { calculateRentalPeriod, calculateRentalPrice, calculateDiscount } from "../../utils/rentalCalculations";
@@ -32,6 +33,7 @@ const BikeDetailsPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const toast = useToast();
+    const { t } = useTranslation();
     const { executeRecaptcha } = useGoogleReCaptcha();
 
     const [bike, setBike] = useState<any>(null);
@@ -60,8 +62,8 @@ const BikeDetailsPage: React.FC = () => {
             } catch (error) {
                 console.error("Error fetching motorbike:", error);
                 toast({
-                    title: "Error",
-                    description: "Could not load motorbike details",
+                    title: t('booking.errors.errorTitle'),
+                    description: t('bike.couldNotLoad'),
                     status: "error",
                     duration: 3000,
                     isClosable: true,
@@ -104,8 +106,8 @@ const BikeDetailsPage: React.FC = () => {
     const handleBookNow = async () => {
         if (!startDate || !endDate) {
             toast({
-                title: "Validation Error",
-                description: "Please select pick-up and drop-off dates",
+                title: t('bike.validationErrors.validationError'),
+                description: t('bike.validationErrors.selectDates'),
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -121,8 +123,8 @@ const BikeDetailsPage: React.FC = () => {
 
         if (start < today) {
             toast({
-                title: "Invalid Date",
-                description: "Pick-up date cannot be in the past",
+                title: t('bike.validationErrors.invalidDate'),
+                description: t('bike.validationErrors.pickupPast'),
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -148,8 +150,8 @@ const BikeDetailsPage: React.FC = () => {
 
             if (startHour > endHour || (startHour === endHour && startMinute >= endMinute)) {
                 toast({
-                    title: "Invalid Time",
-                    description: "End time must be after start time",
+                    title: t('bike.validationErrors.invalidTime'),
+                    description: t('bike.validationErrors.endTimeAfterStart'),
                     status: "error",
                     duration: 3000,
                     isClosable: true,
@@ -165,8 +167,8 @@ const BikeDetailsPage: React.FC = () => {
 
                 if (startHour < currentHour || (startHour === currentHour && startMinute <= currentMinute)) {
                     toast({
-                        title: "Invalid Time",
-                        description: "Start time cannot be in the past",
+                        title: t('bike.validationErrors.invalidTime'),
+                        description: t('bike.validationErrors.startTimeCannotBePast'),
                         status: "error",
                         duration: 3000,
                         isClosable: true,
@@ -178,8 +180,8 @@ const BikeDetailsPage: React.FC = () => {
             // For multi-day bookings, validate dates only
             if (end < start) {
                 toast({
-                    title: "Invalid Date",
-                    description: "Drop-off date must be after pick-up date",
+                    title: t('bike.validationErrors.invalidDate'),
+                    description: t('bike.validationErrors.dropoffAfterPickup'),
                     status: "error",
                     duration: 3000,
                     isClosable: true,
@@ -203,7 +205,7 @@ const BikeDetailsPage: React.FC = () => {
         //     return;
         // }
 
-        let recaptchaToken: string;
+        let recaptchaToken: string | undefined = undefined;
         // try {
         //     recaptchaToken = await executeRecaptcha('bike_rental');
         // } catch (error) {
@@ -237,8 +239,8 @@ const BikeDetailsPage: React.FC = () => {
             if (!userId) {
                 if (!contactName || !contactEmail || !contactPhone || !pickupLocation) {
                     toast({
-                        title: "Contact Info Required",
-                        description: "Please provide your contact information and pickup location to book",
+                        title: t('booking.errors.requiredFieldsTitle'),
+                        description: t('booking.errors.contactInfoRequired'),
                         status: "error",
                         duration: 3000,
                         isClosable: true,
@@ -251,8 +253,8 @@ const BikeDetailsPage: React.FC = () => {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(contactEmail)) {
                     toast({
-                        title: "Invalid Email",
-                        description: "Please enter a valid email address",
+                        title: t('booking.errors.invalidEmailTitle'),
+                        description: t('booking.errors.invalidEmailDescription'),
                         status: "error",
                         duration: 3000,
                         isClosable: true,
@@ -267,7 +269,7 @@ const BikeDetailsPage: React.FC = () => {
 
             if (period.days === 0 && period.hours === 0) {
                 toast({
-                    title: "Invalid rental period",
+                    title: t('booking.errors.invalidRentalPeriodTitle'),
                     description: period.displayText,
                     status: "error",
                     duration: 3000,
@@ -307,9 +309,10 @@ const BikeDetailsPage: React.FC = () => {
             const toastDuration = null;
             const navigateDelay = isMobile ? 4000 : 2000;  // 4s on mobile, 2s on desktop
 
+            const dealerInfo = bookingData?.dealerName ? t('booking.assignedToDealer', { dealerName: bookingData.dealerName, dealerPhone: bookingData.dealerPhone || '' }) : '';
             toast({
-                title: "Booking Successful! 🎉",
-                description: `Booking ID: ${bookingData?.bookingId || 'N/A'}. Your booking has been processed successfully! ${bookingData?.dealerName ? `It has been assigned to dealer ${bookingData.dealerName}${bookingData.dealerPhone ? ` (Phone: ${bookingData.dealerPhone})` : ''}.` : ''} We will deliver the bike to you soon. Please check your email for detailed information.`,
+                title: t('booking.rentalSuccessTitle'),
+                description: t('booking.rentalSuccessDescription', { bookingId: bookingData?.bookingId || 'N/A', dealerInfo }),
                 status: "success",
                 duration: toastDuration,
                 isClosable: true,
@@ -318,8 +321,8 @@ const BikeDetailsPage: React.FC = () => {
             // Show redirect notification after a delay
             setTimeout(() => {
                 toast({
-                    title: "Redirecting...",
-                    description: "Taking you to track your booking",
+                    title: t('booking.redirectingTitle'),
+                    description: t('booking.redirectingDescription'),
                     status: "info",
                     duration: 2000,
                     isClosable: true,
@@ -386,7 +389,7 @@ const BikeDetailsPage: React.FC = () => {
     if (loading) {
         return (
             <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
-                <Text>Loading...</Text>
+                <Text>{t('bike.loading')}</Text>
             </Box>
         );
     }
@@ -394,7 +397,7 @@ const BikeDetailsPage: React.FC = () => {
     if (!bike) {
         return (
             <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
-                <Text>Motorbike not found</Text>
+                <Text>{t('bike.notFound')}</Text>
             </Box>
         );
     }
@@ -411,7 +414,7 @@ const BikeDetailsPage: React.FC = () => {
                     variant="ghost"
                     mb={4}
                 >
-                    Back
+                    {t('common.back')}
                 </Button>
 
                 <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
@@ -457,18 +460,20 @@ const BikeDetailsPage: React.FC = () => {
                                 mb={4}
                                 textTransform="uppercase"
                             >
-                                {bike.transmission === 'Manual' ? 'Manual Bike' : bike.fuel_type === 'electric' ? 'Electric Scooter' : 'Scooter'}
+                                {bike.transmission === 'Manual' ? t('search.filter.type.manualBike') : bike.fuel_type === 'electric' ? t('search.filter.type.electricScooter') : t('search.filter.type.scooter')}
                             </Badge>
 
                             {/* Specs */}
                             <HStack spacing={6} mb={4}>
                                 <HStack spacing={2}>
                                     <Icon as={FaUsers} color="gray.600" />
-                                    <Text fontSize="sm">{bike.seats || 2} Seats</Text>
+                                    <Text fontSize="sm">{bike.seats || 2} {t('bike.seats')}</Text>
                                 </HStack>
                                 <HStack spacing={2}>
                                     <Icon as={bike.fuel_type === 'electric' ? FaBolt : FaGasPump} color="gray.600" />
-                                    <Text fontSize="sm" textTransform="capitalize">{bike.fuel_type || 'Gasoline'}</Text>
+                                    <Text fontSize="sm" textTransform="capitalize">
+                                        {bike.fuel_type === 'electric' ? t('bike.fuelType.electric') : t('bike.fuelType.gasoline')}
+                                    </Text>
                                 </HStack>
                                 <HStack spacing={2}>
                                     <Icon as={GiGearStickPattern} color="gray.600" />
@@ -480,55 +485,55 @@ const BikeDetailsPage: React.FC = () => {
 
                             {/* Description */}
                             <Heading as="h3" size="md" mb={3}>
-                                Description
+                                {t('bike.descriptionTitle')}
                             </Heading>
                             <Text color="gray.700" mb={4}>
-                                {bike.description || `Experience the city on this stylish and modern scooter. The ${bike.model} offers a smooth and efficient ride for urban commuting.`}
+                                {bike.description || t('bike.descriptionDefault', { model: bike.model })}
                             </Text>
 
                             {/* Highlights */}
                             <Heading as="h3" size="md" mb={3}>
-                                Highlights
+                                {t('bike.highlightsTitle')}
                             </Heading>
                             <SimpleGrid columns={2} spacing={4}>
                                 <HStack>
                                     <Icon as={FaCheckCircle} color="green.500" />
                                     <Text fontSize="sm">
-                                        {bike.rating && bike.rating >= 4.5 ? 'Excellent' : bike.rating && bike.rating >= 3.5 ? 'Good' : 'Fair'} condition
+                                        {bike.rating && bike.rating >= 4.5 ? t('bike.rating.excellent') : bike.rating && bike.rating >= 3.5 ? t('bike.rating.good') : t('bike.rating.fair')} {t('bike.rating.condition')}
                                     </Text>
                                 </HStack>
                                 <HStack>
                                     <Icon as={FaCheckCircle} color="green.500" />
-                                    <Text fontSize="sm">Recently serviced</Text>
+                                    <Text fontSize="sm">{t('bike.highlight.recentlyServiced')}</Text>
                                 </HStack>
                                 <HStack>
                                     <Icon as={FaCheckCircle} color="green.500" />
-                                    <Text fontSize="sm">Professionally cleaned</Text>
+                                    <Text fontSize="sm">{t('bike.highlight.professionallyCleaned')}</Text>
                                 </HStack>
                                 {bike.fuel_type === 'electric' && (
                                     <HStack>
                                         <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">Eco-friendly</Text>
+                                        <Text fontSize="sm">{t('bike.highlight.ecoFriendly')}</Text>
                                     </HStack>
                                 )}
                                 {bike.transmission === 'Manual' && bike.price > 400000 && (
                                     <HStack>
                                         <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">Off-road capable</Text>
+                                        <Text fontSize="sm">{t('bike.highlight.offroadCapable')}</Text>
                                     </HStack>
                                 )}
                             </SimpleGrid>
 
                             {/* Features */}
                             <Heading as="h3" size="md" mt={6} mb={3}>
-                                Features
+                                {t('bike.featuresTitle')}
                             </Heading>
                             <SimpleGrid columns={2} spacing={4}>
                                 {/* Premium bikes (>200k) get Smart Key */}
                                 {bike.price > 200000 && (
                                     <HStack>
                                         <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">Smart Key</Text>
+                                        <Text fontSize="sm">{t('bike.feature.smartKey')}</Text>
                                     </HStack>
                                 )}
 
@@ -536,7 +541,7 @@ const BikeDetailsPage: React.FC = () => {
                                 {(bike.price > 150000 || bike.fuel_type === 'electric') && (
                                     <HStack>
                                         <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">Full LED Lighting</Text>
+                                        <Text fontSize="sm">{t('bike.feature.fullLed')}</Text>
                                     </HStack>
                                 )}
 
@@ -544,7 +549,7 @@ const BikeDetailsPage: React.FC = () => {
                                 {bike.price > 120000 && (
                                     <HStack>
                                         <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">USB Charger</Text>
+                                        <Text fontSize="sm">{t('bike.feature.usbCharger')}</Text>
                                     </HStack>
                                 )}
 
@@ -552,7 +557,7 @@ const BikeDetailsPage: React.FC = () => {
                                 {bike.price > 200000 && (
                                     <HStack>
                                         <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">ABS</Text>
+                                        <Text fontSize="sm">{t('bike.feature.abs')}</Text>
                                     </HStack>
                                 )}
 
@@ -561,11 +566,11 @@ const BikeDetailsPage: React.FC = () => {
                                     <>
                                         <HStack>
                                             <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">High Ground Clearance</Text>
+                                            <Text fontSize="sm">{t('bike.feature.highGround')}</Text>
                                         </HStack>
                                         <HStack>
                                             <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">Knobby Tires</Text>
+                                            <Text fontSize="sm">{t('bike.feature.knobbyTires')}</Text>
                                         </HStack>
                                     </>
                                 )}
@@ -575,11 +580,11 @@ const BikeDetailsPage: React.FC = () => {
                                     <>
                                         <HStack>
                                             <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">Fuel Efficient</Text>
+                                            <Text fontSize="sm">{t('bike.feature.fuelEfficient')}</Text>
                                         </HStack>
                                         <HStack>
                                             <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">Easy to Ride</Text>
+                                            <Text fontSize="sm">{t('bike.feature.easyToRide')}</Text>
                                         </HStack>
                                     </>
                                 )}
@@ -589,11 +594,11 @@ const BikeDetailsPage: React.FC = () => {
                                     <>
                                         <HStack>
                                             <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">Zero Emissions</Text>
+                                            <Text fontSize="sm">{t('bike.feature.zeroEmissions')}</Text>
                                         </HStack>
                                         <HStack>
                                             <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">Silent Operation</Text>
+                                            <Text fontSize="sm">{t('bike.feature.silentOperation')}</Text>
                                         </HStack>
                                     </>
                                 )}
@@ -605,7 +610,7 @@ const BikeDetailsPage: React.FC = () => {
                     <Box position="sticky" top={4} h="fit-content">
                         <Box bg="white" p={6} borderRadius="xl" shadow="lg">
                             <Heading as="h2" size="lg" mb={2}>
-                                Book this motorcycle
+                                {t('bike.bookThis')}
                             </Heading>
                             <HStack mb={6}>
                                 <Heading as="h3" size="2xl" color="teal.600">
@@ -619,7 +624,7 @@ const BikeDetailsPage: React.FC = () => {
                             <VStack spacing={4} align="stretch">
                                 {/* Pick-up / Drop-off */}
                                 <FormControl isRequired>
-                                    <FormLabel fontWeight="semibold">Pick-up / Drop-off</FormLabel>
+                                    <FormLabel fontWeight="semibold">{t('booking.pickupDropoff')}</FormLabel>
                                     <HStack spacing={2}>
                                         <Input
                                             type="date"
@@ -640,7 +645,7 @@ const BikeDetailsPage: React.FC = () => {
                                 {/* Time picker for same day rentals */}
                                 {startDate && endDate && startDate === endDate && (
                                     <FormControl isRequired>
-                                        <FormLabel fontWeight="semibold">Time Range (Same Day Rental)</FormLabel>
+                                        <FormLabel fontWeight="semibold">{t('booking.timeRangeLabel')}</FormLabel>
                                         <HStack spacing={2}>
                                             <Input
                                                 type="time"
@@ -674,7 +679,7 @@ const BikeDetailsPage: React.FC = () => {
                                 {startDate && endDate && (
                                     <Box p={3} bg="gray.50" borderRadius="md">
                                         <Text fontSize="sm" color="gray.600" fontWeight="semibold">
-                                            Rental Period: {getRentalPeriod().displayText}
+                                            {t('booking.rentalPeriodLabel')}: {getRentalPeriod().displayText}
                                         </Text>
                                         {getRentalPeriod().days > 0 && getDiscountPercentage() > 0 && (
                                             <Text fontSize="sm" color="green.600">
@@ -686,7 +691,7 @@ const BikeDetailsPage: React.FC = () => {
 
                                 {/* Contact Info - always show */}
                                 <FormControl isRequired>
-                                    <FormLabel fontWeight="semibold">Your Name</FormLabel>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.nameLabel')}</FormLabel>
                                     <Input
                                         type="text"
                                         placeholder="Enter your full name"
@@ -696,7 +701,7 @@ const BikeDetailsPage: React.FC = () => {
                                 </FormControl>
 
                                 <FormControl isRequired>
-                                    <FormLabel fontWeight="semibold">Email</FormLabel>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.emailLabel')}</FormLabel>
                                     <Input
                                         type="email"
                                         placeholder="your.email@example.com"
@@ -706,7 +711,7 @@ const BikeDetailsPage: React.FC = () => {
                                 </FormControl>
 
                                 <FormControl isRequired>
-                                    <FormLabel fontWeight="semibold">Phone Number</FormLabel>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.phoneLabel')}</FormLabel>
                                     <Input
                                         type="tel"
                                         placeholder="Enter your phone number"
@@ -716,10 +721,10 @@ const BikeDetailsPage: React.FC = () => {
                                 </FormControl>
 
                                 <FormControl isRequired>
-                                    <FormLabel fontWeight="semibold">Pickup Location</FormLabel>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.pickupLabel')}</FormLabel>
                                     <Input
                                         type="text"
-                                        placeholder="Enter pickup address (e.g., 123 Nguyen Hue Street)"
+                                        placeholder={t('booking.form.pickupPlaceholder')}
                                         value={pickupLocation}
                                         onChange={(e) => setPickupLocation(e.target.value)}
                                     />
@@ -732,7 +737,7 @@ const BikeDetailsPage: React.FC = () => {
                                     </FormLabel>
                                     <Input
                                         type="tel"
-                                        placeholder="Enter phone number"
+                                        placeholder={t('booking.contact.placeholder.phone')}
                                         value={referrerPhone}
                                         onChange={(e) => setReferrerPhone(e.target.value)}
                                     />
@@ -775,12 +780,12 @@ const BikeDetailsPage: React.FC = () => {
                                 )}
 
                                 <HStack justify="space-between">
-                                    <Text>Taxes & Fees</Text>
+                                    <Text>{t('booking.taxesFees')}</Text>
                                     <Text fontWeight="semibold">0 VNĐ</Text>
                                 </HStack>
                                 <Divider />
                                 <HStack justify="space-between">
-                                    <Heading as="h4" size="md">Total</Heading>
+                                    <Heading as="h4" size="md">{t('booking.total')}</Heading>
                                     <Heading as="h4" size="md" color="teal.600">
                                         {calculateTotal().toLocaleString('vi-VN')} VNĐ
                                     </Heading>
@@ -788,7 +793,7 @@ const BikeDetailsPage: React.FC = () => {
 
                                 {getRentalDays() === 0 && getRentalPeriod().hours === 0 && (
                                     <Text fontSize="xs" color="gray.500" textAlign="center">
-                                        Select dates to see pricing
+                                        {t('bike.selectDatesToSeePricing')}
                                     </Text>
                                 )}
 
@@ -799,15 +804,15 @@ const BikeDetailsPage: React.FC = () => {
                                     w="full"
                                     onClick={handleBookNow}
                                     isLoading={isSubmitting}
-                                    loadingText="Processing..."
+                                    loadingText={t('booking.processing')}
                                     isDisabled={!startDate || !endDate || bike.status !== 'available'}
                                 >
-                                    Book Now
+                                    {t('bike.bookNow')}
                                 </Button>
 
                                 {bike.status !== 'available' && (
                                     <Text fontSize="sm" color="red.500" textAlign="center">
-                                        This motorcycle is currently not available
+                                        {t('bike.notAvailable')}
                                     </Text>
                                 )}
                             </VStack>

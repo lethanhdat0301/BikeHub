@@ -32,6 +32,7 @@ import {
     Flex,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
+import { useTranslation } from 'react-i18next';
 import {
     FaCheckCircle,
     FaHourglassHalf,
@@ -73,6 +74,7 @@ interface Order {
 
 const TrackOrderPage: React.FC = () => {
     const toast = useToast();
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
@@ -119,23 +121,23 @@ const TrackOrderPage: React.FC = () => {
             },
             trackingSteps: [
                 {
-                    title: "Order Confirmed",
-                    description: "Your order has been confirmed",
+                    title: t('orderTracking.orderConfirmed'),
+                    description: t('orderTracking.orderConfirmedDesc'),
                     timestamp: "2024-12-25 10:30 AM",
                 },
                 {
-                    title: "Preparing Motorcycle",
-                    description: "We're getting your motorcycle ready",
+                    title: t('orderTracking.preparingMotorcycle'),
+                    description: t('orderTracking.preparingMotorcycleDesc'),
                     timestamp: "2024-12-25 11:00 AM",
                 },
                 {
-                    title: "Out for Delivery",
-                    description: "Your motorcycle is on the way",
+                    title: t('orderTracking.outForDelivery'),
+                    description: t('orderTracking.outForDeliveryDesc'),
                     timestamp: "2024-12-26 09:00 AM",
                 },
                 {
-                    title: "Delivered",
-                    description: "Motorcycle delivered to your location",
+                    title: t('orderTracking.delivered'),
+                    description: t('orderTracking.deliveredDesc'),
                 },
             ],
         },
@@ -159,22 +161,22 @@ const TrackOrderPage: React.FC = () => {
             },
             trackingSteps: [
                 {
-                    title: "Order Confirmed",
-                    description: "Your order has been confirmed",
+                    title: t('orderTracking.orderConfirmed'),
+                    description: t('orderTracking.orderConfirmedDesc'),
                     timestamp: "2024-12-26 08:00 AM",
                 },
                 {
-                    title: "Preparing Motorcycle",
-                    description: "We're getting your motorcycle ready",
+                    title: t('orderTracking.preparingMotorcycle'),
+                    description: t('orderTracking.preparingMotorcycleDesc'),
                     timestamp: "2024-12-26 08:30 AM",
                 },
                 {
-                    title: "Out for Delivery",
-                    description: "Your motorcycle is on the way",
+                    title: t('orderTracking.outForDelivery'),
+                    description: t('orderTracking.outForDeliveryDesc'),
                 },
                 {
-                    title: "Delivered",
-                    description: "Motorcycle delivered to your location",
+                    title: t('orderTracking.delivered'),
+                    description: t('orderTracking.deliveredDesc'),
                 },
             ],
         },
@@ -185,8 +187,8 @@ const TrackOrderPage: React.FC = () => {
 
         if (!queryToSearch.trim()) {
             toast({
-                title: "Search Required",
-                description: "Please enter a Booking ID, phone number, or email",
+                title: t('booking.errors.errorTitle'),
+                description: t('booking.errors.requiredFieldsDescription'),
                 status: "warning",
                 duration: 3000,
                 isClosable: true,
@@ -233,23 +235,23 @@ const TrackOrderPage: React.FC = () => {
                     } : null,
                     trackingSteps: [
                         {
-                            title: "Order Confirmed",
-                            description: "Your order has been confirmed",
+                            title: t('orderTracking.orderConfirmed'),
+                            description: t('orderTracking.orderConfirmedDesc'),
                             timestamp: new Date(booking.created_at).toLocaleString(),
                         },
                         {
-                            title: "Preparing Motorcycle",
-                            description: "We're getting your motorcycle ready",
+                            title: t('orderTracking.preparingMotorcycle'),
+                            description: t('orderTracking.preparingMotorcycleDesc'),
                             timestamp: booking.status !== 'PENDING' ? new Date(booking.created_at).toLocaleString() : undefined,
                         },
                         {
-                            title: "Out for Delivery",
-                            description: "Your motorcycle is on the way",
+                            title: t('orderTracking.outForDelivery'),
+                            description: t('orderTracking.outForDeliveryDesc'),
                             timestamp: booking.status === 'APPROVED' || booking.status === 'COMPLETED' ? (booking.start_date ? new Date(booking.start_date).toLocaleString() : undefined) : undefined,
                         },
                         {
-                            title: "Delivered",
-                            description: "Motorcycle delivered to your location",
+                            title: t('orderTracking.delivered'),
+                            description: t('orderTracking.deliveredDesc'),
                             timestamp: booking.status === 'COMPLETED' && booking.end_date ? new Date(booking.end_date).toLocaleString() : undefined,
                         },
                     ],
@@ -279,39 +281,24 @@ const TrackOrderPage: React.FC = () => {
                     } : null,
                     trackingSteps: [
                         {
-                            title: "Order Confirmed",
-                            description: "Your order has been confirmed",
+                            title: t('orderTracking.orderConfirmed'),
+                            description: t('orderTracking.orderConfirmedDesc'),
                             timestamp: new Date(rental.created_at).toLocaleString(),
                         },
                         {
-                            title: "Preparing Motorcycle",
-                            description: "We're getting your motorcycle ready",
-                            timestamp: (() => {
-                                const status = rental.status?.toLowerCase();
-                                return (status !== 'pending' && status !== 'cancelled')
-                                    ? new Date(rental.start_time).toLocaleString()
-                                    : undefined;
-                            })(),
+                            title: t('orderTracking.preparingMotorcycle'),
+                            description: t('orderTracking.preparingMotorcycleDesc'),
+                            timestamp: rental.status !== 'pending' ? new Date(rental.start_time).toLocaleString() : undefined,
                         },
                         {
-                            title: "Out for Delivery",
-                            description: "Your motorcycle is on the way",
-                            timestamp: (() => {
-                                const status = rental.status?.toLowerCase();
-                                return (status === 'ongoing' || status === 'active' || status === 'completed')
-                                    ? new Date(rental.start_time).toLocaleString()
-                                    : undefined;
-                            })(),
+                            title: t('orderTracking.outForDelivery'),
+                            description: t('orderTracking.outForDeliveryDesc'),
+                            timestamp: rental.status === 'active' || rental.status === 'completed' ? new Date(rental.start_time).toLocaleString() : undefined,
                         },
                         {
-                            title: "Delivered",
-                            description: "Motorcycle delivered to your location",
-                            timestamp: (() => {
-                                const status = rental.status?.toLowerCase();
-                                return (status === 'completed' && rental.end_time)
-                                    ? new Date(rental.end_time).toLocaleString()
-                                    : undefined;
-                            })(),
+                            title: t('orderTracking.delivered'),
+                            description: t('orderTracking.deliveredDesc'),
+                            timestamp: rental.status === 'completed' && rental.end_time ? new Date(rental.end_time).toLocaleString() : undefined,
                         },
                     ],
                 }))
@@ -321,15 +308,13 @@ const TrackOrderPage: React.FC = () => {
             setLastRefreshTime(new Date());
 
             if (foundOrders.length === 0) {
-                if (!silentRefresh) {
-                    toast({
-                        title: "No Orders Found",
-                        description: "No orders found with the provided information",
-                        status: "info",
-                        duration: 3000,
-                        isClosable: true,
-                    });
-                }
+                toast({
+                    title: t('booking.errors.errorTitle'),
+                    description: t('trackOrder.noOrdersFound'),
+                    status: "info",
+                    duration: 3000,
+                    isClosable: true,
+                });
             } else {
                 // Enable auto-refresh when orders are found
                 setAutoRefresh(true);
@@ -348,13 +333,21 @@ const TrackOrderPage: React.FC = () => {
             console.error("Error searching orders:", error);
             if (!silentRefresh) {
                 toast({
-                    title: "Search Failed",
-                    description: "Unable to search for orders. Please try again.",
-                    status: "error",
-                    duration: 5000,
+                    title: t('booking.successTitle'),
+                    description: t('trackOrder.ordersFound', { count: foundOrders.length }),
+                    status: "success",
+                    duration: 3000,
                     isClosable: true,
                 });
             }
+        } catch (error) {
+            toast({
+                title: t('booking.errors.errorTitle'),
+                description: t('booking.errors.errorDescription'),
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
         } finally {
             setIsSearching(false);
         }
@@ -379,11 +372,10 @@ const TrackOrderPage: React.FC = () => {
                     {/* Header */}
                     <Box textAlign="center">
                         <Heading as="h1" size={{ base: "xl", md: "2xl" }} color="teal.700" mb={3}>
-                            Track Your Order
+                            {t('trackOrder.pageTitle')}
                         </Heading>
                         <Text fontSize={{ base: "md", md: "lg" }} color="gray.600" maxW="2xl">
-                            Enter your booking ID, phone number, or license plate to see the delivery
-                            status.
+                            {t('trackOrder.pageDescription')}
                         </Text>
                     </Box>
 
@@ -404,7 +396,7 @@ const TrackOrderPage: React.FC = () => {
                         <VStack spacing={6}>
                             <FormControl isRequired>
                                 <FormLabel fontWeight="semibold" color="gray.700">
-                                    Track Your Delivery
+                                    {t('trackOrder.searchLabel')}
                                 </FormLabel>
                                 <InputGroup size="lg">
                                     <InputLeftElement pointerEvents="none">
@@ -412,7 +404,7 @@ const TrackOrderPage: React.FC = () => {
                                     </InputLeftElement>
                                     <Input
                                         type="text"
-                                        placeholder="Booking ID, Phone Number, or License Plate"
+                                        placeholder={t('trackOrder.searchPlaceholder')}
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         borderColor="teal.300"
@@ -429,14 +421,14 @@ const TrackOrderPage: React.FC = () => {
                                 w="full"
                                 leftIcon={<SearchIcon />}
                                 isLoading={isSearching}
-                                loadingText="Searching..."
+                                loadingText={t('booking.processing')}
                                 _hover={{
                                     transform: "translateY(-2px)",
                                     boxShadow: "lg",
                                 }}
                                 transition="all 0.2s"
                             >
-                                Track Order
+                                {t('trackOrder.searchButton')}
                             </Button>
                         </VStack>
                     </Box>
@@ -452,7 +444,7 @@ const TrackOrderPage: React.FC = () => {
                     {orders.length > 0 && (
                         <VStack spacing={6} w="full">
                             <Heading size="md" alignSelf="flex-start" color="gray.700">
-                                Your Orders ({orders.length})
+                                {t('trackOrder.searchHeading')} ({orders.length})
                             </Heading>
 
                             {orders.map((order) => (
@@ -638,8 +630,7 @@ const TrackOrderPage: React.FC = () => {
                         <Box bg="teal.50" p={6} borderRadius="lg" w="full" maxW="600px" textAlign="center">
                             <Icon as={FaMotorcycle} boxSize={12} color="teal.500" mb={3} />
                             <Text color="teal.700" fontSize="sm">
-                                💡 Enter your order details above to track your motorcycle delivery in
-                                real-time. You'll see updates from confirmation to delivery!
+                                {t("trackOrder.pageInfoText")}
                             </Text>
                         </Box>
                     )}

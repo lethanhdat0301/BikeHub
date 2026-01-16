@@ -23,6 +23,7 @@ import {
     useBreakpointValue,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from "react-router-dom";
 import CardBike from "../../components/home/bikes/cardBike.component";
 import bikeService from "../../services/bikeService";
@@ -44,6 +45,7 @@ const SearchPage: React.FC = () => {
     const { isOpen: isFilterOpen, onToggle: onFilterToggle } = useDisclosure({
         defaultIsOpen: !isMobile
     });
+    const { t } = useTranslation();
 
     // Filter states
     const [priceRange, setPriceRange] = useState<number[]>([0, 1000000]);
@@ -136,7 +138,7 @@ const SearchPage: React.FC = () => {
         <Container maxW="container.xl" py={10}>
             <Box mb={8}>
                 <Heading size="xl" mb={2}>
-                    Search Results
+                    {t('bike.searchResults')}
                 </Heading>
                 <Text color="gray.600">
                     {parkId && `Park ID: ${parkId}`}
@@ -158,10 +160,10 @@ const SearchPage: React.FC = () => {
                         size="lg"
                         fontWeight="semibold"
                     >
-                        {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+                        {isFilterOpen ? t('search.hideFilters') : t('search.showFilters')}
                         {!isFilterOpen && (
                             <Text ml={2} fontSize="sm" color="gray.500">
-                                (Found {filteredBikes.length} results)
+                                ({t('search.foundResults', { count: filteredBikes.length })})
                             </Text>
                         )}
                     </Button>
@@ -187,14 +189,14 @@ const SearchPage: React.FC = () => {
                         borderTopRadius="lg"
                         display={{ base: "none", lg: "flex" }}
                     >
-                        <Heading size="md">Filters</Heading>
+                        <Heading size="md">{t('search.filters')}</Heading>
                         <Button
                             size="sm"
                             variant="ghost"
                             colorScheme="teal"
                             onClick={handleResetFilters}
                         >
-                            Reset
+                            {t('search.reset')}
                         </Button>
                     </Flex>
 
@@ -209,7 +211,7 @@ const SearchPage: React.FC = () => {
                             {/* Price Range Filter */}
                             <Box>
                                 <Text fontWeight="semibold" mb={3}>
-                                    Price Range (VNĐ/day)
+                                    {t('search.priceRangeLabel')}
                                 </Text>
                                 <RangeSlider
                                     aria-label={["min", "max"]}
@@ -240,7 +242,7 @@ const SearchPage: React.FC = () => {
                             {/* Motorcycle Type Filter */}
                             <Box>
                                 <Text fontWeight="semibold" mb={3}>
-                                    Motorcycle Type
+                                    {t('search.motorcycleType')}
                                 </Text>
                                 <CheckboxGroup
                                     colorScheme="teal"
@@ -248,9 +250,9 @@ const SearchPage: React.FC = () => {
                                     onChange={(values) => setSelectedTypes(values as string[])}
                                 >
                                     <Stack spacing={2}>
-                                        <Checkbox value="Electric Scooter">Electric Scooter</Checkbox>
-                                        <Checkbox value="Scooter">Automatic Scooter</Checkbox>
-                                        <Checkbox value="Manual Bike">Manual Bike</Checkbox>
+                                        <Checkbox value="Electric Scooter">{t('search.filter.type.electricScooter')}</Checkbox>
+                                        <Checkbox value="Scooter">{t('search.filter.type.scooter')}</Checkbox>
+                                        <Checkbox value="Manual Bike">{t('search.filter.type.manualBike')}</Checkbox>
                                     </Stack>
                                 </CheckboxGroup>
                             </Box>
@@ -260,7 +262,7 @@ const SearchPage: React.FC = () => {
                             {/* Transmission Filter */}
                             <Box>
                                 <Text fontWeight="semibold" mb={3}>
-                                    Transmission
+                                    {t('search.transmission')}
                                 </Text>
                                 <CheckboxGroup
                                     colorScheme="teal"
@@ -268,8 +270,8 @@ const SearchPage: React.FC = () => {
                                     onChange={(values) => setSelectedTransmission(values as string[])}
                                 >
                                     <Stack spacing={2}>
-                                        <Checkbox value="automatic">Automatic</Checkbox>
-                                        <Checkbox value="manual">Manual</Checkbox>
+                                        <Checkbox value="automatic">{t('search.filter.transmission.automatic')}</Checkbox>
+                                        <Checkbox value="manual">{t('search.filter.transmission.manual')}</Checkbox>
                                     </Stack>
                                 </CheckboxGroup>
                             </Box>
@@ -283,7 +285,7 @@ const SearchPage: React.FC = () => {
                                     onClick={handleResetFilters}
                                     size="lg"
                                 >
-                                    Reset All Filters
+                                    {t('search.resetAll')}
                                 </Button>
                             </Box>
                         </VStack>
@@ -293,7 +295,7 @@ const SearchPage: React.FC = () => {
                 {/* Bikes Grid */}
                 <Box flex={1}>
                     <Text mb={4} color="gray.600" fontWeight="medium">
-                        Found {filteredBikes.length} motorcycle{filteredBikes.length !== 1 ? "s" : ""}
+                        {t('search.foundResults', { count: filteredBikes.length })}
                     </Text>
 
                     {loading ? (
@@ -304,10 +306,10 @@ const SearchPage: React.FC = () => {
                         <Center h="400px">
                             <VStack spacing={4}>
                                 <Text fontSize="xl" color="gray.500">
-                                    No motorcycles found for your search criteria
+                                    {t('search.noResults')}
                                 </Text>
                                 <Button colorScheme="teal" onClick={handleResetFilters}>
-                                    Reset Filters
+                                    {t('search.reset')}
                                 </Button>
                             </VStack>
                         </Center>
