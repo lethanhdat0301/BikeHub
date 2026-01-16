@@ -38,24 +38,68 @@ const RequestBookingPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [useAutoFill, setUseAutoFill] = useState(false);
 
-  // Auto-fill name if user is logged in
-  useEffect(() => {
-    const userString = localStorage.getItem("user");
-    if (userString) {
+  // Save form data to localStorage
+  const saveFormData = (data: typeof formData) => {
+    localStorage.setItem('bookingFormData', JSON.stringify(data));
+  };
+
+  // Restore form data from localStorage
+  const restoreFormData = () => {
+    const savedData = localStorage.getItem('bookingFormData');
+    if (savedData) {
       try {
-        const user = JSON.parse(userString);
-        setFormData(prev => ({
-          ...prev,
-          name: user.name || "",
-          email: user.email || "",
-          contactDetails: user.phone || "",
-        }));
+        const parsed = JSON.parse(savedData);
+        setFormData(parsed);
       } catch (error) {
-        console.error("Error parsing user data:", error);
+        console.error('Error restoring form data:', error);
       }
     }
-  }, []);
+  };
+
+  // Auto-fill from user profile or restore from localStorage
+  useEffect(() => {
+    // First try to restore from localStorage
+    const savedData = localStorage.getItem('bookingFormData');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        setFormData(parsed);
+        return;
+      } catch (error) {
+        console.error('Error restoring form data:', error);
+      }
+    }
+
+    // If no saved data and user wants auto-fill
+    if (useAutoFill) {
+      const userString = localStorage.getItem("user");
+      if (userString) {
+        try {
+          const user = JSON.parse(userString);
+          const autoFilledData = {
+            name: user.name || "",
+            email: user.email || "",
+            contactMethod: "phone",
+            contactDetails: user.phone || "",
+            pickupLocation: "",
+          };
+          setFormData(autoFilledData);
+          saveFormData(autoFilledData);
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
+    }
+  }, [useAutoFill]);
+
+  // Save form data whenever it changes
+  useEffect(() => {
+    if (formData.name || formData.email || formData.contactDetails || formData.pickupLocation) {
+      saveFormData(formData);
+    }
+  }, [formData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,22 +206,22 @@ const RequestBookingPage: React.FC = () => {
         title: "Request Sent Successfully! 🎉",
         description: `Booking ID: ${response.data?.bookingId || response.bookingId || 'BK' + String(response.data?.id || response.id).padStart(6, '0')}. Your booking request has been sent to admin. We'll contact you soon!`,
         status: "success",
-        duration: 10000,
+        // duration: 10000,
+        duration: null,
         isClosable: true,
         position: "top",
       });
 
-      // Reset form (but keep name and email if logged in)
-      setFormData(prev => ({
-        name: userId ? prev.name : "",
-        email: userId ? prev.email : "",
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
         contactMethod: "phone",
-        contactDetails: userId ? prev.contactDetails : "",
+        contactDetails: "",
         pickupLocation: "",
-      }));
-
-      // Reset terms agreement
+      });
       setAgreedToTerms(false);
+      localStorage.removeItem('bookingFormData');
 
       // Reset requestSent after 5 seconds
       setTimeout(() => setRequestSent(false), 5000);
@@ -284,9 +328,10 @@ const RequestBookingPage: React.FC = () => {
                   type="text"
                   placeholder="Enter your name"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const newFormData = { ...formData, name: e.target.value };
+                    setFormData(newFormData);
+                  }}
                   size={{ base: "md", md: "lg" }}
                   borderColor="teal.300"
                   _hover={{ borderColor: "teal.500" }}
@@ -307,9 +352,10 @@ const RequestBookingPage: React.FC = () => {
                     type="email"
                     placeholder="your.email@example.com"
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => {
+                      const newFormData = { ...formData, email: e.target.value };
+                      setFormData(newFormData);
+                    }}
                     borderColor="teal.300"
                     _hover={{ borderColor: "teal.500" }}
                     focusBorderColor="teal.500"
@@ -327,9 +373,10 @@ const RequestBookingPage: React.FC = () => {
                 </FormLabel>
                 <RadioGroup
                   value={formData.contactMethod}
-                  onChange={(value) =>
-                    setFormData({ ...formData, contactMethod: value })
-                  }
+                  onChange={(value) => {
+                    const newFormData = { ...formData, contactMethod: value };
+                    setFormData(newFormData);
+                  }}
                 >
                   <Stack direction={{ base: "column", sm: "row" }} spacing={{ base: 2, sm: 4 }}>
                     <Radio value="phone" colorScheme="teal" size={{ base: "sm", md: "md" }}>
@@ -367,12 +414,13 @@ const RequestBookingPage: React.FC = () => {
                     type="text"
                     placeholder={getContactPlaceholder()}
                     value={formData.contactDetails}
-                    onChange={(e) =>
-                      setFormData({
+                    onChange={(e) => {
+                      const newFormData = {
                         ...formData,
                         contactDetails: e.target.value,
-                      })
-                    }
+                      };
+                      setFormData(newFormData);
+                    }}
                     borderColor="teal.300"
                     _hover={{ borderColor: "teal.500" }}
                     focusBorderColor="teal.500"
@@ -389,12 +437,13 @@ const RequestBookingPage: React.FC = () => {
                   type="text"
                   placeholder="Enter your preferred pickup location (e.g., Downtown, Beach Area, etc.)"
                   value={formData.pickupLocation}
-                  onChange={(e) =>
-                    setFormData({
+                  onChange={(e) => {
+                    const newFormData = {
                       ...formData,
                       pickupLocation: e.target.value,
-                    })
-                  }
+                    };
+                    setFormData(newFormData);
+                  }}
                   size={{ base: "md", md: "lg" }}
                   borderColor="teal.300"
                   _hover={{ borderColor: "teal.500" }}

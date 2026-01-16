@@ -76,6 +76,26 @@ const TrackOrderPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [autoRefresh, setAutoRefresh] = useState(true);
+    const [lastSearchQuery, setLastSearchQuery] = useState("");
+    const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+
+    // Auto-refresh every 30 seconds when orders are displayed
+    React.useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        if (autoRefresh && orders.length > 0 && lastSearchQuery) {
+            interval = setInterval(() => {
+                searchOrders(lastSearchQuery, true); // true for silent refresh
+            }, 30000); // 30 seconds
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [autoRefresh, orders.length, lastSearchQuery]);
 
     // Mock data for orders
     const mockOrders: Order[] = [
@@ -160,10 +180,10 @@ const TrackOrderPage: React.FC = () => {
         },
     ];
 
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const searchOrders = async (query?: string, silentRefresh = false) => {
+        const queryToSearch = query || searchQuery;
 
-        if (!searchQuery.trim()) {
+        if (!queryToSearch.trim()) {
             toast({
                 title: "Search Required",
                 description: "Please enter a Booking ID, phone number, or email",
@@ -176,11 +196,16 @@ const TrackOrderPage: React.FC = () => {
 
         setIsSearching(true);
 
+        // Store last search query for auto-refresh
+        if (!silentRefresh) {
+            setLastSearchQuery(queryToSearch);
+        }
+
         try {
             // Search both booking-requests and rentals
             const [bookingResponse, rentalResponse] = await Promise.all([
-                api.get(`/booking-requests/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] })),
-                api.get(`/rentals/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] }))
+                api.get(`/booking-requests/search/${encodeURIComponent(queryToSearch)}`).catch(() => ({ data: [] })),
+                api.get(`/rentals/search/${encodeURIComponent(queryToSearch)}`).catch(() => ({ data: [] }))
             ]);
 
             const foundBookings = Array.isArray(bookingResponse.data) ? bookingResponse.data : [];
@@ -190,7 +215,7 @@ const TrackOrderPage: React.FC = () => {
             const foundOrders = [
                 ...foundBookings.map((booking: any) => ({
                     id: booking.id,
-                    bookingId: `BK${String(booking.id).padStart(6, '0')}`,
+                    bookingId: booking.booking_code || `BK${String(booking.id).padStart(6, '0')}`,
                     bikeName: booking.Bike?.model || 'N/A',
                     bikeModel: booking.Bike?.transmission || 'N/A',
                     bikeImage: booking.Bike?.image || bike1,
@@ -231,7 +256,7 @@ const TrackOrderPage: React.FC = () => {
                 })),
                 ...foundRentals.map((rental: any) => ({
                     id: rental.id,
-                    bookingId: `BK${String(rental.id).padStart(6, '0')}`,
+                    bookingId: rental.booking_code || `BK${String(rental.id).padStart(6, '0')}`,
                     bikeName: rental.Bike?.model || 'N/A',
                     bikeModel: rental.Bike?.transmission || 'N/A',
                     bikeImage: rental.Bike?.image || bike1,
@@ -240,7 +265,12 @@ const TrackOrderPage: React.FC = () => {
                     deliveryAddress: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
                     orderDate: new Date(rental.created_at).toLocaleString(),
                     expectedDelivery: new Date(rental.start_time).toLocaleString(),
-                    currentStatus: rental.status === 'completed' ? 3 : rental.status === 'active' ? 2 : 1,
+                    currentStatus: (() => {
+                        const status = rental.status?.toLowerCase();
+                        if (status === 'completed') return 3;
+                        if (status === 'ongoing' || status === 'active') return 2;
+                        return 1; // pending or any other status
+                    })(),
                     totalPrice: rental.price || 0,
                     dealerInfo: rental.Bike?.Dealer ? {
                         name: rental.Bike.Dealer.name,
@@ -256,49 +286,75 @@ const TrackOrderPage: React.FC = () => {
                         {
                             title: "Preparing Motorcycle",
                             description: "We're getting your motorcycle ready",
-                            timestamp: rental.status !== 'pending' ? new Date(rental.start_time).toLocaleString() : undefined,
+                            timestamp: (() => {
+                                const status = rental.status?.toLowerCase();
+                                return (status !== 'pending' && status !== 'cancelled')
+                                    ? new Date(rental.start_time).toLocaleString()
+                                    : undefined;
+                            })(),
                         },
                         {
                             title: "Out for Delivery",
                             description: "Your motorcycle is on the way",
-                            timestamp: rental.status === 'active' || rental.status === 'completed' ? new Date(rental.start_time).toLocaleString() : undefined,
+                            timestamp: (() => {
+                                const status = rental.status?.toLowerCase();
+                                return (status === 'ongoing' || status === 'active' || status === 'completed')
+                                    ? new Date(rental.start_time).toLocaleString()
+                                    : undefined;
+                            })(),
                         },
                         {
                             title: "Delivered",
                             description: "Motorcycle delivered to your location",
-                            timestamp: rental.status === 'completed' && rental.end_time ? new Date(rental.end_time).toLocaleString() : undefined,
+                            timestamp: (() => {
+                                const status = rental.status?.toLowerCase();
+                                return (status === 'completed' && rental.end_time)
+                                    ? new Date(rental.end_time).toLocaleString()
+                                    : undefined;
+                            })(),
                         },
                     ],
                 }))
             ];
 
             setOrders(foundOrders);
+            setLastRefreshTime(new Date());
 
             if (foundOrders.length === 0) {
-                toast({
-                    title: "No Orders Found",
-                    description: "No orders found with the provided information",
-                    status: "info",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                if (!silentRefresh) {
+                    toast({
+                        title: "No Orders Found",
+                        description: "No orders found with the provided information",
+                        status: "info",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                }
             } else {
+                // Enable auto-refresh when orders are found
+                setAutoRefresh(true);
+
+                if (!silentRefresh) {
+                    toast({
+                        title: "Orders Found",
+                        description: `Found ${foundOrders.length} order(s). Auto-refresh enabled.`,
+                        status: "success",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error searching orders:", error);
+            if (!silentRefresh) {
                 toast({
-                    title: "Orders Found",
-                    description: `Found ${foundOrders.length} order(s)`,
-                    status: "success",
-                    duration: 3000,
+                    title: "Search Failed",
+                    description: "Unable to search for orders. Please try again.",
+                    status: "error",
+                    duration: 5000,
                     isClosable: true,
                 });
             }
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: "Something went wrong. Please try again.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
         } finally {
             setIsSearching(false);
         }
@@ -334,7 +390,10 @@ const TrackOrderPage: React.FC = () => {
                     {/* Search Form */}
                     <Box
                         as="form"
-                        onSubmit={handleSearch}
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            searchOrders();
+                        }}
                         w="full"
                         maxW="600px"
                         bg="white"
@@ -381,6 +440,13 @@ const TrackOrderPage: React.FC = () => {
                             </Button>
                         </VStack>
                     </Box>
+
+                    {/* Last Updated Time - Only show when orders exist */}
+                    {orders.length > 0 && lastRefreshTime && (
+                        <Text fontSize="sm" color="gray.500" textAlign="center">
+                            Last updated: {lastRefreshTime.toLocaleTimeString()} (Auto-refreshing every 30s)
+                        </Text>
+                    )}
 
                     {/* Orders List */}
                     {orders.length > 0 && (

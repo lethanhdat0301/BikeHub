@@ -1,26 +1,33 @@
 steps:
-  # Build the container image with build args
+  # Build the container image using Secret Manager
   - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
     args:
-      - 'build'
-      - '--build-arg'
-      - 'VITE_MODE=prod'
-      - '--build-arg'
-      - 'VITE_BACK_END_PROD=${_VITE_BACK_END_PROD}'
-      - '--build-arg'
-      - 'VITE_RECAPTCHA_SITE_KEY=${_VITE_RECAPTCHA_SITE_KEY}'
-      - '-t'
-      - 'gcr.io/$PROJECT_ID/frontend'
-      - '.'
-  
-  # Push the container image to Container Registry
+      - '-c'
+      - |
+        docker build \
+        --build-arg VITE_MODE=prod \
+        --build-arg VITE_BACK_END_PROD=${_VITE_BACK_END_PROD} \
+        --build-arg VITE_RECAPTCHA_SITE_KEY=$$RECAPTCHA_VAL \
+        -t gcr.io/$PROJECT_ID/frontend:latest \
+        -t gcr.io/$PROJECT_ID/frontend:$SHORT_SHA \
+        .
+    secretEnv: ['RECAPTCHA_VAL']
+
+  # Push the container image (Push cả tag latest và tag theo commit SHA)
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/frontend']
 
 images:
-  - 'gcr.io/$PROJECT_ID/frontend'
+  - 'gcr.io/$PROJECT_ID/frontend:latest'
+  - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
 
-# Default values (can be overridden)
+# Cấu hình lấy Secret từ GCP
+availableSecrets:
+  secretManager:
+  - versionName: projects/$PROJECT_ID/secrets/RECAPTCHA_SITE_KEY/versions/latest
+    env: 'RECAPTCHA_VAL'
+
 substitutions:
-  _VITE_BACK_END_PROD: 'https://api-289273895966.asia-southeast1.run.app/api/v1/'
-  _VITE_RECAPTCHA_SITE_KEY: ''  # Set this when running build
+  _VITE_BACK_END_PROD: 'https://api.rentnride.travel/api/v1/'
+  _VITE_RECAPTCHA_SITE_KEY: ''

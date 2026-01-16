@@ -303,7 +303,8 @@ const BikeDetailsPage: React.FC = () => {
 
             // Toast duration and navigate delay - longer on mobile
             const isMobile = window.innerWidth <= 768;
-            const toastDuration = isMobile ? 10000 : 7000; // 10s on mobile, 7s on desktop
+            // const toastDuration = isMobile ? 10000 : 7000; // 10s on mobile, 7s on desktop
+            const toastDuration = null;
             const navigateDelay = isMobile ? 4000 : 2000;  // 4s on mobile, 2s on desktop
 
             toast({
@@ -750,7 +751,7 @@ const BikeDetailsPage: React.FC = () => {
                                             <Text>Base Price</Text>
                                             <Text
                                                 fontWeight="semibold"
-                                                textDecoration={getDiscountPercentage() > 0 ? "line-through" : "none"}
+                                                // textDecoration={getDiscountPercentage() > 0 ? "line-through" : "none"}
                                                 color={getDiscountPercentage() > 0 ? "gray.500" : "inherit"}
                                             >
                                                 {getBasePrice().toLocaleString('vi-VN')} VNĐ

@@ -89,7 +89,7 @@ const TermsPage: React.FC = () => {
                                     </Heading>
                                 </HStack>
                                 <Text color={textColor} fontSize="md" lineHeight="1.6">
-                                    Complimentary motorcycle delivery and pickup service for distances under 5km
+                                    Complimentary motorcycle delivery and pickup service for distances under 10km
                                     from our rental locations.
                                 </Text>
                             </Box>

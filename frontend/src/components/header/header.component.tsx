@@ -74,8 +74,7 @@ const Header: React.FC = () => {
   ];
 
   const phoneNumbers = [
-    { number: "+84 123 456 789", display: "0123 456 789" },
-    { number: "+84 123 456 789", display: "0123 456 789" }
+    { number: "+84 388 817 935", display: "0388817935" },
   ];
 
   const socialLinks = {

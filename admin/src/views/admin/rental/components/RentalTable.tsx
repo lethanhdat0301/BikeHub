@@ -38,10 +38,12 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                 accessor: "id",
                 Cell: ({ row }: any) => {
                     // Use booking_request_id if available, otherwise use rental id
-                    const bookingId = row.original.booking_request_id || row.original.id;
+                    const displayId = row.original.booking_code
+                        ? row.original.booking_code
+                        : `BK${String(row.original.booking_request_id || row.original.id).padStart(6, '0')}`;
                     return (
                         <p className="text-sm font-bold text-navy-700 dark:text-white">
-                            BK{String(bookingId).padStart(6, '0')}
+                            {displayId}
                         </p>
                     );
                 },

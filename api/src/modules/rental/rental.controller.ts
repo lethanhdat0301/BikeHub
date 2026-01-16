@@ -25,6 +25,7 @@ import { EmailService } from '../email/email.service';
 import { buildRentalConfirmationHtml } from '../email/templates/rental-confirmation.template';
 import { UserService } from '../user/user.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { generateBookingCode } from 'src/ultis/ultis';
 import * as fs from 'fs';
 
 @ApiTags('rentals')
@@ -86,6 +87,8 @@ export class RentalController {
       }
     }
 
+    const newBookingCode = generateBookingCode();
+
     // Create rental with pending status
     const rental = await this.rentalService.create({
       start_time: new Date(start_date),
@@ -97,6 +100,7 @@ export class RentalController {
       contact_email: contact_email || '',
       contact_phone: contact_phone || '',
       pickup_location: pickup_location || '',
+      booking_code: newBookingCode,
       ...(finalUserId ? { User: { connect: { id: finalUserId } } } : {}),
       Bike: { connect: { id: bike_id } },
     });
@@ -104,8 +108,8 @@ export class RentalController {
     // Fetch complete rental details with bike and dealer info
     const rentalDetails: any = await this.rentalService.findOne({ id: rental.id });
 
-    // Prepare booking details response with formatted booking ID
-    const formattedBookingId = `BK${String(rental.id).padStart(6, '0')}`;
+    const formattedBookingId = rental.booking_code;
+
     const bookingDetails = {
       bookingId: formattedBookingId,
       bikeCode: rentalDetails?.Bike?.id || bike_id,
@@ -125,7 +129,7 @@ export class RentalController {
       try {
         // console.log('=== Attempting to send confirmation email to:', contact_email);
 
-        const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: $${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
+        const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: ${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
 
         // Get the appropriate base URL based on environment
         const getBaseUrl = () => {
@@ -290,19 +294,11 @@ export class RentalController {
   async searchRentals(
     @Param('query') query: string,
   ): Promise<RentalModel[]> {
-    // Search by booking ID (format: BK001234), phone, or email
-    // First check if query is a booking ID format
-    let bookingId: number | null = null;
-    if (query.toUpperCase().startsWith('BK')) {
-      const idStr = query.substring(2);
-      bookingId = parseInt(idStr, 10);
-    }
-
     // Search in multiple fields
     const rentals = await this.rentalService.findAll({
       where: {
         OR: [
-          ...(bookingId ? [{ id: bookingId }] : []),
+          { booking_code: query },
           { contact_phone: { contains: query } },
           { contact_email: { contains: query.toLowerCase() } },
           {
@@ -382,8 +378,11 @@ export class RentalController {
       throw new ForbiddenException('You can only create rentals for yourself');
     }
 
+    const newBookingCode = generateBookingCode();
+
     return this.rentalService.create({
       ...rest,
+      booking_code: newBookingCode,
       User: {
         connect: { id: user_id },
       },

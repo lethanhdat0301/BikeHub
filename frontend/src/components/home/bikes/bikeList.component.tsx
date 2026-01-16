@@ -109,10 +109,27 @@ const BikeList: React.FC = () => {
                 }
 
                 // Thêm ảnh mặc định nếu cần
-                const bikesWithImages = data.map((bike, index) => ({
-                    ...bike,
-                    image: bike.image || defaultImages[index % defaultImages.length]
-                }));
+                const bikesWithImages = data.map((bike, index) => {
+                    let processedImage = defaultImages[index % defaultImages.length]
+
+                    if (bike.image) {
+                        if (bike.image.startsWith('http') || bike.image.startsWith('data:')) {
+                            processedImage = bike.image
+                        }
+                        else {
+                            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000/';
+
+                            const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+
+                            processedImage = `${baseUrl}uploads/image/${bike.image}`;
+                        }
+                    }
+
+                    return {
+                        ...bike,
+                        image: processedImage
+                    };
+                });
 
                 setBikes(bikesWithImages);
                 setError(null);

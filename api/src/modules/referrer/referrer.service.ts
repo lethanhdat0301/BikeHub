@@ -83,7 +83,7 @@ export class ReferrerService {
             estimatedCommission,
             referralHistory: referralRentals.map(rental => ({
                 id: rental.id,
-                bookingId: `BK${String(rental.booking_request_id || rental.id).padStart(6, '0')}`,
+                bookingId: rental.booking_code || `BK${String(rental.booking_request_id || rental.id).padStart(6, '0')}`,
                 customerName: rental.User ? rental.User.name : rental.contact_name || 'Guest',
                 customerEmail: rental.User ? rental.User.email : rental.contact_email,
                 customerPhone: rental.User ? rental.User.phone : rental.contact_phone,
