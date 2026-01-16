@@ -11,6 +11,13 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🚀 Start seeding...');
 
+  try {
+    await prisma.$executeRawUnsafe(`CREATE SEQUENCE IF NOT EXISTS booking_id_seq START 1;`);
+    console.log('✅ Sequence "booking_id_seq" ensured.');
+  } catch (error) {
+    console.warn('⚠️ Could not create sequence (might already exist or not supported):', error);
+  }
+
   // 1. Users (Admin + Dealers + Customers)
   const { dealers, users } = await seedUsers(prisma);
 

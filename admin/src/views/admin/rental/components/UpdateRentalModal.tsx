@@ -129,7 +129,7 @@ const UpdateRentalModal: React.FC<Props> = ({ isOpen, onClose, rental, onSuccess
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
                     <h2 className="text-xl font-bold text-gray-800">
-                        Update Rental - {rental?.id ? `BK${String(rental.id).padStart(6, '0')}` : ''}
+                        Update Rental - {rental?.booking_code || (rental.id ? `BK${String(rental.id).padStart(6, '0')}` : '')}
                     </h2>
                     <button
                         onClick={onClose}

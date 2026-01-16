@@ -81,10 +81,43 @@ export class RentalService {
     data: Prisma.RentalUpdateInput;
   }): Promise<Rental> {
     const { data, where } = params;
-    return this.prisma.rental.update({
+
+    // Get current rental before update
+    const currentRental = await this.prisma.rental.findUnique({
+      where,
+      include: { BookingRequest: true },
+    });
+
+    // Update the rental
+    const updatedRental = await this.prisma.rental.update({
       data,
       where,
     });
+
+    // Sync booking request status if rental has a linked booking request
+    if (currentRental?.BookingRequest && data.status) {
+      const rentalStatus = String(data.status).toLowerCase();
+      let bookingStatus = currentRental.BookingRequest.status;
+
+      // Map rental status to booking status
+      if (rentalStatus === 'completed') {
+        bookingStatus = 'COMPLETED';
+      } else if (rentalStatus === 'ongoing' || rentalStatus === 'active') {
+        bookingStatus = 'APPROVED'; // Keep as approved when ongoing
+      } else if (rentalStatus === 'cancelled') {
+        bookingStatus = 'REJECTED';
+      }
+
+      // Update booking request if status changed
+      if (bookingStatus !== currentRental.BookingRequest.status) {
+        await this.prisma.bookingRequest.update({
+          where: { id: currentRental.BookingRequest.id },
+          data: { status: bookingStatus },
+        });
+      }
+    }
+
+    return updatedRental;
   }
 
   async delete(where: Prisma.RentalWhereUniqueInput): Promise<Rental> {
@@ -109,6 +142,7 @@ export class RentalService {
 
     return rentals.map(rental => ({
       id: rental.id,
+      bookingId: rental.booking_code || `BK${String(rental.id).padStart(6, '0')}`,
       customer_name: rental.User ? rental.User.name : rental.contact_name || 'Guest',
       customer_phone: rental.User ? rental.User.phone : rental.contact_phone || 'N/A',
       vehicle_model: rental.Bike?.model || 'N/A',

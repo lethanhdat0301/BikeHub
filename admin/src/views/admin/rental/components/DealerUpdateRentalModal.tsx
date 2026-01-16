@@ -91,8 +91,7 @@ const DealerUpdateRentalModal: React.FC<Props> = ({ isOpen, onClose, rental, onS
                         <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Rental ID:</span>
                             <span className="text-sm font-semibold text-gray-800">
-                                {rental?.id ? `BK${String(rental.id).padStart(6, '0')}` : ''}
-                            </span>
+                                {rental?.booking_code || (rental?.id ? `BK${String(rental.id).padStart(6, '0')}` : '')}                            </span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Customer:</span>

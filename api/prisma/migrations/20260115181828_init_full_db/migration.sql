@@ -1,3 +1,5 @@
+CREATE SEQUENCE IF NOT EXISTS booking_id_seq START 1;
+
 -- CreateTable
 CREATE TABLE "Bike" (
     "id" SERIAL NOT NULL,
@@ -54,9 +56,11 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Rental" (
-    "id" SERIAL NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('booking_id_seq'),
+    "booking_code" TEXT,
     "user_id" INTEGER,
     "bike_id" INTEGER NOT NULL,
+    "booking_request_id" INTEGER,
     "start_time" TIMESTAMP(3) NOT NULL,
     "end_time" TIMESTAMP(3),
     "status" TEXT NOT NULL,
@@ -76,7 +80,8 @@ CREATE TABLE "Rental" (
 
 -- CreateTable
 CREATE TABLE "BookingRequest" (
-    "id" SERIAL NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('booking_id_seq'),
+    "booking_code" TEXT,
     "user_id" INTEGER,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -85,6 +90,11 @@ CREATE TABLE "BookingRequest" (
     "pickup_location" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'PENDING',
     "admin_notes" TEXT,
+    "dealer_id" INTEGER,
+    "bike_id" INTEGER,
+    "start_date" TIMESTAMP(3),
+    "end_date" TIMESTAMP(3),
+    "estimated_price" DOUBLE PRECISION,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -132,6 +142,12 @@ CREATE TABLE "Referrer" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Rental_booking_code_key" ON "Rental"("booking_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BookingRequest_booking_code_key" ON "BookingRequest"("booking_code");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Dealer_email_key" ON "Dealer"("email");
 
 -- AddForeignKey
@@ -147,4 +163,13 @@ ALTER TABLE "Rental" ADD CONSTRAINT "Rental_user_id_fkey" FOREIGN KEY ("user_id"
 ALTER TABLE "Rental" ADD CONSTRAINT "Rental_bike_id_fkey" FOREIGN KEY ("bike_id") REFERENCES "Bike"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Rental" ADD CONSTRAINT "Rental_booking_request_id_fkey" FOREIGN KEY ("booking_request_id") REFERENCES "BookingRequest"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "BookingRequest" ADD CONSTRAINT "BookingRequest_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BookingRequest" ADD CONSTRAINT "BookingRequest_bike_id_fkey" FOREIGN KEY ("bike_id") REFERENCES "Bike"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BookingRequest" ADD CONSTRAINT "BookingRequest_dealer_id_fkey" FOREIGN KEY ("dealer_id") REFERENCES "Dealer"("id") ON DELETE SET NULL ON UPDATE CASCADE;
