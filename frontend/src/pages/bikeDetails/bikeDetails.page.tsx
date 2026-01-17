@@ -26,6 +26,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import bikeService from "../../services/bikeService";
 import api from "../../apis/axios";
 import { calculateRentalPeriod, calculateRentalPrice, calculateDiscount } from "../../utils/rentalCalculations";
+import bikeImage from "../../assets/images/bike-placeholder.jpg";
 
 const BikeDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -399,7 +400,7 @@ const BikeDetailsPage: React.FC = () => {
         );
     }
 
-    const bikeImages = bike.images || [bike.image];
+    const bikeImageUrl = bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : bikeImage;
 
     return (
         <Box minH="100vh" bg="gray.50" py={8}>
@@ -420,7 +421,7 @@ const BikeDetailsPage: React.FC = () => {
                         {/* Main Image */}
                         <Box position="relative" borderRadius="xl" overflow="hidden" bg="white" shadow="lg">
                             <Image
-                                src={bikeImages[currentImageIndex]}
+                                src={bikeImageUrl}
                                 alt={bike.model}
                                 w="100%"
                                 h={{ base: "300px", md: "400px" }}
