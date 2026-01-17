@@ -1,10 +1,9 @@
 steps:
-  # Build the container image with build args
   - name: "gcr.io/cloud-builders/docker"
     args:
       - "build"
       - "--build-arg"
-      - "REACT_APP_API_URL=${_REACT_APP_API_URL}"
+      - "REACT_APP_API_URL=https://api.rentnride.travel/api/v1"
       - "-t"
       - "gcr.io/$PROJECT_ID/admin:$BUILD_ID"
       - "-t"
@@ -16,6 +15,3 @@ images:
   - "gcr.io/$PROJECT_ID/admin:latest"
 
 timeout: "1200s"
-
-substitutions:
-  _REACT_APP_API_URL: "https://api.rentnride.travel/api/v1/"
