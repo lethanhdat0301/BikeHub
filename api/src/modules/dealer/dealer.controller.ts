@@ -22,6 +22,11 @@ export class DealerController {
         return this.dealerService.findAll();
     }
 
+    @Get('user/:userId')
+    async findDealerByUserId(@Param('userId') userId: string) {
+        return this.dealerService.findDealerByUserId(+userId);
+    }
+
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.dealerService.findOne(+id);

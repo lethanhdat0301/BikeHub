@@ -19,8 +19,8 @@ export class UploadsController {
 
   @Get('image/:name')
   async getImageUrl(@Param('name') name: string) {
-    // returns a signed url valid for a short period
-    const url = await this.uploadsService.getSignedUrl(name);
+    // returns a public url for the image
+    const url = await this.uploadsService.getFileUrl(name);
     return { url };
   }
 }

@@ -15,20 +15,28 @@ const Bookings = () => {
 
             const bookingRequestsData = await bookingRequestsRes.json();
 
+            // console.log('📋 Booking requests data:', bookingRequestsData);
+
             // Format booking requests data
-            const formattedData = Array.isArray(bookingRequestsData) ? bookingRequestsData.map(br => ({
-                ...br,
-                type: 'booking-request',
-                bookingId: `BK${String(br.id).padStart(6, '0')}`,
-                customer_name: br.name,
-                customer_phone: br.contact_details,
-                vehicle_model: br.Bike?.model || 'Pending Assignment',
-                dealer_name: br.Dealer?.name || 'Not Assigned',
-                location: br.pickup_location,
-                start_time: br.start_date,
-                end_time: br.end_date,
-                price: br.estimated_price || 0,
-            })) : [];
+            const formattedData = Array.isArray(bookingRequestsData) ? bookingRequestsData.map(br => {
+                // Get dealer name with priority: 
+                // 1. Direct dealer assignment, 2. Bike dealer, 3. Fallback
+                const dealerName = br.Dealer?.name || br.Bike?.Dealer?.name || br.Bike?.dealer_name || 'Not Assigned';
+
+                return {
+                    ...br,
+                    type: 'booking-request',
+                    bookingId: br.booking_code || `BK${String(br.id).padStart(6, '0')}`,
+                    customer_name: br.name,
+                    customer_phone: br.contact_details,
+                    vehicle_model: br.Bike?.model || 'Pending Assignment',
+                    dealer_name: dealerName,
+                    location: br.pickup_location,
+                    start_time: br.start_date,
+                    end_time: br.end_date,
+                    price: br.estimated_price || 0,
+                };
+            }) : [];
 
             setTableData(formattedData);
         } catch (error) {

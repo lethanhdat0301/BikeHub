@@ -1,5 +1,5 @@
 steps:
-  # Build the container image with build args
+  # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
@@ -12,15 +12,11 @@ steps:
       - '-t'
       - 'gcr.io/$PROJECT_ID/frontend'
       - '.'
-  
-  # Push the container image to Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/frontend']
 
 images:
   - 'gcr.io/$PROJECT_ID/frontend'
 
-# Default values (can be overridden)
+# Default values
 substitutions:
-  _VITE_BACK_END_PROD: 'https://api-289273895966.asia-southeast1.run.app/api/v1/'
-  _VITE_RECAPTCHA_SITE_KEY: ''  # Set this when running build
+  _VITE_BACK_END_PROD: 'https://api.rentnride.travel/api/v1'
+  _VITE_RECAPTCHA_SITE_KEY: ''

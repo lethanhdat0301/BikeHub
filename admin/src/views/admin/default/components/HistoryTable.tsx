@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import useAuth from "utils/auth/AuthHook";
 import Card from "components/card";
 import {
   MdCancel,
@@ -101,6 +102,7 @@ const columns = [
 
 // const columns = columnsDataCheck;
 export default function HistoryTable() {
+  const { user } = useAuth();
   const [tableData, setTableData] = useState<Rental[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -110,9 +112,9 @@ export default function HistoryTable() {
         const rentalsResponse = await axios.get(`${process.env.REACT_APP_API_URL}rentals/list`, {
           withCredentials: true,
         });
-        console.log("-response------------")
-        console.log(rentalsResponse)
-        console.log("-------------")
+        // console.log("-response------------")
+        // console.log(rentalsResponse)
+        // console.log("-------------")
         const rentals: Rental[] = rentalsResponse.data;
 
         // Sort rentals by date and take the last 5

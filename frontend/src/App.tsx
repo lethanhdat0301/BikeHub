@@ -1,4 +1,5 @@
 import Header from "./components/header/header.component";
+import './i18n';
 
 import {
   Toaster

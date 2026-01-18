@@ -32,12 +32,16 @@ import {
     Flex,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
+import { useTranslation } from 'react-i18next';
 import {
     FaCheckCircle,
     FaHourglassHalf,
     FaMotorcycle,
     FaTruck,
     FaMapMarkerAlt,
+    FaPhone,
+    FaEnvelope,
+    FaBuilding,
 } from "react-icons/fa";
 import api from "../../apis/axios";
 import bike1 from "../../assets/images/bikes/bike1.jpg";
@@ -56,6 +60,11 @@ interface Order {
     expectedDelivery: string;
     currentStatus: number;
     totalPrice: number;
+    dealerInfo?: {
+        name: string;
+        phone: string;
+        email: string;
+    };
     trackingSteps: {
         title: string;
         description: string;
@@ -65,9 +74,30 @@ interface Order {
 
 const TrackOrderPage: React.FC = () => {
     const toast = useToast();
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [autoRefresh, setAutoRefresh] = useState(true);
+    const [lastSearchQuery, setLastSearchQuery] = useState("");
+    const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+
+    // Auto-refresh every 30 seconds when orders are displayed
+    React.useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        if (autoRefresh && orders.length > 0 && lastSearchQuery) {
+            interval = setInterval(() => {
+                searchOrders(lastSearchQuery, true); // true for silent refresh
+            }, 30000); // 30 seconds
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [autoRefresh, orders.length, lastSearchQuery]);
 
     // Mock data for orders
     const mockOrders: Order[] = [
@@ -84,25 +114,30 @@ const TrackOrderPage: React.FC = () => {
             expectedDelivery: "2024-12-26 02:00 PM",
             currentStatus: 2,
             totalPrice: 350,
+            dealerInfo: {
+                name: "Phu Quoc Bike Center",
+                phone: "+84 297 123 4567",
+                email: "phuquoc@bikehub.vn"
+            },
             trackingSteps: [
                 {
-                    title: "Order Confirmed",
-                    description: "Your order has been confirmed",
+                    title: t('orderTracking.orderConfirmed'),
+                    description: t('orderTracking.orderConfirmedDesc'),
                     timestamp: "2024-12-25 10:30 AM",
                 },
                 {
-                    title: "Preparing Motorcycle",
-                    description: "We're getting your motorcycle ready",
+                    title: t('orderTracking.preparingMotorcycle'),
+                    description: t('orderTracking.preparingMotorcycleDesc'),
                     timestamp: "2024-12-25 11:00 AM",
                 },
                 {
-                    title: "Out for Delivery",
-                    description: "Your motorcycle is on the way",
+                    title: t('orderTracking.outForDelivery'),
+                    description: t('orderTracking.outForDeliveryDesc'),
                     timestamp: "2024-12-26 09:00 AM",
                 },
                 {
-                    title: "Delivered",
-                    description: "Motorcycle delivered to your location",
+                    title: t('orderTracking.delivered'),
+                    description: t('orderTracking.deliveredDesc'),
                 },
             ],
         },
@@ -119,36 +154,41 @@ const TrackOrderPage: React.FC = () => {
             expectedDelivery: "2024-12-26 04:00 PM",
             currentStatus: 1,
             totalPrice: 245,
+            dealerInfo: {
+                name: "Nha Trang Motor Station",
+                phone: "+84 258 987 6543",
+                email: "nhatrang@bikehub.vn"
+            },
             trackingSteps: [
                 {
-                    title: "Order Confirmed",
-                    description: "Your order has been confirmed",
+                    title: t('orderTracking.orderConfirmed'),
+                    description: t('orderTracking.orderConfirmedDesc'),
                     timestamp: "2024-12-26 08:00 AM",
                 },
                 {
-                    title: "Preparing Motorcycle",
-                    description: "We're getting your motorcycle ready",
+                    title: t('orderTracking.preparingMotorcycle'),
+                    description: t('orderTracking.preparingMotorcycleDesc'),
                     timestamp: "2024-12-26 08:30 AM",
                 },
                 {
-                    title: "Out for Delivery",
-                    description: "Your motorcycle is on the way",
+                    title: t('orderTracking.outForDelivery'),
+                    description: t('orderTracking.outForDeliveryDesc'),
                 },
                 {
-                    title: "Delivered",
-                    description: "Motorcycle delivered to your location",
+                    title: t('orderTracking.delivered'),
+                    description: t('orderTracking.deliveredDesc'),
                 },
             ],
         },
     ];
 
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const searchOrders = async (query?: string, silentRefresh = false) => {
+        const queryToSearch = query || searchQuery;
 
-        if (!searchQuery.trim()) {
+        if (!queryToSearch.trim()) {
             toast({
-                title: "Search Required",
-                description: "Please enter a Booking ID, phone number, or email",
+                title: t('booking.errors.errorTitle'),
+                description: t('booking.errors.requiredFieldsDescription'),
                 status: "warning",
                 duration: 3000,
                 isClosable: true,
@@ -158,11 +198,16 @@ const TrackOrderPage: React.FC = () => {
 
         setIsSearching(true);
 
+        // Store last search query for auto-refresh
+        if (!silentRefresh) {
+            setLastSearchQuery(queryToSearch);
+        }
+
         try {
             // Search both booking-requests and rentals
             const [bookingResponse, rentalResponse] = await Promise.all([
-                api.get(`/booking-requests/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] })),
-                api.get(`/rentals/search/${encodeURIComponent(searchQuery)}`).catch(() => ({ data: [] }))
+                api.get(`/booking-requests/search/${encodeURIComponent(queryToSearch)}`).catch(() => ({ data: [] })),
+                api.get(`/rentals/search/${encodeURIComponent(queryToSearch)}`).catch(() => ({ data: [] }))
             ]);
 
             const foundBookings = Array.isArray(bookingResponse.data) ? bookingResponse.data : [];
@@ -172,7 +217,7 @@ const TrackOrderPage: React.FC = () => {
             const foundOrders = [
                 ...foundBookings.map((booking: any) => ({
                     id: booking.id,
-                    bookingId: `BK${String(booking.id).padStart(6, '0')}`,
+                    bookingId: booking.booking_code || `BK${String(booking.id).padStart(6, '0')}`,
                     bikeName: booking.Bike?.model || 'N/A',
                     bikeModel: booking.Bike?.transmission || 'N/A',
                     bikeImage: booking.Bike?.image || bike1,
@@ -183,32 +228,37 @@ const TrackOrderPage: React.FC = () => {
                     expectedDelivery: booking.start_date ? new Date(booking.start_date).toLocaleString() : 'N/A',
                     currentStatus: booking.status === 'COMPLETED' ? 3 : booking.status === 'APPROVED' ? 2 : 1,
                     totalPrice: booking.estimated_price || 0,
+                    dealerInfo: booking.Dealer ? {
+                        name: booking.Dealer.name,
+                        phone: booking.Dealer.phone || 'N/A',
+                        email: booking.Dealer.email || 'N/A'
+                    } : null,
                     trackingSteps: [
                         {
-                            title: "Order Confirmed",
-                            description: "Your order has been confirmed",
+                            title: t('orderTracking.orderConfirmed'),
+                            description: t('orderTracking.orderConfirmedDesc'),
                             timestamp: new Date(booking.created_at).toLocaleString(),
                         },
                         {
-                            title: "Preparing Motorcycle",
-                            description: "We're getting your motorcycle ready",
+                            title: t('orderTracking.preparingMotorcycle'),
+                            description: t('orderTracking.preparingMotorcycleDesc'),
                             timestamp: booking.status !== 'PENDING' ? new Date(booking.created_at).toLocaleString() : undefined,
                         },
                         {
-                            title: "Out for Delivery",
-                            description: "Your motorcycle is on the way",
+                            title: t('orderTracking.outForDelivery'),
+                            description: t('orderTracking.outForDeliveryDesc'),
                             timestamp: booking.status === 'APPROVED' || booking.status === 'COMPLETED' ? (booking.start_date ? new Date(booking.start_date).toLocaleString() : undefined) : undefined,
                         },
                         {
-                            title: "Delivered",
-                            description: "Motorcycle delivered to your location",
+                            title: t('orderTracking.delivered'),
+                            description: t('orderTracking.deliveredDesc'),
                             timestamp: booking.status === 'COMPLETED' && booking.end_date ? new Date(booking.end_date).toLocaleString() : undefined,
                         },
                     ],
                 })),
                 ...foundRentals.map((rental: any) => ({
                     id: rental.id,
-                    bookingId: `BK${String(rental.id).padStart(6, '0')}`,
+                    bookingId: rental.booking_code || `BK${String(rental.id).padStart(6, '0')}`,
                     bikeName: rental.Bike?.model || 'N/A',
                     bikeModel: rental.Bike?.transmission || 'N/A',
                     bikeImage: rental.Bike?.image || bike1,
@@ -217,27 +267,37 @@ const TrackOrderPage: React.FC = () => {
                     deliveryAddress: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
                     orderDate: new Date(rental.created_at).toLocaleString(),
                     expectedDelivery: new Date(rental.start_time).toLocaleString(),
-                    currentStatus: rental.status === 'completed' ? 3 : rental.status === 'active' ? 2 : 1,
+                    currentStatus: (() => {
+                        const status = rental.status?.toLowerCase();
+                        if (status === 'completed') return 3;
+                        if (status === 'ongoing' || status === 'active') return 2;
+                        return 1; // pending or any other status
+                    })(),
                     totalPrice: rental.price || 0,
+                    dealerInfo: rental.Bike?.Dealer ? {
+                        name: rental.Bike.Dealer.name,
+                        phone: rental.Bike.Dealer.phone || 'N/A',
+                        email: rental.Bike.Dealer.email || 'N/A'
+                    } : null,
                     trackingSteps: [
                         {
-                            title: "Order Confirmed",
-                            description: "Your order has been confirmed",
+                            title: t('orderTracking.orderConfirmed'),
+                            description: t('orderTracking.orderConfirmedDesc'),
                             timestamp: new Date(rental.created_at).toLocaleString(),
                         },
                         {
-                            title: "Preparing Motorcycle",
-                            description: "We're getting your motorcycle ready",
+                            title: t('orderTracking.preparingMotorcycle'),
+                            description: t('orderTracking.preparingMotorcycleDesc'),
                             timestamp: rental.status !== 'pending' ? new Date(rental.start_time).toLocaleString() : undefined,
                         },
                         {
-                            title: "Out for Delivery",
-                            description: "Your motorcycle is on the way",
+                            title: t('orderTracking.outForDelivery'),
+                            description: t('orderTracking.outForDeliveryDesc'),
                             timestamp: rental.status === 'active' || rental.status === 'completed' ? new Date(rental.start_time).toLocaleString() : undefined,
                         },
                         {
-                            title: "Delivered",
-                            description: "Motorcycle delivered to your location",
+                            title: t('orderTracking.delivered'),
+                            description: t('orderTracking.deliveredDesc'),
                             timestamp: rental.status === 'completed' && rental.end_time ? new Date(rental.end_time).toLocaleString() : undefined,
                         },
                     ],
@@ -245,32 +305,41 @@ const TrackOrderPage: React.FC = () => {
             ];
 
             setOrders(foundOrders);
+            setLastRefreshTime(new Date());
 
             if (foundOrders.length === 0) {
                 toast({
-                    title: "No Orders Found",
-                    description: "No orders found with the provided information",
+                    title: t('booking.errors.errorTitle'),
+                    description: t('trackOrder.noOrdersFound'),
                     status: "info",
                     duration: 3000,
                     isClosable: true,
                 });
             } else {
+                // Enable auto-refresh when orders are found
+                setAutoRefresh(true);
+
+                if (!silentRefresh) {
+                    toast({
+                        title: "Orders Found",
+                        description: `Found ${foundOrders.length} order(s). Auto-refresh enabled.`,
+                        status: "success",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error searching orders:", error);
+            if (!silentRefresh) {
                 toast({
-                    title: "Orders Found",
-                    description: `Found ${foundOrders.length} order(s)`,
-                    status: "success",
+                    title: t('booking.errors.errorTitle'),
+                    description: t('booking.errors.errorDescription'),
+                    status: "error",
                     duration: 3000,
                     isClosable: true,
                 });
             }
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: "Something went wrong. Please try again.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
         } finally {
             setIsSearching(false);
         }
@@ -295,18 +364,20 @@ const TrackOrderPage: React.FC = () => {
                     {/* Header */}
                     <Box textAlign="center">
                         <Heading as="h1" size={{ base: "xl", md: "2xl" }} color="teal.700" mb={3}>
-                            Track Your Order
+                            {t('trackOrder.pageTitle')}
                         </Heading>
                         <Text fontSize={{ base: "md", md: "lg" }} color="gray.600" maxW="2xl">
-                            Enter your booking ID, phone number, or license plate to see the delivery
-                            status.
+                            {t('trackOrder.pageDescription')}
                         </Text>
                     </Box>
 
                     {/* Search Form */}
                     <Box
                         as="form"
-                        onSubmit={handleSearch}
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            searchOrders();
+                        }}
                         w="full"
                         maxW="600px"
                         bg="white"
@@ -317,7 +388,7 @@ const TrackOrderPage: React.FC = () => {
                         <VStack spacing={6}>
                             <FormControl isRequired>
                                 <FormLabel fontWeight="semibold" color="gray.700">
-                                    Track Your Delivery
+                                    {t('trackOrder.searchLabel')}
                                 </FormLabel>
                                 <InputGroup size="lg">
                                     <InputLeftElement pointerEvents="none">
@@ -325,7 +396,7 @@ const TrackOrderPage: React.FC = () => {
                                     </InputLeftElement>
                                     <Input
                                         type="text"
-                                        placeholder="Booking ID, Phone Number, or License Plate"
+                                        placeholder={t('trackOrder.searchPlaceholder')}
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         borderColor="teal.300"
@@ -342,23 +413,30 @@ const TrackOrderPage: React.FC = () => {
                                 w="full"
                                 leftIcon={<SearchIcon />}
                                 isLoading={isSearching}
-                                loadingText="Searching..."
+                                loadingText={t('booking.processing')}
                                 _hover={{
                                     transform: "translateY(-2px)",
                                     boxShadow: "lg",
                                 }}
                                 transition="all 0.2s"
                             >
-                                Track Order
+                                {t('trackOrder.searchButton')}
                             </Button>
                         </VStack>
                     </Box>
+
+                    {/* Last Updated Time - Only show when orders exist */}
+                    {orders.length > 0 && lastRefreshTime && (
+                        <Text fontSize="sm" color="gray.500" textAlign="center">
+                            Last updated: {lastRefreshTime.toLocaleTimeString()} (Auto-refreshing every 30s)
+                        </Text>
+                    )}
 
                     {/* Orders List */}
                     {orders.length > 0 && (
                         <VStack spacing={6} w="full">
                             <Heading size="md" alignSelf="flex-start" color="gray.700">
-                                Your Orders ({orders.length})
+                                {t('trackOrder.searchHeading')} ({orders.length})
                             </Heading>
 
                             {orders.map((order) => (
@@ -429,6 +507,51 @@ const TrackOrderPage: React.FC = () => {
                                                 </VStack>
                                             </HStack>
 
+                                            {/* Dealer Information */}
+                                            {order.dealerInfo && (
+                                                <Box>
+                                                    <Text fontWeight="semibold" color="gray.700" mb={3} display="flex" alignItems="center" gap={2}>
+                                                        <Icon as={FaBuilding} color="teal.500" />
+                                                        Dealer Information
+                                                    </Text>
+                                                    <HStack
+                                                        spacing={6}
+                                                        flexWrap="wrap"
+                                                        fontSize="sm"
+                                                        color="gray.600"
+                                                        bg="gray.50"
+                                                        p={4}
+                                                        borderRadius="md"
+                                                    >
+                                                        <VStack align="flex-start" spacing={1}>
+                                                            <Text fontWeight="semibold">Dealer Name</Text>
+                                                            <Text>{order.dealerInfo.name}</Text>
+                                                        </VStack>
+                                                        <VStack align="flex-start" spacing={1}>
+                                                            <Text fontWeight="semibold">Contact Phone</Text>
+                                                            <HStack spacing={1}>
+                                                                <Icon as={FaPhone} color="green.500" boxSize={3} />
+                                                                <Text color="green.600" fontWeight="medium">
+                                                                    {order.dealerInfo.phone}
+                                                                </Text>
+                                                            </HStack>
+                                                        </VStack>
+                                                        <VStack align="flex-start" spacing={1}>
+                                                            <Text fontWeight="semibold">Email</Text>
+                                                            <HStack spacing={1}>
+                                                                <Icon as={FaEnvelope} color="blue.500" boxSize={3} />
+                                                                <Text color="blue.600" fontWeight="medium">
+                                                                    {order.dealerInfo.email}
+                                                                </Text>
+                                                            </HStack>
+                                                        </VStack>
+                                                    </HStack>
+                                                    <Text fontSize="xs" color="orange.600" mt={2} fontStyle="italic">
+                                                        💡 In case you don't receive our email confirmation, please contact the dealer directly using the information above.
+                                                    </Text>
+                                                </Box>
+                                            )}
+
                                             <HStack spacing={2} fontSize="sm">
                                                 <Icon as={FaMapMarkerAlt} color="teal.500" />
                                                 <Text color="gray.600">
@@ -484,7 +607,7 @@ const TrackOrderPage: React.FC = () => {
                                                     Total Amount
                                                 </Text>
                                                 <Text fontSize="2xl" fontWeight="bold" color="teal.600">
-                                                    ${order.totalPrice}
+                                                    {order.totalPrice?.toLocaleString('vi-VN')} VNĐ
                                                 </Text>
                                             </Flex>
                                         </VStack>
@@ -499,8 +622,7 @@ const TrackOrderPage: React.FC = () => {
                         <Box bg="teal.50" p={6} borderRadius="lg" w="full" maxW="600px" textAlign="center">
                             <Icon as={FaMotorcycle} boxSize={12} color="teal.500" mb={3} />
                             <Text color="teal.700" fontSize="sm">
-                                💡 Enter your order details above to track your motorcycle delivery in
-                                real-time. You'll see updates from confirmation to delivery!
+                                {t("trackOrder.pageInfoText")}
                             </Text>
                         </Box>
                     )}

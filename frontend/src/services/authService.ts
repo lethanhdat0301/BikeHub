@@ -18,7 +18,7 @@ class AuthService {
         "image": user.image,
       };
       Token = accessToken;
-      console.log("Cookies Still on: ", response.status);
+      // console.log("Cookies Still on: ", response.status);
       authStatus.user = data;
       //check  if there user in localstorage
       if (!storedToken) {
@@ -29,7 +29,7 @@ class AuthService {
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         // mean user dont have cookies token
-        //console.error("Unauthorized request:", error.response.status);
+        console.error("Unauthorized request:", error.response.status);
         // log person out so he can login again ann get new token cookies
         //update local storage if token still in cookies
         localStorage.removeItem('user');
@@ -48,7 +48,7 @@ class AuthService {
       const timeToExpireInHours = Math.floor(timeToExpire / 1000 / 60 / 60);
       const minutesLeft = Math.floor((timeToExpire / 1000 / 60) % 60);
       const secondLeft = Math.floor((timeToExpire / 1000) % 60);
-      console.log("token expire in D:H:M:S: ", timeToExpireInDays, timeToExpireInHours, minutesLeft, secondLeft)
+      // console.log("token expire in D:H:M:S: ", timeToExpireInDays, timeToExpireInHours, minutesLeft, secondLeft)
       if (Date.now() > expirationTime) {
         localStorage.removeItem('user');
       }

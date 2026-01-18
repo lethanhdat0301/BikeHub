@@ -52,7 +52,7 @@ const AdminTable: React.FC<Props> = ({
           }
 
           if (header.id === "image") {
-            const ImageFromKey: React.FC<{ keyOrUrl: string }>= ({ keyOrUrl }) => {
+            const ImageFromKey: React.FC<{ keyOrUrl: string }> = ({ keyOrUrl }) => {
               const [src, setSrc] = React.useState<string | null>(null);
               const cache = React.useRef<Map<string, string>>(new Map());
 
@@ -124,13 +124,13 @@ const AdminTable: React.FC<Props> = ({
             if (value === undefined || value === null || value === "-") return <p className="text-sm font-bold text-navy-700 dark:text-white">-</p>;
             const num = Number(value);
             if (isNaN(num)) return <p className="text-sm font-bold text-navy-700 dark:text-white">{String(value)}</p>;
-            return <p className="text-sm font-bold text-navy-700 dark:text-white">${num.toFixed(2)}</p>;
+            return <p className="text-sm font-bold text-navy-700 dark:text-white">{Number(num || 0).toLocaleString('vi-VN')} VNĐ`</p>;
           }
 
           if (header.id === "price") {
             const num = Number(value);
             return (
-              <p className="text-sm font-bold text-navy-700 dark:text-white">{isNaN(num) ? '-' : `$${num.toFixed(2)}`}</p>
+              <p className="text-sm font-bold text-navy-700 dark:text-white">{isNaN(num) ? '-' : `${num.toLocaleString('vi-VN')} VNĐ`}</p>
             );
           }
 

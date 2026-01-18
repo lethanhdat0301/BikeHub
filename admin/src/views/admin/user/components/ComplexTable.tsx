@@ -107,7 +107,7 @@ export default function ComplexTable(props: {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => {
-              console.log("test");
+              // console.log("test");
               return (
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => {

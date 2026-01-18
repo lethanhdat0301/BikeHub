@@ -54,7 +54,7 @@ const Bikes = () => {
     <div className="mt-5">
       <div className="mb-5">
         <h3 className="text-3xl font-bold text-navy-700 dark:text-white">
-          Bikes Management
+          Motorbikes Management
         </h3>
         <p className="mt-2 text-base text-gray-600 dark:text-gray-400">
           Manage all vehicles in the system.

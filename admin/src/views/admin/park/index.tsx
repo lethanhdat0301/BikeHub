@@ -40,7 +40,7 @@ const Parks = () => {
           Parks Management
         </h3>
         <p className="mt-2 text-base text-gray-600 dark:text-gray-400">
-          Manage all bike parking locations.
+          Manage all motorbike parking locations.
         </p>
       </div>
       <ParkTable tableContent={tableData} loading={loading} />

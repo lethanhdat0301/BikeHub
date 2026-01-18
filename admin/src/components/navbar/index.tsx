@@ -21,7 +21,7 @@ const Navbar = (props: {
   const { onOpenSidenav, brandText } = props;
   const [darkmode, setDarkmode] = React.useState(false);
   const { logOut, user } = useAuth();
-  console.log("user", user)
+  // console.log("user", user)
   const handleLogout = () => {
     logOut();
   };

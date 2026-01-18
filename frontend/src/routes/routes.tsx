@@ -19,6 +19,7 @@ import RequestBookingPage from "../pages/booking/booking.page.tsx";
 import ReturnPage from "../pages/return/return.page.tsx";
 import TrackOrderPage from "../pages/order/trackOrder.page.tsx";
 import BikeDetailsPage from "../pages/bikeDetails/bikeDetails.page.tsx";
+import TermsPage from "../pages/terms/terms.page.tsx";
 
 
 
@@ -84,6 +85,7 @@ const Routes: React.FC = () => {
       <Route path="/request-booking" element={<RequestBookingPage />} />
       <Route path="/return" element={<ReturnPage />} />
       <Route path="/tracking" element={<TrackOrderPage />} />
+      <Route path="/terms" element={<TermsPage />} />
     </ReactRouterRoutes>
   );
 };

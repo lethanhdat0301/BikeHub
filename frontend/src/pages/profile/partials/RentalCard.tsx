@@ -68,7 +68,7 @@ const RentalCard = ({
         textAlign={"center"}
         color={"orange"}
       >
-        <Text>${rental?.price}</Text>
+        <Text>{Number(rental?.price).toLocaleString('vi-VN')} VNĐ</Text>
         {/* <Text></Text> */}
       </Box>
       <Box color={"gray"} fontSize={"small"} fontWeight={"medium"}>
