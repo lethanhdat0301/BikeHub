@@ -63,7 +63,13 @@ async function bootstrap() {
   }
 
   // const PORT = process.env.API_PORT || GLOBAL_CONFIG.nest.port;
-  const PORT = process.env.API_PORT || 8080;
-  await app.listen(PORT);
+  // const PORT = process.env.API_PORT || 8080;
+  // await app.listen(PORT);
+  const PORT = process.env.PORT || process.env.API_PORT || 8080;
+
+  // BẮT BUỘC: Thêm tham số '0.0.0.0' để Cloud Run có thể kết nối
+  await app.listen(PORT, '0.0.0.0');
+
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
