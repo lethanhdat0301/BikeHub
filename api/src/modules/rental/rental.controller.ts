@@ -35,6 +35,7 @@ export class RentalController {
     private rentalService: RentalService,
     private emailService: EmailService,
     private userService: UserService,
+    private prisma: PrismaService,
   ) { }
 
   // ================= PUBLIC ENDPOINT =================
@@ -226,7 +227,7 @@ export class RentalController {
         orderBy: { created_at: 'desc' },
       });
     }
-    
+
     // Dealers see rentals for bikes they own
     if (user.role === ROLES_ENUM.DEALER) {
       return this.rentalService.findAll({
@@ -402,7 +403,7 @@ export class RentalController {
   ): Promise<RentalModel> {
     await this.checkDealerOwnRental(id, user);
 
-    const { user_id, bike_id, ...rest } = dto;
+    const { user_id, bike_id, transfer_park_id, transfer_dealer_id, current_location, ...rest } = dto;
 
     if (
       user.role !== ROLES_ENUM.ADMIN &&

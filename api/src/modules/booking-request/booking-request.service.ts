@@ -219,9 +219,12 @@ export class BookingRequestService {
       const dataAny = data as any; // Type cast to bypass Prisma type restrictions
       if (dataAny.dealer_id) {
         console.log('Checking dealer_id exists:', dataAny.dealer_id);
-        const dealerExists = await this.prisma.dealer.findUnique({ where: { id: Number(dataAny.dealer_id) } });
-        if (!dealerExists) {
-          throw new Error(`Dealer with ID ${dataAny.dealer_id} does not exist`);
+        // Validate with User table (dealers are users with role='dealer')
+        const dealerUser = await this.prisma.user.findUnique({ 
+          where: { id: Number(dataAny.dealer_id) } 
+        });
+        if (!dealerUser || dealerUser.role !== 'dealer') {
+          throw new Error(`Dealer user with ID ${dataAny.dealer_id} does not exist or is not a dealer`);
         }
         console.log('Dealer validation passed');
       }

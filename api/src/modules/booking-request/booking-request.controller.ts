@@ -13,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { BookingRequest as BookingRequestModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
 import { Roles } from '../auth/auth.roles.decorator';
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { ROLES_ENUM } from '../../shared/constants/global.constants';
 import { BookingRequestService } from './booking-request.service';
 import { EmailService } from '../email/email.service';
@@ -31,6 +32,7 @@ export class BookingRequestController {
   constructor(
     private bookingRequestService: BookingRequestService,
     private emailService: EmailService,
+    private dealerService: DealerService,
   ) { }
 
   // Public endpoint - Anyone can create a booking request
@@ -194,10 +196,11 @@ export class BookingRequestController {
   // Admin only - Update booking request (approve/reject/complete)
   @Put('/:id')
   @Roles(ROLES_ENUM.ADMIN)
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateBookingRequest(
     @Param('id') id: string,
     @Body() updateBookingRequestDto: UpdateBookingRequestDto,
+    @CurrentUser() user: any,
   ): Promise<BookingRequestModel> {
     try {
       console.log('=== UPDATE BOOKING REQUEST START ===');
