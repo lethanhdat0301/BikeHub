@@ -62,7 +62,7 @@ model User {
   Bikes          Bike[]           @relation("DealerBikes")
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
-  birthdate      DateTime
+  birthdate      DateTime?
   phone          String?
   image          String?
 }
@@ -95,8 +95,10 @@ model Rental {
 
 model BookingRequest {
   id              Int      @id @default(dbgenerated("nextval('booking_id_seq')"))
-  booking_code    String?  @unique
-  user_id         Int?
+
+  user_id         Int?     @unique
+  User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  
   name            String
   email           String
   contact_method  String
@@ -109,7 +111,6 @@ model BookingRequest {
   start_date      DateTime?
   end_date        DateTime?
   estimated_price Float?
-  User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
   Bike            Bike?    @relation("BookingBike", fields: [bike_id], references: [id], onDelete: SetNull)
   Dealer          Dealer?  @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
   Rental          Rental[] // One booking request can have multiple rentals (though usually just one)

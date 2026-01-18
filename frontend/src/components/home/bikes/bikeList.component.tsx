@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Center, Heading, SimpleGrid, Spinner, Text, Button, HStack, IconButton } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { useTranslation } from "react-i18next";
 import CardBike from "./cardBike.component";
 import { Reveal } from "../../motion/reveal.component";
 import bikeService from "../../../services/bikeService";
@@ -88,6 +89,7 @@ const mockBikes: Bike[] = [
 
 const BikeList: React.FC = () => {
     // console.log("🔵 BikeList component rendered!");
+    const { t } = useTranslation();
 
     const [bikes, setBikes] = useState<Bike[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -179,7 +181,7 @@ const BikeList: React.FC = () => {
             <Center mt={100} justifyContent={"center"} flexDirection={"column"}>
                 <Reveal>
                     <Heading as="h3" size={{ base: "sm", md: "xl" }} className="capitalize">
-                        What we offer
+                        {t('home.whatWeOffer')}
                     </Heading>
                 </Reveal>
                 <Reveal>
@@ -189,7 +191,7 @@ const BikeList: React.FC = () => {
                         className="py-4"
                         color={"orange.500"}
                     >
-                        Explore Our Bike Range
+                        {t('home.exploreOurBikeRange')}
                     </Heading>
                 </Reveal>
             </Center>
@@ -213,7 +215,7 @@ const BikeList: React.FC = () => {
                 ) : bikes.length === 0 ? (
                     <Center gridColumn="1 / -1" py={10}>
                         <Text fontSize="lg" color="gray.500">
-                            No motorbikes are available at the moment. Please come back later.
+                            {t('home.noBikesAvailable')}
                         </Text>
                     </Center>
                 ) : (

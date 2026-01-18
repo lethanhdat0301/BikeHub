@@ -12,6 +12,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Reveal } from "../../motion/reveal.component";
 import bikeImage from "../../../assets/images/bikes/bike1.jpg";
 import { FaStar, FaHeart, FaGasPump, FaBolt, FaUsers } from "react-icons/fa";
@@ -59,6 +60,7 @@ const CardBike = ({
   searchStartDate?: string;
   searchEndDate?: string;
 }) => {
+  const { t } = useTranslation();
   const [liked, setLiked] = useState(false);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const navigate = useNavigate();
@@ -70,7 +72,7 @@ const CardBike = ({
     // provider: bike.Dealer?.name || bike.dealer_name || "RentnRide",
     provider: bike.Park?.name || bike.location || "RentnRide",
     condition: bike.rating && bike.rating >= 4.5 ? "excellent" : bike.rating && bike.rating >= 3.5 ? "good" : "fair",
-    features: bike.rating && bike.rating >= 4.5 ? ["Highly Rated", "Recently Serviced"] : ["Recently Serviced"],
+    features: bike.rating && bike.rating >= 4.5 ? [t('bike.highlight.highlyRated'), t('bike.highlight.recentlyServiced')] : [t('bike.highlight.recentlyServiced')],
     seats: bike.seats || 2,
     fuelType: bike.fuel_type || "gasoline",
     transmission: bike.transmission || "manual",
@@ -165,7 +167,7 @@ const CardBike = ({
         <Reveal>
           <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600" noOfLines={1}>
             <Text as="span" fontWeight={600}>
-              Provided by:{" "}
+              {t('bike.providedBy')}{" "}
             </Text>
             {bikeData.provider}
           </Text>
@@ -176,7 +178,7 @@ const CardBike = ({
           <VStack align="stretch" spacing={1}>
             <HStack spacing={2}>
               <Text fontSize={{ base: "xs", md: "sm" }} fontWeight={600} color="gray.700">
-                Condition:
+                {t('bike.condition')}:
               </Text>
               <Badge
                 colorScheme={bikeData.condition === "excellent" ? "green" : "blue"}
@@ -204,17 +206,17 @@ const CardBike = ({
             <HStack spacing={1}>
               <FaUsers color="#319795" size={14} />
               <Text color="gray.700" fontWeight={500}>
-                {bikeData.seats} seats
+                {bikeData.seats} {t('bike.seats').toLowerCase()}
               </Text>
             </HStack>
             <HStack spacing={1}>
-              {bikeData.fuelType === "gas" ? (
-                <FaGasPump color="#319795" size={14} />
-              ) : (
+              {bike.fuel_type === "electric" ? (
                 <FaBolt color="#319795" size={14} />
+              ) : (
+                <FaGasPump color="#319795" size={14} />
               )}
               <Text color="gray.700" fontWeight={500} textTransform="capitalize">
-                {bikeData.fuelType}
+                {bike.fuel_type === 'electric' ? t('bike.fuelType.electric') : t('bike.fuelType.gasoline')}
               </Text>
             </HStack>
           </HStack>
@@ -224,7 +226,7 @@ const CardBike = ({
           <HStack spacing={1} fontSize={{ base: "xs", md: "sm" }}>
             <GiGearStickPattern color="#319795" size={16} />
             <Text color="gray.700" fontWeight={500} textTransform="capitalize">
-              {bikeData.transmission}
+              {bike.transmission === 'manual' ? t('bike.transmission.manual') : t('bike.transmission.automatic')}
             </Text>
           </HStack>
         </Reveal>
@@ -249,7 +251,7 @@ const CardBike = ({
             }}
             transition="all 0.2s"
           >
-            View Details
+            {t('bike.viewDetails')}
           </Button>
         </Reveal>
       </VStack>

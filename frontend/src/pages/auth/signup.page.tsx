@@ -1,10 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import RegisterForm from "../../components/auth/registerForm/registerForm.component";
 import signupImage from "../../assets/images/signupImage.png";
 import logoImage from "../../assets/images/logoofficial.png";
 import { Image } from "@chakra-ui/react";
 
 const SignupPage: React.FC = () => {
+  const { t } = useTranslation();
   const mode = import.meta.env.VITE_MODE ?? import.meta.env.MODE;
   let GoogleLogin: string = "";
   if (mode === "prod") {
@@ -23,7 +25,7 @@ const SignupPage: React.FC = () => {
 
           {/* <h1 className="text-2xl font-bold text-gray-700">Sign up</h1> */}
           <p className="text-sm font-normal text-gray-500">
-            Enter your details to create your account.
+            {t("auth.enterDetailsToCreate")}
           </p>
           <a
             href={`${GoogleLogin}auth/google`}
@@ -50,12 +52,12 @@ const SignupPage: React.FC = () => {
               </svg>
             </div>
             <h1 className="px-4 py-3 w-5/6 text-center text-gray-600 font-bold">
-              Sign up with Google
+              {t("auth.signUpWithGoogle")}
             </h1>
           </a>
           <div className="mt-4 w-4/5 flex items-center justify-between">
             <span className="border-b w-1/3 lg:w-1/3"></span>
-            <p className="text-xs text-center text-gray-500 uppercase">or</p>
+            <p className="text-xs text-center text-gray-500 uppercase">{t("auth.or")}</p>
             <span className="border-b w-1/3 lg:w-1/3"></span>
           </div>
           <RegisterForm />

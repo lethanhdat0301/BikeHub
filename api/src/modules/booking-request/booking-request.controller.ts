@@ -14,7 +14,6 @@ import { BookingRequest as BookingRequestModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
 import { Roles } from '../auth/auth.roles.decorator';
 import { ROLES_ENUM } from '../../shared/constants/global.constants';
-import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { BookingRequestService } from './booking-request.service';
 import { EmailService } from '../email/email.service';
 import { buildBookingConfirmationHtml } from '../email/templates/booking-confirmation.template';
@@ -31,7 +30,6 @@ import {
 export class BookingRequestController {
   constructor(
     private bookingRequestService: BookingRequestService,
-    private dealerService: DealerService,
     private emailService: EmailService,
   ) { }
 
@@ -129,7 +127,7 @@ export class BookingRequestController {
         console.error('=== Failed to send booking request email:', error);
       }
     } else {
-      // console.log('=== No email provided for booking request, skipping email');
+      console.log('=== No email provided for booking request, skipping email');
     }
 
     return {
@@ -164,31 +162,14 @@ export class BookingRequestController {
     return this.bookingRequestService.findAll({ where });
   }
 
-  // Admin and Dealer - Get all booking requests
+  // Admin only - Get all booking requests
   @Get('/')
-  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
-  @UseGuards(JwtAuthGuard)
+  @Roles(ROLES_ENUM.ADMIN)
+  // @UseGuards(JwtAuthGuard)
   async getAllBookingRequests(
-    @CurrentUser() user: any,
     @Query('status') status?: string,
   ): Promise<BookingRequestModel[]> {
-    let where: any = status ? { status } : {};
-
-    // Dealers only see booking requests for their bikes
-    if (user.role === ROLES_ENUM.DEALER) {
-      // Find dealer record from user
-      const dealer = await this.dealerService.findDealerByUserId(user.id);
-      if (dealer) {
-        where = {
-          ...where,
-          dealer_id: dealer.id,
-        };
-      } else {
-        // If no dealer found, return empty array
-        return [];
-      }
-    }
-
+    const where = status ? { status } : {};
     return this.bookingRequestService.findAll({ where });
   }
 
@@ -200,9 +181,9 @@ export class BookingRequestController {
     return this.bookingRequestService.getStatistics();
   }
 
-  // Admin and Dealer - Get single booking request
+  // Admin only - Get single booking request
   @Get('/:id')
-  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @Roles(ROLES_ENUM.ADMIN)
   @UseGuards(JwtAuthGuard)
   async getBookingRequestById(
     @Param('id') id: string,
@@ -210,14 +191,13 @@ export class BookingRequestController {
     return this.bookingRequestService.findOne({ id: Number(id) });
   }
 
-  // Admin and Dealer - Update booking request (approve/reject/complete)
+  // Admin only - Update booking request (approve/reject/complete)
   @Put('/:id')
-  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
-  @UseGuards(JwtAuthGuard)
+  @Roles(ROLES_ENUM.ADMIN)
+  // @UseGuards(JwtAuthGuard)
   async updateBookingRequest(
     @Param('id') id: string,
     @Body() updateBookingRequestDto: UpdateBookingRequestDto,
-    @CurrentUser() user: any,
   ): Promise<BookingRequestModel> {
     try {
       console.log('=== UPDATE BOOKING REQUEST START ===');
@@ -263,38 +243,6 @@ export class BookingRequestController {
       console.error('Stack trace:', error.stack);
       throw error;
     }
-  }
-
-  // New endpoint specifically for dealer actions (accept/reject)
-  @Put('/:id/dealer-action')
-  @Roles(ROLES_ENUM.DEALER)
-  @UseGuards(JwtAuthGuard)
-  async dealerAction(
-    @Param('id') id: string,
-    @Body() body: { action: 'accept' | 'reject'; notes?: string },
-    @CurrentUser() user: any,
-  ): Promise<BookingRequestModel> {
-    const dealer = await this.dealerService.findDealerByUserId(user.id);
-    if (!dealer) {
-      throw new Error('Dealer not found');
-    }
-
-    const booking = await this.bookingRequestService.findOne({ id: Number(id) });
-    if (!booking) {
-      throw new Error('Booking not found');
-    }
-
-    if (booking.dealer_id !== dealer.id) {
-      throw new Error('You can only update your own bookings');
-    }
-
-    const status = body.action === 'accept' ? 'CONFIRMED' : 'REJECTED';
-    const admin_notes = body.notes || `${body.action === 'accept' ? 'Accepted' : 'Rejected'} by dealer ${dealer.name}`;
-
-    return this.bookingRequestService.update({
-      where: { id: Number(id) },
-      data: { status, admin_notes },
-    });
   }
 
   // Admin only - Delete booking request

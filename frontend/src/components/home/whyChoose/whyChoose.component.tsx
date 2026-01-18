@@ -2,6 +2,7 @@ import { Box, Container, Heading, Image, Text } from "@chakra-ui/react";
 import { IoTimeOutline } from "react-icons/io5";
 import { CiWallet } from "react-icons/ci";
 import { MdDirectionsBike } from "react-icons/md";
+import { useTranslation } from "react-i18next";
 import { Reveal } from "../../motion/reveal.component";
 import { IconType } from "react-icons";
 
@@ -67,26 +68,24 @@ const CardChoose = ({ id, title, description, Icon }: CardChooseProps) => {
 };
 
 const WhyChoose = () => {
+  const { t } = useTranslation();
   const data = [
     {
       id: 1,
-      title: "Smart Booking",
-      description:
-        "Book in seconds via our Chatbot. No complex selection required—simply leave your details.",
+      title: t('home.smartBookingTitle'),
+      description: t('home.smartBookingDesc'),
       icon: IoTimeOutline,
     },
     {
       id: 2,
-      title: "Doorstep Delivery",
-      description:
-        "Free pickup and delivery within a 10km radius in Phu Quoc, Nha Trang, and Ha Giang.",
+      title: t('home.doorstepDeliveryTitle'),
+      description: t('home.doorstepDeliveryDesc'),
       icon: CiWallet,
     },
     {
       id: 3,
-      title: "Flexible Payment",
-      description:
-        "We accept Cash, Bank Transfer, PayPal, or Credit Card swipe upon delivery.",
+      title: t('home.flexiblePaymentTitle'),
+      description: t('home.flexiblePaymentDesc'),
       icon: MdDirectionsBike,
     },
   ];
@@ -111,7 +110,7 @@ const WhyChoose = () => {
             textAlign="center"
             px={{ base: 4, md: 0 }}
           >
-            Why Choose RentnRide 🚴‍♂️✨
+            {t('home.whyChooseTitle')}
           </Heading>
         </Reveal>
         {/* <Reveal>
