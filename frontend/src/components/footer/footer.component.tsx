@@ -1,16 +1,18 @@
 import { Box, Button, Flex, Image, Link as A } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import logoImage from "../../assets/images/logoofficial.png";
 
 const Footer = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const footerItems = [
-    { label: "Search", path: "search" },
-    { label: "Booking Request", path: "request-booking" },
-    { label: "Return", path: "return" },
-    { label: "Track Order", path: "tracking" },
-    { label: "Terms of Service", path: "terms" },
-    { label: "How It Works", path: "howItWork", isHash: true }
+    { key: "search", path: "search", labelKey: "footer.search" },
+    { key: "bookingRequest", path: "request-booking", labelKey: "footer.bookingRequest" },
+    { key: "return", path: "return", labelKey: "footer.return" },
+    { key: "trackOrder", path: "tracking", labelKey: "footer.trackOrder" },
+    { key: "termsOfService", path: "terms", labelKey: "footer.termsOfService" },
+    { key: "howItWorks", path: "howItWork", isHash: true, labelKey: "footer.howItWorks" }
   ];
 
   const handleNavigation = (item: any) => {
@@ -53,7 +55,7 @@ const Footer = () => {
                 _hover={{ transition: "all 0.3s ease-in-out" }}
                 pos={"relative"}
               >
-                Home
+                {t('footer.home')}
                 <Box
                   position={"absolute"}
                   className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
@@ -77,7 +79,7 @@ const Footer = () => {
                 pos={"relative"}
                 onClick={() => handleNavigation(item)}
               >
-                {item.label}
+                {t(item.labelKey)}
                 <Box
                   position={"absolute"}
                   className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
@@ -95,11 +97,11 @@ const Footer = () => {
         <span className="block text-sm text-center text-gray-500 sm:text-center dark:text-gray-400">
           © 2025{" "}
           <Link to="/" className="hover:underline">
-            RentnRide
+            {t('footer.companyName')}
           </Link>
-          . All Rights Reserved.<br />
+          . {t('footer.allRightsReserved')}.<br />
           <Link to="/terms" className="hover:underline text-teal-600">
-            Terms of Service
+            {t('footer.termsLink')}
           </Link>
         </span>
       </div>

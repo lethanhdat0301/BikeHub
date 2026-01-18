@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Container,
@@ -33,6 +33,7 @@ import {
     Textarea,
 } from "@chakra-ui/react";
 import { SearchIcon, StarIcon } from "@chakra-ui/icons";
+import { useTranslation } from 'react-i18next';
 import { FaMotorcycle, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign, FaPhone, FaUser } from "react-icons/fa";
 import api from "../../apis/axios";
 import bike1 from "../../assets/images/bikes/bike1.jpg";
@@ -57,6 +58,7 @@ interface Rental {
 
 const ReturnPage: React.FC = () => {
     const toast = useToast();
+    const { t } = useTranslation();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
@@ -65,6 +67,25 @@ const ReturnPage: React.FC = () => {
     const [isReturning, setIsReturning] = useState(false);
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState("");
+
+    useEffect(() => {
+        if (isOpen) {
+            // Ẩn scrollbar khi modal mở
+            const style = document.createElement('style');
+            style.innerHTML = `
+                [role="dialog"] {
+                    overflow: hidden !important;
+                }
+                [role="dialog"] *::-webkit-scrollbar {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                }
+            `;
+            document.head.appendChild(style);
+            return () => document.head.removeChild(style);
+        }
+    }, [isOpen]);
 
     // Mock data for rentals
     const mockRentals: Rental[] = [
@@ -120,8 +141,8 @@ const ReturnPage: React.FC = () => {
 
         if (!searchQuery.trim()) {
             toast({
-                title: "Search Required",
-                description: "Please enter a Booking ID, phone number, or email",
+                title: t('return.searchRequired'),
+                description: t('return.enterDetails'),
                 status: "warning",
                 duration: 3000,
                 isClosable: true,
@@ -176,8 +197,8 @@ const ReturnPage: React.FC = () => {
             }
         } catch (error) {
             toast({
-                title: "Error",
-                description: "Something went wrong. Please try again.",
+                title: t('return.error'),
+                description: t('return.errorMessage'),
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -211,7 +232,7 @@ const ReturnPage: React.FC = () => {
             );
 
             toast({
-                title: "Motorcycle Returned Successfully!",
+                title: t('return.motorcycleReturnedSuccess'),
                 description: `Booking ${selectedRental.bookingId} has been completed. ${rating > 0 ? 'Thank you for your rating!' : ''}`,
                 status: "success",
                 duration: 5000,
@@ -256,11 +277,11 @@ const ReturnPage: React.FC = () => {
     const getStatusText = (status: string) => {
         switch (status) {
             case "active":
-                return "Active";
+                return t('return.statusActive');
             case "overdue":
-                return "Overdue";
+                return t('return.statusOverdue');
             case "completed":
-                return "Completed";
+                return t('return.statusCompleted');
             default:
                 return status;
         }
@@ -273,11 +294,10 @@ const ReturnPage: React.FC = () => {
                     {/* Header */}
                     <Box textAlign="center">
                         <Heading as="h1" size={{ base: "xl", md: "2xl" }} color="teal.700" mb={3}>
-                            Return a Motorcycle
+                            {t('return.pageTitle')}
                         </Heading>
                         <Text fontSize={{ base: "md", md: "lg" }} color="gray.600" maxW="2xl">
-                            Enter your Booking ID, phone number, or license plate to find your current
-                            rentals.
+                            {t('return.pageDescription')}
                         </Text>
                     </Box>
 
@@ -295,7 +315,7 @@ const ReturnPage: React.FC = () => {
                         <VStack spacing={6}>
                             <FormControl isRequired>
                                 <FormLabel fontWeight="semibold" color="gray.700">
-                                    Search for Your Rental
+                                    {t('return.searchLabel')}
                                 </FormLabel>
                                 <InputGroup size="lg">
                                     <InputLeftElement pointerEvents="none">
@@ -303,7 +323,7 @@ const ReturnPage: React.FC = () => {
                                     </InputLeftElement>
                                     <Input
                                         type="text"
-                                        placeholder="Booking ID, Phone Number, or License Plate"
+                                        placeholder={t('booking.returnSearchPlaceholder')}
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         borderColor="teal.300"
@@ -442,14 +462,40 @@ const ReturnPage: React.FC = () => {
             {/* Return Confirmation Modal */}
             <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
                 <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Confirm Return</ModalHeader>
+                <ModalContent 
+                    maxH="90vh"
+                    sx={{
+                        overflow: 'hidden',
+                        '&::-webkit-scrollbar': {
+                            display: 'none !important',
+                            width: '0 !important',
+                        },
+                        'scrollbarWidth': 'none !important',
+                        'msOverflowStyle': 'none !important',
+                    }}>
+                    <ModalHeader>{t('return.confirmReturn')}</ModalHeader>
                     <ModalCloseButton />
-                    <ModalBody>
+                    <ModalBody 
+                        sx={{
+                            overflow: 'auto',
+                            '&::-webkit-scrollbar': {
+                                display: 'none !important',
+                                width: '0 !important',
+                                height: '0 !important',
+                            },
+                            '&::-webkit-scrollbar-track': {
+                                display: 'none !important',
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                                display: 'none !important',
+                            },
+                            'scrollbarWidth': 'none !important',
+                            'msOverflowStyle': 'none !important',
+                        }}>
                         {selectedRental && (
                             <VStack align="stretch" spacing={4}>
                                 <Text>
-                                    Are you sure you want to return this motorcycle?
+                                    {t('return.areYouSure')}
                                 </Text>
                                 <Box bg="gray.50" p={4} borderRadius="md">
                                     <VStack align="stretch" spacing={2}>
@@ -478,7 +524,7 @@ const ReturnPage: React.FC = () => {
 
                                 {/* Rating Section */}
                                 <Box>
-                                    <FormLabel>Rate your experience (Optional)</FormLabel>
+                                    <FormLabel>{t('return.rateYourExperience')}</FormLabel>
                                     <HStack spacing={2}>
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <Icon
@@ -497,33 +543,32 @@ const ReturnPage: React.FC = () => {
 
                                 {/* Review Section */}
                                 <FormControl>
-                                    <FormLabel>Leave a review (Optional)</FormLabel>
+                                    <FormLabel>{t('return.leaveReview')}</FormLabel>
                                     <Textarea
                                         value={review}
                                         onChange={(e) => setReview(e.target.value)}
-                                        placeholder="Share your experience with this motorbike..."
+                                        placeholder={t('return.reviewPlaceholder')}
                                         rows={4}
                                     />
                                 </FormControl>
 
                                 <Text fontSize="sm" color="gray.600">
-                                    Please ensure you've returned the motorbike to the designated location and removed
-                                    all personal belongings.
+                                    {t('return.returnReminder')}
                                 </Text>
                             </VStack>
                         )}
                     </ModalBody>
                     <ModalFooter>
                         <Button variant="ghost" mr={3} onClick={onClose}>
-                            Cancel
+                            {t('common.cancel')}
                         </Button>
                         <Button
                             colorScheme="teal"
                             onClick={handleConfirmReturn}
                             isLoading={isReturning}
-                            loadingText="Processing..."
+                            loadingText={t('booking.processing')}
                         >
-                            Confirm Return
+                            {t('return.confirmReturn')}
                         </Button>
                     </ModalFooter>
                 </ModalContent>

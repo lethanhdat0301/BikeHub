@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { getAllParks, Park } from "../../../services/parkService";
 import backgroundImage from "../../../assets/images/background.png";
 
@@ -25,6 +26,7 @@ const SearchBikeVietnam: React.FC = () => {
     const [parks, setParks] = useState<Park[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // Lấy danh sách parks khi component mount
     useEffect(() => {
@@ -103,7 +105,7 @@ const SearchBikeVietnam: React.FC = () => {
                             textShadow="2px 2px 8px rgba(0,0,0,0.8)"
                             letterSpacing="-0.02em"
                         >
-                            Explore Vietnam Your Way
+                            {t('home.heroTitle')}
                         </Heading>
                         <Text
                             fontSize={{ base: "xl", md: "2xl" }}
@@ -113,7 +115,7 @@ const SearchBikeVietnam: React.FC = () => {
                             textShadow="2px 2px 6px rgba(0,0,0,0.8)"
                             lineHeight="1.4"
                         >
-                            Premium Motorbikes, Free Delivery, Seamless Adventures.
+                            {t('home.heroTagline')}
                         </Text>
                         {/* <HStack
                             spacing={8}
@@ -182,10 +184,10 @@ const SearchBikeVietnam: React.FC = () => {
                                         gap={2}
                                     >
                                         <Box color="blue.500">📍</Box>
-                                        Pickup Location
+                                        {t('home.pickupLocation')}
                                     </FormLabel>
                                     <Select
-                                        placeholder={loading ? "Loading locations..." : "Select location"}
+                                        placeholder={loading ? "Loading locations..." : t('home.selectLocation')}
                                         value={parkId}
                                         onChange={(e) => setParkId(e.target.value)}
                                         size="lg"
@@ -230,7 +232,7 @@ const SearchBikeVietnam: React.FC = () => {
                                             gap={2}
                                         >
                                             <Box color="blue.500">📅</Box>
-                                            Start Date
+                                            {t('home.startDate')}
                                         </FormLabel>
                                         <Input
                                             type="date"
@@ -263,7 +265,7 @@ const SearchBikeVietnam: React.FC = () => {
                                             gap={2}
                                         >
                                             <Box color="blue.500">📅</Box>
-                                            End Date
+                                            {t('home.endDate')}
                                         </FormLabel>
                                         <Input
                                             type="date"
@@ -311,7 +313,7 @@ const SearchBikeVietnam: React.FC = () => {
                                     minW="250px"
                                     boxShadow="0 15px 20px -5px rgba(59, 130, 246, 0.3), 0 8px 10px -5px rgba(6, 182, 212, 0.2)"
                                 >
-                                    Find motorbike
+                                    {t('home.findMotorbike')}
                                 </Button>
                             </Flex>
 
@@ -322,7 +324,7 @@ const SearchBikeVietnam: React.FC = () => {
                                 textAlign="center"
                                 fontStyle="italic"
                             >
-                                ✨ Rent for 3+ hours and get charged for 1 full day.
+                                ✨ {t('home.rentalBonus')}
                             </Text>
                         </VStack>
                     </Box>

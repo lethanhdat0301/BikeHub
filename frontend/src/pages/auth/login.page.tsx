@@ -1,10 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import LoginForm from "../../components/auth/loginForm/loginForm.component";
 import loginImage from "../../assets/images/loginImage.png";
 import logoImage from "../../assets/images/logoofficial.png";
 import { Image } from "@chakra-ui/react";
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   // Resolve backend URL for OAuth links; fall back to Vite's MODE if VITE_MODE unset
   const mode = import.meta.env.VITE_MODE ?? import.meta.env.MODE;
   let GoogleLogin: string = "";
@@ -24,7 +26,7 @@ const LoginPage: React.FC = () => {
 
           {/* <h1 className="text-2xl font-bold text-gray-700">Sign in</h1> */}
           <p className="text-sm font-normal text-gray-500">
-            Sign in to continue using RentnRide
+            {t("auth.signInToContinue")}
           </p>
           {/* dddddddddddddd */}
           <a
@@ -52,12 +54,12 @@ const LoginPage: React.FC = () => {
               </svg>
             </div>
             <h1 className="px-4 py-3 w-5/6 text-center text-gray-600 font-bold">
-              Sign in with Google
+              {t("auth.signInWithGoogle")}
             </h1>
           </a>
           <div className="mt-4 w-4/5 flex items-center justify-between">
             <span className="border-b w-1/3 lg:w-1/3"></span>
-            <p className="text-xs text-center text-gray-500 uppercase">or</p>
+            <p className="text-xs text-center text-gray-500 uppercase">{t("auth.or")}</p>
             <span className="border-b w-1/3 lg:w-1/3"></span>
           </div>
           {/* ddddddddddddddddddddddd */}

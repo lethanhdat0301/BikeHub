@@ -34,6 +34,7 @@ import { useAuth } from "../../hooks/useAuth";
 import logoImage from "../../assets/images/logoofficial.png";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 /**
  * Header: A functional component representing a header in React with Tailwind CSS.
  *
@@ -42,14 +43,34 @@ import { useLocation } from 'react-router-dom';
 const Header: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [language, setLanguage] = useState<string>('en');
+  const [language, setLanguage] = useState<string>(localStorage.getItem('i18nextLng') || 'en');
+  const { t, i18n } = useTranslation();
+
+  const changeLanguageTo = (lng: string) => {
+    setLanguage(lng);
+    if (i18n) {
+      i18n.changeLanguage(lng);
+      console.log('[i18n] changeLanguageTo:', lng, 'current:', i18n.language, 'available:', Object.keys(i18n.options?.resources || {}));
+    } else {
+      console.log('[i18n] no i18n instance to change language to', lng);
+    }
+    localStorage.setItem('i18nextLng', lng);
+  };
+
+  // Ensure i18n uses stored language on mount / when language changes
+  React.useEffect(() => {
+    if (i18n && i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [i18n, language]);
+
 
   const headerItems = [
-    { label: "Search", path: "search" },
-    { label: "Booking Request", path: "request-booking" },
-    { label: "Return", path: "return" },
-    { label: "Track Order", path: "tracking" },
-    { label: "How It Works", path: "howItWork", isHash: true }
+    { key: "search", path: "search" },
+    { key: "bookingRequest", path: "request-booking" },
+    { key: "return", path: "return" },
+    { key: "trackOrder", path: "tracking" },
+    { key: "howItWorks", path: "howItWork", isHash: true }
   ];
 
   const phoneNumbers = [
@@ -119,7 +140,7 @@ const Header: React.FC = () => {
             fontSize={{ base: "sm", lg: "md" }}
             whiteSpace="nowrap"
           >
-            Home
+            {t('header.home')}
             <Box
               position={"absolute"}
               className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
@@ -144,7 +165,7 @@ const Header: React.FC = () => {
             fontSize={{ base: "sm", lg: "md" }}
             whiteSpace="nowrap"
           >
-            {item.label}
+            {t(`header.${item.key}`)}
             <Box
               position={"absolute"}
               className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
@@ -212,7 +233,7 @@ const Header: React.FC = () => {
         </HStack>
         <Select
           value={language}
-          onChange={handleLanguageChange}
+          onChange={(e) => changeLanguageTo(e.target.value)}
           size="sm"
           width="80px"
           borderColor="teal.300"
@@ -220,7 +241,7 @@ const Header: React.FC = () => {
           focusBorderColor="teal.500"
         >
           <option value="en">EN</option>
-          <option value="vi">VI</option>
+          <option value="ru">RU</option>
         </Select>
       </Box>
 
@@ -285,7 +306,7 @@ const Header: React.FC = () => {
       {/* Desktop language selector */}
       <Select
         value={language}
-        onChange={handleLanguageChange}
+        onChange={(e) => changeLanguageTo(e.target.value)}
         size="sm"
         width="90px"
         display={{ base: "none", lg: "block" }}
@@ -294,8 +315,10 @@ const Header: React.FC = () => {
         focusBorderColor="teal.500"
         flexShrink={0}
       >
-        <option value="en">English</option>
-        <option value="vi">Tiếng Việt</option>
+        <option value="en">{t('lang.en')}</option>
+        <option value="ru">{t('lang.ru')}</option>
+        <option value="vi">{t('lang.vi')}</option>
+        <option value="de">{t('lang.de')}</option>
       </Select>
 
 
@@ -369,7 +392,7 @@ const Header: React.FC = () => {
                         className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
                       >
                         <Text fontWeight={500} fontSize={16}>
-                          Profile
+                          {t('header.profile')}
                         </Text>
                       </Link>
                     </MenuItem>
@@ -385,7 +408,7 @@ const Header: React.FC = () => {
                         className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
                       >
                         <Text fontWeight={500} fontSize={16}>
-                          Settings
+                          {t('header.settings')}
                         </Text>
                       </Link>
                     </MenuItem>
@@ -398,7 +421,7 @@ const Header: React.FC = () => {
                     >
                       <LogoutButton>
                         <TbLogout className="mr-2 text-red-500" />
-                        <Text color="red.400">Logout</Text>
+                        <Text color="red.400">{t('header.logout')}</Text>
                       </LogoutButton>
                     </MenuItem>
                   </MenuList>
@@ -433,7 +456,7 @@ const Header: React.FC = () => {
                   onClick={onClose}
                   w="full"
                 >
-                  Home
+                  {t('header.home')}
                 </Button>
               </Link>
 
@@ -451,7 +474,7 @@ const Header: React.FC = () => {
                   }}
                   w="full"
                 >
-                  {item.label}
+                  {t(`header.${item.key}`)}
                 </Button>
               ))}
             </VStack>
@@ -476,14 +499,14 @@ const Header: React.FC = () => {
                   _hover={{ bg: "teal.50", borderColor: "teal.500" }}
                   _active={{ bg: "teal.100" }}
                 >
-                  {language === 'en' ? 'English' : 'Tiếng Việt'}
+                  {t(`lang.${language}`)}
                 </MenuButton>
                 <MenuList minW="150px" fontSize="sm" zIndex={1500}>
-                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'en' } })}>
-                    🇺🇸 English
+                  <MenuItem onClick={() => changeLanguageTo('en')}>
+                    🇺🇸 {t('lang.en')}
                   </MenuItem>
-                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'vi' } })}>
-                    🇻🇳 Tiếng Việt
+                  <MenuItem onClick={() => changeLanguageTo('ru')}>
+                    🇷🇺 {t('lang.ru')}
                   </MenuItem>
                 </MenuList>
               </Menu>

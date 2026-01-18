@@ -24,6 +24,20 @@ export class DealerService {
     }
 
     async createDealerWithAccount(data: any) {
+        // Validate park_id là bắt buộc
+        if (!data.park_id) {
+            throw new Error('park_id is required. Dealer must be assigned to a park.');
+        }
+
+        // Verify park exists
+        const park = await this.prisma.park.findUnique({
+            where: { id: data.park_id }
+        });
+
+        if (!park) {
+            throw new Error(`Park with id ${data.park_id} does not exist.`);
+        }
+
         // Prisma middleware sẽ tự động hash password, không cần hash ở đây
         const user = await this.prisma.user.create({
             data: {
@@ -38,6 +52,8 @@ export class DealerService {
 
         const dealer = await this.prisma.dealer.create({
             data: {
+                user_id: user.id,
+                park_id: data.park_id,
                 name: data.name,
                 email: data.email,
                 phone: data.phone,

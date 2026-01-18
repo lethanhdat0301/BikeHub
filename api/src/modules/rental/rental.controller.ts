@@ -117,7 +117,7 @@ export class RentalController {
       bookingDate: rental.start_time,
       startDate: rental.start_time,
       endDate: rental.end_time,
-      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'RentnRide',
+      dealerName: rentalDetails?.Bike?.Dealer?.name || rentalDetails?.Bike?.dealer_name || 'BikeHub',
       dealerPhone: rentalDetails?.Bike?.Dealer?.phone || rentalDetails?.Bike?.dealer_contact || 'Contact support',
       pickupLocation: pickup_location || rentalDetails?.Bike?.Park?.location || 'N/A',
       price: price,
@@ -476,7 +476,6 @@ export class RentalController {
 
   @Get('bookings')
   async getBookings() {
-    // This endpoint returns rentals (confirmed bookings), not booking requests
     return this.rentalService.getBookingsWithDetails();
   }
 
@@ -496,5 +495,4 @@ export class RentalController {
   async fixMissingContactInfo(): Promise<any> {
     return this.rentalService.fixMissingContactInfo();
   }
-
 }

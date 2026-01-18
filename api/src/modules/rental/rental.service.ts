@@ -146,7 +146,7 @@ export class RentalService {
       customer_name: rental.User ? rental.User.name : rental.contact_name || 'Guest',
       customer_phone: rental.User ? rental.User.phone : rental.contact_phone || 'N/A',
       vehicle_model: rental.Bike?.model || 'N/A',
-      dealer_name: rental.Bike?.Dealer?.name || rental.Bike?.dealer_name || 'N/A',
+      dealer_name: rental.Bike?.dealer_name || rental.Bike?.Dealer?.name || 'N/A',
       start_time: rental.start_time,
       end_time: rental.end_time,
       location: rental.Bike?.Park?.location || rental.pickup_location || 'N/A',

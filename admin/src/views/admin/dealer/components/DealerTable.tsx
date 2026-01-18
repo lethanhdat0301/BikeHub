@@ -177,7 +177,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "total_revenue",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`
+                        {Number(value || 0).toLocaleString('vi-VN')} VNĐ
                     </p>
                 ),
             },

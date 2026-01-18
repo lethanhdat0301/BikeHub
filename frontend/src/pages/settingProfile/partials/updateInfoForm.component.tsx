@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   FormControl,
   FormLabel,
@@ -23,6 +24,7 @@ interface RegisterCredentials {
 }
 
 const UpdateInfoPers = () => {
+  const { t } = useTranslation();
   const { user, login } = useAuth();
   const [data, setData] = useState<RegisterCredentials>({
     name: user ? user.name : "",
@@ -76,8 +78,8 @@ const UpdateInfoPers = () => {
       // console.log(JSON.stringify(response?.data));
       setErrMsg("");
       toast({
-        title: "Information updated.",
-        description: "Your information has been successfully updated.",
+        title: t('profile.informationUpdated'),
+        description: t('profile.informationUpdatedDesc'),
         status: "success",
         duration: 2500,
         isClosable: true,
@@ -101,7 +103,7 @@ const UpdateInfoPers = () => {
         errorMessage = error?.response?.data?.message.join(", ");
 
       toast({
-        title: "Error",
+        title: t('profile.error'),
         description: errorMessage,
         status: "error",
         duration: 5000,
@@ -130,45 +132,45 @@ const UpdateInfoPers = () => {
       </FormControl>
       <Flex gap={4} className="max-sm:flex-col">
         <FormControl id="name" isInvalid={errName}>
-          <FormLabel>Full Name</FormLabel>
+          <FormLabel>{t('profile.fullName')}</FormLabel>
           <Input
             type="text"
             value={data.name}
             onChange={(e) => {
               setData({ ...data, name: e.target.value });
             }}
-            placeholder="Full Name"
+            placeholder={t('profile.fullName') as string}
           />
-          <FormErrorMessage>Name is messing</FormErrorMessage>
+          <FormErrorMessage>{t('profile.errorName')}</FormErrorMessage>
         </FormControl>
         <FormControl id="email" isInvalid={errEmail}>
-          <FormLabel>Email</FormLabel>
+          <FormLabel>{t('profile.email')}</FormLabel>
           <Input
             type="email"
             value={data.email}
             onChange={(e) => {
               setData({ ...data, email: e.target.value });
             }}
-            placeholder="Email"
+            placeholder={t('profile.email') as string}
           />
-          <FormErrorMessage>email should not be empty</FormErrorMessage>
+          <FormErrorMessage>{t('profile.errorEmail')}</FormErrorMessage>
         </FormControl>
       </Flex>
       <Flex gap={4} className="max-sm:flex-col">
         <FormControl id="birthdate">
-          <FormLabel>Date Of Birth</FormLabel>
+          <FormLabel>{t('profile.dateOfBirth')}</FormLabel>
           <Input
             type="date"
             value={data.birthdate}
             onChange={(e) => {
               setData({ ...data, birthdate: e.target.value });
             }}
-            placeholder="DD/MM/YYYY"
+            placeholder={t('profile.dateOfBirth') as string}
           />
           <FormErrorMessage></FormErrorMessage>
         </FormControl>
         <FormControl id="phone">
-          <FormLabel>Phone Number</FormLabel>
+          <FormLabel>{t('profile.phoneNumber')}</FormLabel>
           <InputGroup>
             <InputLeftElement pointerEvents="none">
               <PhoneIcon color="gray.300" />
@@ -179,10 +181,10 @@ const UpdateInfoPers = () => {
               onChange={(e) => {
                 setData({ ...data, phone: e.target.value });
               }}
-              placeholder="Phone Number"
+              placeholder={t('profile.phoneNumber') as string}
             />
           </InputGroup>
-          <FormErrorMessage>error Phone Number</FormErrorMessage>
+          <FormErrorMessage>{t('profile.errorPhone')}</FormErrorMessage>
         </FormControl>
       </Flex>
       <Stack spacing={2} align={"center"}>
@@ -193,8 +195,8 @@ const UpdateInfoPers = () => {
           isLoading={isSubmitting}
           type="submit"
         >
-          Save Change
-        </Button>
+          {t('profile.saveChange')}
+        </Button> 
       </Stack>
     </form>
   );

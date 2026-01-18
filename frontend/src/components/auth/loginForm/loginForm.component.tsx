@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import axios from "../../../apis/axios";
@@ -25,6 +26,7 @@ interface LoginCredentials {
 }
 
 const LoginForm: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const stateLocation = useLocation().state;
   const toast = useToast({ position: "top" });
@@ -100,18 +102,18 @@ const LoginForm: React.FC = () => {
       setIsSubmitting(false);
       navigate(stateLocation?.from ? stateLocation.from : "/");
       toast({
-        title: "Login Successful",
-        description: "You have successfully logged in.",
+        title: t("auth.loginSuccessful"),
+        description: t("auth.loginSuccessfulDesc"),
         status: "success",
         duration: 2000,
         isClosable: true,
       });
     } catch (error: any) {
       if (!error?.response) {
-        setErrMsg("Something went wrong. Please try again later.");
+        setErrMsg(t("auth.somethingWentWrong"));
         toast({
-          title: "Error",
-          description: "Something went wrong. Please try again later.",
+          title: t("auth.error"),
+          description: t("auth.somethingWentWrong"),
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -119,7 +121,7 @@ const LoginForm: React.FC = () => {
       } else if (error.response?.status === 400) {
         setErrMsg(error.response.data?.message[0]);
         toast({
-          title: "Error",
+          title: t("auth.error"),
           description: error.response.data?.message[0],
           status: "error",
           duration: 5000,
@@ -128,7 +130,7 @@ const LoginForm: React.FC = () => {
       } else if (error.response?.status === 401) {
         setErrMsg(error.response.data?.message);
         toast({
-          title: "Error",
+          title: t("auth.error"),
           description: error.response.data?.message[0],
           status: "error",
           duration: 5000,
@@ -150,7 +152,7 @@ const LoginForm: React.FC = () => {
       </FormControl>
 
       <FormControl id="email" isInvalid={errEmail}>
-        <FormLabel>Email address</FormLabel>
+        <FormLabel>{t("auth.emailAddress")}</FormLabel>
         <Input
           isInvalid={errEmail || errMsg != ""}
           errorBorderColor="crimson"
@@ -158,10 +160,10 @@ const LoginForm: React.FC = () => {
           value={data.email}
           onChange={handleEmailChange}
         />
-        <FormErrorMessage>email should not be empty</FormErrorMessage>
+        <FormErrorMessage>{t("auth.errorEmailEmpty")}</FormErrorMessage>
       </FormControl>
       <FormControl id="password" isInvalid={errPassword}>
-        <FormLabel>Password</FormLabel>
+        <FormLabel>{t("auth.password")}</FormLabel>
         <InputGroup>
           <Input
             isInvalid={errPassword || errMsg != ""}
@@ -189,9 +191,9 @@ const LoginForm: React.FC = () => {
           align={"start"}
           justify={"space-between"}
         >
-          <Checkbox colorScheme="teal">Remember me</Checkbox>
+          <Checkbox colorScheme="teal">{t("auth.rememberMe")}</Checkbox>
           <Link to="/login">
-            <Text color={"teal.400"}>Forgot password?</Text>
+            <Text color={"teal.400"}>{t("auth.forgotPassword")}</Text>
           </Link>
         </Stack>
         <Button
@@ -203,17 +205,17 @@ const LoginForm: React.FC = () => {
           isLoading={isSubmitting}
           type="submit"
         >
-          Sign in
+          {t("auth.signIn")}
         </Button>
       </Stack>
 
       <p className="text-sm text-center font-light text-gray-500 dark:text-gray-400">
-        Don’t have an account yet?{" "}
+        {t("auth.dontHaveAccount")}{" "}
         <Link
           to="/signup"
           className="font-medium text-teal-600 hover:underline dark:text-teal-500"
         >
-          Sign up
+          {t("auth.signUp")}
         </Link>
       </p>
     </form>

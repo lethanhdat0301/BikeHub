@@ -1,8 +1,12 @@
-import { Prisma, User } from '@prisma/client';
 import { Injectable, UnauthorizedException, NotFoundException, BadRequestException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { AuthHelpers } from '../../shared/helpers/auth.helpers';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUser } from './../auth/auth.dto';
+import Decimal from 'decimal.js';
+import { PrismaClient, Prisma, User } from '@prisma/client';
+
+// Initialize PrismaClient
+const prisma = new PrismaClient();
 
 @Injectable()
 export class UserService {
@@ -10,7 +14,7 @@ export class UserService {
 
   async findUser(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
+  ): Promise<ReturnType<typeof prisma.user.findUnique> | null> {
     // console.log('==== findUser called with ====', userWhereUniqueInput);
     // console.log('Stack trace:', new Error().stack);
 
@@ -24,7 +28,7 @@ export class UserService {
     });
   }
 
-  async findFirst(): Promise<User | null> {
+  async findFirst(): Promise<ReturnType<typeof prisma.user.findUnique> | null> {
     return this.prisma.user.findFirst();
   }
 
@@ -34,7 +38,7 @@ export class UserService {
     cursor?: Prisma.UserWhereUniqueInput;
     where?: Prisma.UserWhereInput;
     orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
+  }): Promise<ReturnType<typeof prisma.user.findMany>> {
     const { skip, take, cursor, where, orderBy } = params;
     return this.prisma.user.findMany({
       skip,
@@ -76,7 +80,10 @@ export class UserService {
       const { password, Rental, ...rest } = u as any;
       const rentals = Rental ?? [];
       const totalRentals = rentals.length;
-      const totalSpent = rentals.reduce((sum: number, r: any) => sum + (r.price ?? 0), 0);
+      const totalSpent = rentals.reduce((sum: Decimal, r: any) => {
+        console.log('Rental price:', r.price);
+        return sum.plus(new Decimal(r.price));
+      }, new Decimal(0));
       const lastRental = rentals.reduce((latest: string | null, r: any) => {
         const candidate = r.end_time ?? r.created_at;
         if (!candidate) return latest;
@@ -100,6 +107,8 @@ export class UserService {
     if (payload.password) {
       payload.password = await AuthHelpers.hash(payload.password as string);
     }
+
+    console.log('Creating user with data:', payload);
 
     try {
       const user = await this.prisma.user.create({ data: payload });
@@ -195,7 +204,10 @@ export class UserService {
 
     const registeredCustomers = users.map(user => {
       const totalRentals = user.Rental.length;
-      const totalSpent = user.Rental.reduce((sum, rental) => sum + rental.price, 0);
+      const totalSpent = user.Rental.reduce((sum: Decimal, rental) => {
+        const price = new Decimal(rental.price);
+        return sum.plus(price);
+      }, new Decimal(0));
       const lastRental = user.Rental.length > 0
         ? user.Rental.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
         : null;

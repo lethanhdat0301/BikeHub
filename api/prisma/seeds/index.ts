@@ -21,19 +21,19 @@ async function main() {
   // 1. Users (Admin + Dealers + Customers)
   const { dealers, users } = await seedUsers(prisma);
 
-  // 2. Parks (Gắn với Dealers)
+  // 2. Dealer business profiles (linked to dealer users)
+  await seedDealers(prisma, dealers);
+
+  // 3. Parks (Gắn với Dealers)
   const parks = await seedParks(prisma, dealers);
 
-  // 3. Bikes (Gắn với Parks và Dealers thật)
+  // 4. Bikes (Gắn với Parks và Dealers thật)
   const bikes = await seedBikes(prisma, parks, { dealers, users });
 
-  // 4. Rentals (Gắn với Users & Bikes)
+  // 5. Rentals (Gắn với Users & Bikes)
   if (bikes) {
     await seedRentals(prisma, users, bikes);
   }
-
-  // 5. Dealers
-  await seedDealers(prisma);
 
   // 6. Referrers
   await seedReferrers(prisma);
