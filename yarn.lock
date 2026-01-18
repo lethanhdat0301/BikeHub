@@ -1677,7 +1677,7 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bike/admin@file:D:\\Project\\BikeHub\\BikeHub\\admin":
+"@bike/admin@file:C:\\Users\\Latendy\\Documents\\BikeHub\\admin":
   version "0.0.1"
   resolved "file:admin"
   dependencies:
@@ -1713,7 +1713,7 @@
     typescript "^4.7.4"
     web-vitals "^2.1.4"
 
-"@bike/api@file:D:\\Project\\BikeHub\\BikeHub\\api":
+"@bike/api@file:C:\\Users\\Latendy\\Documents\\BikeHub\\api":
   version "0.0.1"
   resolved "file:api"
   dependencies:
@@ -1753,7 +1753,7 @@
     uuid "^9.0.0"
     winston "^3.3.3"
 
-"@bike/frontend@file:D:\\Project\\BikeHub\\BikeHub\\frontend":
+"@bike/frontend@file:C:\\Users\\Latendy\\Documents\\BikeHub\\frontend":
   version "0.0.1"
   resolved "file:frontend"
   dependencies:
@@ -7146,7 +7146,7 @@ decamelize@^1.2.0:
   resolved "https://registry.npmjs.org/decamelize/-/decamelize-1.2.0.tgz"
   integrity sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==
 
-decimal.js@^10.2.1:
+decimal.js@^10.2.1, decimal.js@^10.6.0:
   version "10.6.0"
   resolved "https://registry.npmjs.org/decimal.js/-/decimal.js-10.6.0.tgz"
   integrity sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==

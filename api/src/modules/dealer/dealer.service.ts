@@ -6,74 +6,61 @@ export class DealerService {
     constructor(private prisma: PrismaService) { }
 
     async findAll() {
-        return this.prisma.dealer.findMany({
+        return this.prisma.user.findMany({
+            where: { role: 'dealer' },
             orderBy: { created_at: 'desc' },
         });
     }
 
     async findOne(id: number) {
-        return this.prisma.dealer.findUnique({
+        return this.prisma.user.findUnique({
             where: { id },
         });
     }
 
     async create(data: any) {
-        return this.prisma.dealer.create({
-            data,
+        return this.prisma.user.create({
+            data: {
+                ...data,
+                role: 'dealer',
+            },
         });
     }
 
     async createDealerWithAccount(data: any) {
-        // Prisma middleware sẽ tự động hash password, không cần hash ở đây
         const user = await this.prisma.user.create({
             data: {
                 name: data.name,
                 email: data.email,
-                password: data.password, // Sẽ được hash bởi UserListener middleware
+                password: data.password,
                 phone: data.phone,
                 role: 'dealer',
                 birthdate: new Date(),
             },
         });
 
-        const dealer = await this.prisma.dealer.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
-                telegram: data.telegram,
-                location: data.location,
-                status: 'Active',
-            },
-        });
-
-        return { user, dealer };
-    }
-
-    // New method to find dealer by user ID
-    async findDealerByUserId(userId: number) {
-        // Find dealer by matching email with user email
-        const user = await this.prisma.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!user) return null;
-
-        return this.prisma.dealer.findUnique({
-            where: { email: user.email }
-        });
+        return user;
     }
 
     async update(id: number, data: any) {
-        return this.prisma.dealer.update({
+        return this.prisma.user.update({
             where: { id },
             data,
         });
     }
 
     async remove(id: number) {
-        return this.prisma.dealer.delete({
+        return this.prisma.user.delete({
             where: { id },
+        });
+    }
+
+    async findDealerByUserId(userId: number) {
+        return this.prisma.user.findFirst({
+            where: {
+                id: userId,
+                role: 'dealer',
+            },
         });
     }
 }
