@@ -59,7 +59,9 @@ export async function seedDealers(prisma: PrismaClient, dealerUsers: User[]) {
             where: { user_id: dealerUser.id },
             update: {},
             create: {
-                user_id: dealerUser.id,
+                User: {
+                    connect: { id: dealerUser.id }
+                },
                 name: profileData.name,
                 email: dealerUser.email, // Use same email from User
                 phone: dealerUser.phone || faker.phone.number(),
