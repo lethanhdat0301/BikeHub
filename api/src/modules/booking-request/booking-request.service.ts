@@ -102,7 +102,7 @@ export class BookingRequestService {
             transmission: true,
             image: true,
             dealer_id: true,
-            DealerUser: {
+            Dealer: {
               select: {
                 id: true,
                 name: true,
@@ -220,8 +220,8 @@ export class BookingRequestService {
       if (dataAny.dealer_id) {
         console.log('Checking dealer_id exists:', dataAny.dealer_id);
         // Validate with User table (dealers are users with role='dealer')
-        const dealerUser = await this.prisma.user.findUnique({ 
-          where: { id: Number(dataAny.dealer_id) } 
+        const dealerUser = await this.prisma.user.findUnique({
+          where: { id: Number(dataAny.dealer_id) }
         });
         if (!dealerUser || dealerUser.role !== 'dealer') {
           throw new Error(`Dealer user with ID ${dataAny.dealer_id} does not exist or is not a dealer`);
