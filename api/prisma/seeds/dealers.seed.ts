@@ -55,12 +55,32 @@ export async function seedDealers(prisma: PrismaClient, dealerUsers: User[]) {
         const dealerUser = dealerUsers[i];
         const profileData = dealerProfiles[i];
 
+        const parkName = `${profileData.location} Station`;
+
+        let park = await prisma.park.findFirst({
+            where: { name: parkName }
+        });
+
+        if (!park) {
+            park = await prisma.park.create({
+                data: {
+                    name: parkName,
+                    location: profileData.location,
+                    image: faker.image.url(),
+                }
+            });
+            console.log(`   Created Park: ${park.name}`);
+        }
+
         await prisma.dealer.upsert({
             where: { user_id: dealerUser.id },
             update: {},
             create: {
                 User: {
                     connect: { id: dealerUser.id }
+                },
+                Park: {
+                    connect: { id: park.id }
                 },
                 name: profileData.name,
                 email: dealerUser.email, // Use same email from User
