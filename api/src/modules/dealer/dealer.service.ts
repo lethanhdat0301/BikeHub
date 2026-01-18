@@ -28,55 +28,56 @@ export class DealerService {
         if (!data.park_id) {
             throw new Error('park_id is required. Dealer must be assigned to a park.');
         }
+        return this.prisma.$transaction(async (tx) => {
+            // Verify park exists
+            const park = await this.prisma.park.findUnique({
+                where: { id: data.park_id }
+            });
 
-        // Verify park exists
-        const park = await this.prisma.park.findUnique({
-            where: { id: data.park_id }
+            if (!park) {
+                throw new Error(`Park with id ${data.park_id} does not exist.`);
+            }
+
+            // Prisma middleware sẽ tự động hash password, không cần hash ở đây
+            const user = await this.prisma.user.create({
+                data: {
+                    name: data.name,
+                    email: data.email,
+                    password: data.password, // Sẽ được hash bởi UserListener middleware
+                    phone: data.phone,
+                    role: 'dealer',
+                    birthdate: new Date(),
+                },
+            });
+
+            const dealer = await this.prisma.dealer.create({
+                data: {
+                    User: {
+                        connect: { id: user.id }
+                    },
+                    Park: {
+                        connect: { id: park.id }
+                    },
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    telegram: data.telegram,
+                    location: data.location,
+                    status: 'Active',
+                },
+            });
+
+            return { user, dealer };
         });
-
-        if (!park) {
-            throw new Error(`Park with id ${data.park_id} does not exist.`);
-        }
-
-        // Prisma middleware sẽ tự động hash password, không cần hash ở đây
-        const user = await this.prisma.user.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                password: data.password, // Sẽ được hash bởi UserListener middleware
-                phone: data.phone,
-                role: 'dealer',
-                birthdate: new Date(),
-            },
-        });
-
-        const dealer = await this.prisma.dealer.create({
-            data: {
-                user_id: user.id,
-                park_id: data.park_id,
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
-                telegram: data.telegram,
-                location: data.location,
-                status: 'Active',
-            },
-        });
-
-        return { user, dealer };
     }
 
     // New method to find dealer by user ID
     async findDealerByUserId(userId: number) {
-        // Find dealer by matching email with user email
-        const user = await this.prisma.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!user) return null;
-
         return this.prisma.dealer.findUnique({
-            where: { email: user.email }
+            where: { user_id: userId },
+            include: {
+                Park: true
+            }
         });
     }
 
