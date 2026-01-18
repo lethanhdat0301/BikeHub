@@ -102,7 +102,7 @@ export class BookingRequestService {
             transmission: true,
             image: true,
             dealer_id: true,
-            Dealer: {
+            DealerUser: {
               select: {
                 id: true,
                 name: true,
@@ -112,7 +112,7 @@ export class BookingRequestService {
             }
           },
         },
-        Dealer: {
+        DealerUser: {
           select: {
             id: true,
             name: true,

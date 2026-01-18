@@ -49,22 +49,25 @@ model Park {
 }
 
 model User {
-  id             Int              @id @default(autoincrement())
-  name           String
-  email          String           @unique
-  password       String
-  role           String           @default("user")
-  status         String           @default("active")
-  Rental         Rental[]
-  // Parks          Park[]           @relation("DealerParks")
-  BookingRequest BookingRequest[]
+  id                        Int              @id @default(autoincrement())
+  name                      String
+  email                     String           @unique
+  password                  String
+  role                      String           @default("user")
+  status                    String           @default("active")
+  Rental                    Rental[]
+  // Parks                     Park[]           @relation("DealerParks")
+  BookingRequest            BookingRequest[] @relation("BookingCustomer")
+  BookingRequestsAsDealer   BookingRequest[] @relation("BookingDealer")
   // Bikes relation for dealers
-  Bikes          Bike[]           @relation("DealerBikes")
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
-  birthdate      DateTime?
-  phone          String?
-  image          String?
+  Bikes                     Bike[]           @relation("DealerBikes")
+  // Dealer business profile (1-to-1 for users with role='dealer')
+  DealerProfile             Dealer?          @relation("UserDealerProfile")
+  created_at                DateTime         @default(now())
+  updated_at                DateTime         @updatedAt
+  birthdate                 DateTime?
+  phone                     String?
+  image                     String?
 }
 
 model Rental {
@@ -97,7 +100,7 @@ model BookingRequest {
   id              Int      @id @default(dbgenerated("nextval('booking_id_seq')"))
 
   user_id         Int?     @unique
-  User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  User            User?    @relation("BookingCustomer", fields: [user_id], references: [id], onDelete: SetNull)
   
   name            String
   email           String
@@ -106,13 +109,14 @@ model BookingRequest {
   pickup_location String
   status          String   @default("PENDING")
   admin_notes     String?
-  dealer_id       Int?
+  dealer_id       Int?     // References User.id where role='dealer'
+  DealerUser      User?    @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
   bike_id         Int?
   start_date      DateTime?
   end_date        DateTime?
   estimated_price Float?
+  booking_code    String?  @unique
   Bike            Bike?    @relation("BookingBike", fields: [bike_id], references: [id], onDelete: SetNull)
-  Dealer          Dealer?  @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
   Rental          Rental[] // One booking request can have multiple rentals (though usually just one)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
@@ -120,6 +124,10 @@ model BookingRequest {
 
 model Dealer {
   id                Int      @id @default(autoincrement())
+  user_id           Int      @unique // Links to User table (role='dealer')
+  User              User     @relation("UserDealerProfile", fields: [user_id], references: [id], onDelete: Cascade)
+  
+  // Business/Analytics fields
   name              String
   email             String   @unique
   phone             String?
@@ -132,7 +140,6 @@ model Dealer {
   last_payment_date DateTime?
   vehicle_count     Int      @default(0)
   image             String?
-  BookingRequest    BookingRequest[] @relation("BookingDealer")
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 }
