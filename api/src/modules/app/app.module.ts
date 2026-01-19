@@ -17,6 +17,8 @@ import { GLOBAL_CONFIG } from '../../configs/global.config';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 
+import { HealthModule } from '../health/health.module';
+
 @Module({
   imports: [
     PrismaModule,
@@ -35,10 +37,11 @@ import { AppController } from './app.controller';
     //   envFilePath: '.env',
     //   load: [() => GLOBAL_CONFIG] 
     // }),
-    PaypalModule
+    PaypalModule,
+    HealthModule
   ],
   controllers: [AppController],
   providers: [AppService],
   exports: [],
 })
-export class AppModule {}
+export class AppModule { }
