@@ -30,18 +30,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dumb-init \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package files for production install
+# Copy package files and node_modules from builder
 COPY package.json yarn.lock* ./
-
-# Install production dependencies only
-RUN yarn install --production --frozen-lockfile
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built application
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
-# Generate Prisma Client in production
-RUN npx prisma generate
+# Prisma is already generated in builder stage, no need to regenerate
 
 # Set environment
 ENV NODE_ENV=production
