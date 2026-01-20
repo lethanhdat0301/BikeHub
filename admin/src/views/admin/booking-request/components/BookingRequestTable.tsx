@@ -72,9 +72,16 @@ const BookingRequestTable: React.FC<Props> = ({ tableContent, loading, onRefresh
                 Header: "Motorbike",
                 accessor: "Bike",
                 Cell: ({ value }: any) => (
-                    <p className="text-sm text-navy-700 dark:text-white">
-                        {value?.model || "N/A"}
-                    </p>
+                    <div>
+                        <p className="text-sm font-bold text-navy-700 dark:text-white">
+                            {value?.model || "N/A"}
+                        </p>
+                        {value?.license_plate && (
+                            <p className="text-xs text-black-600 dark:text-black-400 font-medium">
+                                {value.license_plate}
+                            </p>
+                        )}
+                    </div>
                 ),
             },
             {
