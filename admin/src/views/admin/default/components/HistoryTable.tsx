@@ -55,7 +55,7 @@ const columns = [
           <MdCheckCircle className="me-1 text-green-500 dark:text-green-300" />
         ) : info.getValue() === "lost" ? (
           <MdCancel className="me-1 text-red-500 dark:text-red-300" />
-        ) : info.getValue() === "ongoing" ? (
+        ) : info.getValue() === "active" ? (
           <MdAccessTimeFilled className="me-1 text-amber-500 dark:text-amber-300" />
         ) : null}
         <p className="text-sm font-bold text-navy-700 dark:text-white">

@@ -28,7 +28,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const urls = ["users", "parks", "bikes", "rentals/list"];
+        const urls = ["users", "parks", "bikes", "rentals"];
 
         const allRequests = urls.map((url) =>
           fetch(process.env.REACT_APP_API_URL + url, { credentials: "include" })
@@ -48,10 +48,10 @@ const Dashboard = () => {
         const totalRevenue = Array.isArray(rentals) ?
           rentals.reduce((sum, rental) => sum + (rental.price || 0), 0) : 0;
 
-        // Count active rentals (status: active, ongoing, or confirmed)
+        // Count active rentals (status: active or pending)
         const activeRentals = Array.isArray(rentals) ?
           rentals.filter(rental =>
-            rental.status && ['active', 'ongoing', 'confirmed'].includes(rental.status.toLowerCase())
+            rental.status && ['active', 'pending'].includes(rental.status.toLowerCase())
           ).length : 0;
 
         // console.log('Dashboard stats:', {

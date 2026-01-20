@@ -28,7 +28,9 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
 
     const handleViewRentals = (dealer: any) => {
         // Navigate to rentals page with dealer filter
-        navigate(`/admin/rentals?dealer=${dealer.id}&dealerName=${encodeURIComponent(dealer.name)}`);
+        // Note: dealer.user_id is what Bike.dealer_id references
+        const dealerUserId = dealer.user_id || dealer.User?.id;
+        navigate(`/admin/rentals?dealerUserId=${dealerUserId}&dealerName=${encodeURIComponent(dealer.name)}`);
     };
 
     const handleEdit = (dealer: any) => {
@@ -186,7 +188,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "platform_fee",
                 Cell: ({ value }: any) => (
                     <p className="text-sm text-navy-700 dark:text-white">
-                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ per month`
+                        {Number(value || 0).toLocaleString('vi-VN')} VNĐ per month
                     </p>
                 ),
             },
@@ -195,7 +197,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "current_debt",
                 Cell: ({ value }: any) => (
                     <p className={`text-sm font-bold ${value > 0 ? "text-red-500" : "text-green-500"}`}>
-                        `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`
+                        {Number(value || 0).toLocaleString('vi-VN')} VNĐ
                     </p>
                 ),
             },

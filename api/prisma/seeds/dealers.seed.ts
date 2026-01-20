@@ -55,21 +55,18 @@ export async function seedDealers(prisma: PrismaClient, dealerUsers: User[]) {
         const dealerUser = dealerUsers[i];
         const profileData = dealerProfiles[i];
 
-        const parkName = `${profileData.location} Station`;
-
-        let park = await prisma.park.findFirst({
-            where: { name: parkName }
+        // Find park by location (parks should be created by parks.seed.ts first)
+        const park = await prisma.park.findFirst({
+            where: { 
+                location: {
+                    contains: profileData.location
+                }
+            }
         });
 
         if (!park) {
-            park = await prisma.park.create({
-                data: {
-                    name: parkName,
-                    location: profileData.location,
-                    image: faker.image.url(),
-                }
-            });
-            console.log(`   Created Park: ${park.name}`);
+            console.warn(`⚠️ No park found for location: ${profileData.location}. Skipping dealer ${profileData.name}`);
+            continue;
         }
 
         await prisma.dealer.upsert({

@@ -270,7 +270,7 @@ const TrackOrderPage: React.FC = () => {
                     currentStatus: (() => {
                         const status = rental.status?.toLowerCase();
                         if (status === 'completed') return 3;
-                        if (status === 'ongoing' || status === 'active') return 2;
+                        if (status === 'active') return 2;
                         return 1; // pending or any other status
                     })(),
                     totalPrice: rental.price || 0,

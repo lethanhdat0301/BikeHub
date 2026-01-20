@@ -27,6 +27,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
         seats: string;
         fuel_type: string;
         transmission: string;
+        license_plate: string;
     };
 
     const [formData, setFormData] = useState<BikeFormData>({
@@ -44,6 +45,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
         seats: "2",
         fuel_type: "gasoline",
         transmission: "manual",
+        license_plate: "",
     });
 
     useEffect(() => {
@@ -65,6 +67,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                 seats: "2",
                 fuel_type: "gasoline",
                 transmission: "manual",
+                license_plate: "",
             });
         }
     }, [isOpen]);
@@ -138,6 +141,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                         seats: parseInt(formData.seats),
                         fuel_type: formData.fuel_type,
                         transmission: formData.transmission,
+                        license_plate: formData.license_plate || "",
                         lock: false,
                     }),
                 }
@@ -340,6 +344,21 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                     max="4"
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     required
+                                />
+                            </div>
+
+                            {/* License Plate */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    License Plate (Biển số xe)
+                                </label>
+                                <input
+                                    type="text"
+                                    name="license_plate"
+                                    value={formData.license_plate}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., 29A-12345, 51F-67890"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
 

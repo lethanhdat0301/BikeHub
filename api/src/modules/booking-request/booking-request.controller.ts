@@ -164,14 +164,25 @@ export class BookingRequestController {
     return this.bookingRequestService.findAll({ where });
   }
 
-  // Admin only - Get all booking requests
+  // Admin và Dealer - Get all booking requests
+  // Admin xem tất cả, Dealer chỉ xem booking requests được gán cho mình
   @Get('/')
-  @Roles(ROLES_ENUM.ADMIN)
-  // @UseGuards(JwtAuthGuard)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @UseGuards(JwtAuthGuard)
   async getAllBookingRequests(
+    @CurrentUser() user: any,
     @Query('status') status?: string,
   ): Promise<BookingRequestModel[]> {
-    const where = status ? { status } : {};
+    let where: any = status ? { status } : {};
+
+    // Dealer chỉ xem booking requests được gán cho mình
+    if (user.role === ROLES_ENUM.DEALER) {
+      where = {
+        ...where,
+        dealer_id: user.id,
+      };
+    }
+
     return this.bookingRequestService.findAll({ where });
   }
 
@@ -203,10 +214,10 @@ export class BookingRequestController {
     @CurrentUser() user: any,
   ): Promise<BookingRequestModel> {
     try {
-      console.log('=== UPDATE BOOKING REQUEST START ===');
-      console.log('Booking ID:', id);
-      console.log('User:', { id: user?.id, role: user?.role });
-      console.log('Request body:', JSON.stringify(updateBookingRequestDto, null, 2));
+      // console.log('=== UPDATE BOOKING REQUEST START ===');
+      // console.log('Booking ID:', id);
+      // console.log('User:', { id: user?.id, role: user?.role });
+      // console.log('Request body:', JSON.stringify(updateBookingRequestDto, null, 2));
 
       const bookingId = Number(id);
       if (isNaN(bookingId)) {
@@ -228,17 +239,17 @@ export class BookingRequestController {
 
       // Validate bike belongs to dealer if both are specified
       if (updateBookingRequestDto.dealer_id && updateBookingRequestDto.bike_id) {
-        console.log('Validating bike belongs to dealer...');
+        // console.log('Validating bike belongs to dealer...');
         // Add validation logic here if needed
       }
 
-      console.log('Calling service update...');
+      // console.log('Calling service update...');
       const result = await this.bookingRequestService.update({
         where: { id: bookingId },
         data: updateBookingRequestDto,
       });
 
-      console.log('=== UPDATE BOOKING REQUEST SUCCESS ===');
+      // console.log('=== UPDATE BOOKING REQUEST SUCCESS ===');
       return result;
     } catch (error) {
       console.error('=== UPDATE BOOKING REQUEST ERROR ===');

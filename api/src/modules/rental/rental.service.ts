@@ -102,8 +102,8 @@ export class RentalService {
       // Map rental status to booking status
       if (rentalStatus === 'completed') {
         bookingStatus = 'COMPLETED';
-      } else if (rentalStatus === 'ongoing' || rentalStatus === 'active') {
-        bookingStatus = 'APPROVED'; // Keep as approved when ongoing
+      } else if (rentalStatus === 'active') {
+        bookingStatus = 'APPROVED'; // Keep as approved when active
       } else if (rentalStatus === 'cancelled') {
         bookingStatus = 'REJECTED';
       }

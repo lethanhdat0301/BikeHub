@@ -46,6 +46,7 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
         seats: 2,
         fuel_type: "gasoline",
         transmission: "manual",
+        license_plate: "",
     });
 
     useEffect(() => {
@@ -163,6 +164,11 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
                             <FormControl isRequired>
                                 <FormLabel fontSize="sm" color="gray.600" mb={2}>Location*</FormLabel>
                                 <Input value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} fontSize="sm" />
+                            </FormControl>
+
+                            <FormControl>
+                                <FormLabel fontSize="sm" color="gray.600" mb={2}>License Plate (Biển số xe)</FormLabel>
+                                <Input value={formData.license_plate || ""} onChange={(e) => setFormData({ ...formData, license_plate: e.target.value })} placeholder="e.g., 29A-12345" fontSize="sm" />
                             </FormControl>
 
                             <FormControl>

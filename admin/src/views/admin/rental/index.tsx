@@ -12,7 +12,7 @@ const RentalsTable = () => {
   const { user } = useAuth();
 
   // Get dealer filter from URL params
-  const dealerId = searchParams.get('dealer');
+  const dealerUserId = searchParams.get('dealerUserId'); // This is User.id that Bike.dealer_id references
   const dealerName = searchParams.get('dealerName');
 
   const fetchData = async () => {
@@ -43,13 +43,11 @@ const RentalsTable = () => {
 
       const rentalsList = Array.isArray(rData) ? rData : [];
 
-      // Filter by dealer if specified in URL params
-      const filteredRentals = dealerId
+      // Filter by dealer's user_id if specified in URL params
+      // Bike.dealer_id references User.id (not Dealer.id)
+      const filteredRentals = dealerUserId
         ? rentalsList.filter((rental: any) =>
-          rental.Bike && (
-            rental.Bike.dealer_id === parseInt(dealerId) ||
-            (rental.Bike.Park && rental.Bike.Park.dealer_id === parseInt(dealerId))
-          )
+          rental.Bike && rental.Bike.dealer_id === parseInt(dealerUserId)
         )
         : rentalsList;
 
@@ -65,7 +63,7 @@ const RentalsTable = () => {
 
   useEffect(() => {
     fetchData();
-  }, [dealerId]); // Refetch when dealer filter changes
+  }, [dealerUserId]); // Refetch when dealer filter changes
 
   return (
     <Box className="mt-5" px={4}>

@@ -6,9 +6,53 @@ export class DealerService {
     constructor(private prisma: PrismaService) { }
 
     async findAll() {
-        return this.prisma.dealer.findMany({
+        const dealers = await this.prisma.dealer.findMany({
+            include: {
+                User: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                        role: true,
+                        status: true,
+                    }
+                },
+                Park: true,
+            },
             orderBy: { created_at: 'desc' },
         });
+
+        // Calculate stats for each dealer
+        const dealersWithStats = await Promise.all(dealers.map(async (dealer) => {
+            // Count bikes owned by this dealer
+            const bikes = await this.prisma.bike.findMany({
+                where: { dealer_id: dealer.user_id }
+            });
+            const bikeIds = bikes.map(b => b.id);
+
+            // Count rentals for dealer's bikes
+            const rentals = await this.prisma.rental.findMany({
+                where: {
+                    bike_id: { in: bikeIds }
+                }
+            });
+
+            // Calculate total revenue from completed rentals
+            const totalRevenue = rentals
+                .filter(r => r.status === 'completed')
+                .reduce((sum, r) => sum + (r.price || 0), 0);
+
+            return {
+                ...dealer,
+                vehicles: bikes.length,
+                total_rentals: rentals.length,
+                total_revenue: totalRevenue,
+                // platform_fee and current_debt already in DB
+            };
+        }));
+
+        return dealersWithStats;
     }
 
     async findOne(id: number) {

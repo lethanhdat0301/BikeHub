@@ -140,9 +140,9 @@ export class BookingRequestService {
     const { data, where } = params;
 
     try {
-      console.log('=== BOOKING REQUEST SERVICE UPDATE START ===');
-      console.log('Where clause:', JSON.stringify(where, null, 2));
-      console.log('Original data:', JSON.stringify(data, null, 2));
+      // console.log('=== BOOKING REQUEST SERVICE UPDATE START ===');
+      // console.log('Where clause:', JSON.stringify(where, null, 2));
+      // console.log('Original data:', JSON.stringify(data, null, 2));
 
       // Process date fields if they exist
       const processedData = { ...data };
@@ -150,7 +150,7 @@ export class BookingRequestService {
       // ROBUST datetime processing - handle both ISO strings và datetime-local formats
       if (processedData.start_date && typeof processedData.start_date === 'string') {
         try {
-          console.log('Processing start_date:', processedData.start_date);
+          // console.log('Processing start_date:', processedData.start_date);
           if (processedData.start_date.trim()) {
             // Try direct ISO parse first, fallback to datetime-local format
             let dateObj;
@@ -172,7 +172,7 @@ export class BookingRequestService {
               throw new Error(`Invalid start_date: ${processedData.start_date}`);
             }
             processedData.start_date = dateObj;
-            console.log('Successfully processed start_date:', (processedData.start_date as Date).toISOString());
+            // console.log('Successfully processed start_date:', (processedData.start_date as Date).toISOString());
           } else {
             processedData.start_date = undefined;
           }
@@ -184,7 +184,7 @@ export class BookingRequestService {
 
       if (processedData.end_date && typeof processedData.end_date === 'string') {
         try {
-          console.log('Processing end_date:', processedData.end_date);
+          // console.log('Processing end_date:', processedData.end_date);
           if (processedData.end_date.trim()) {
             let dateObj;
             if (processedData.end_date.includes('Z') || processedData.end_date.includes('+')) {
@@ -203,7 +203,7 @@ export class BookingRequestService {
               throw new Error(`Invalid end_date: ${processedData.end_date}`);
             }
             processedData.end_date = dateObj;
-            console.log('Successfully processed end_date:', (processedData.end_date as Date).toISOString());
+            // console.log('Successfully processed end_date:', (processedData.end_date as Date).toISOString());
           } else {
             processedData.end_date = undefined;
           }
@@ -213,12 +213,12 @@ export class BookingRequestService {
         }
       }
 
-      console.log('Processed data:', JSON.stringify(processedData, null, 2));
+      // console.log('Processed data:', JSON.stringify(processedData, null, 2));
 
       // Validate foreign keys exist before updating (use original data for IDs)
       const dataAny = data as any; // Type cast to bypass Prisma type restrictions
       if (dataAny.dealer_id) {
-        console.log('Checking dealer_id exists:', dataAny.dealer_id);
+        // console.log('Checking dealer_id exists:', dataAny.dealer_id);
         // Validate with User table (dealers are users with role='dealer')
         const dealerUser = await this.prisma.user.findUnique({
           where: { id: Number(dataAny.dealer_id) }
@@ -226,29 +226,29 @@ export class BookingRequestService {
         if (!dealerUser || dealerUser.role !== 'dealer') {
           throw new Error(`Dealer user with ID ${dataAny.dealer_id} does not exist or is not a dealer`);
         }
-        console.log('Dealer validation passed');
+        // console.log('Dealer validation passed');
       }
 
       if (dataAny.bike_id) {
-        console.log('Checking bike_id exists:', dataAny.bike_id);
+        // console.log('Checking bike_id exists:', dataAny.bike_id);
         const bikeExists = await this.prisma.bike.findUnique({ where: { id: Number(dataAny.bike_id) } });
         if (!bikeExists) {
           throw new Error(`Bike with ID ${dataAny.bike_id} does not exist`);
         }
-        console.log('Bike validation passed');
+        // console.log('Bike validation passed');
       }
 
       // Get current booking request to check status change
-      console.log('Finding current booking...');
+      // console.log('Finding current booking...');
       const currentBooking = await this.prisma.bookingRequest.findUnique({
         where,
       });
       if (!currentBooking) {
         throw new Error(`Booking with ID ${where.id} does not exist`);
       }
-      console.log('Current booking found:', currentBooking ? 'Yes' : 'No');
+      // console.log('Current booking found:', currentBooking ? 'Yes' : 'No');
 
-      console.log('Updating booking in database...');
+      // console.log('Updating booking in database...');
       const updatedBooking = await this.prisma.bookingRequest.update({
         data: processedData,
         where,
@@ -256,7 +256,7 @@ export class BookingRequestService {
           User: true,
         },
       });
-      console.log('Database update successful');
+      // console.log('Database update successful');
 
       // If status changed to APPROVED and all required fields are present, create rental
       if (
@@ -275,7 +275,7 @@ export class BookingRequestService {
             booking_request_id: updatedBooking.id,
             start_time: updatedBooking.start_date,
             end_time: updatedBooking.end_date,
-            status: 'ongoing',
+            status: 'active',
             price: updatedBooking.estimated_price,
             contact_name: updatedBooking.name,
             contact_email: updatedBooking.email,

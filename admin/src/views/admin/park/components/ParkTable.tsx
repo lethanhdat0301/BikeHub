@@ -1,13 +1,61 @@
 import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
 import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
+import { useToast } from "@chakra-ui/react";
+import CreateParkModal from "./CreateParkModal";
+import EditParkModal from "./EditParkModal";
 
 type Props = {
     tableContent: any[];
     loading: boolean;
+    onRefresh: () => void;
 };
 
-const ParkTable: React.FC<Props> = ({ tableContent, loading }) => {
+const ParkTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
+    const toast = useToast();
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedPark, setSelectedPark] = useState<any>(null);
+
+    const handleEdit = (park: any) => {
+        setSelectedPark(park);
+        setIsEditModalOpen(true);
+    };
+
+    const handleDelete = async (parkId: number) => {
+        if (!window.confirm("Are you sure you want to delete this park?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}parks/park/${parkId}`,
+                {
+                    method: "DELETE",
+                    credentials: "include",
+                }
+            );
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || "Failed to delete park");
+            }
+
+            toast({
+                title: "Park deleted successfully",
+                status: "success",
+                duration: 3000,
+            });
+            onRefresh();
+        } catch (error: any) {
+            toast({
+                title: "Error",
+                description: error.message || "Failed to delete park",
+                status: "error",
+                duration: 3000,
+            });
+        }
+    };
     const data = React.useMemo(() => {
         if (!tableContent) return [];
         if (Array.isArray(tableContent)) return tableContent;
@@ -53,11 +101,11 @@ const ParkTable: React.FC<Props> = ({ tableContent, loading }) => {
                 ),
             },
             {
-                Header: "Dealer ID",
-                accessor: "dealer_id",
+                Header: "Bikes",
+                accessor: "Bike",
                 Cell: ({ value }: any) => (
-                    <p className="text-sm text-navy-700 dark:text-white">
-                        {value || "N/A"}
+                    <p className="text-sm font-semibold text-blue-600">
+                        {Array.isArray(value) ? value.length : 0} bikes
                     </p>
                 ),
             },
@@ -82,11 +130,17 @@ const ParkTable: React.FC<Props> = ({ tableContent, loading }) => {
                 id: "actions",
                 Cell: ({ row }: any) => (
                     <div className="flex gap-2">
-                        <button className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600">
+                        <button
+                            onClick={() => handleEdit(row.original)}
+                            className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                        >
                             <MdEdit className="h-4 w-4" />
                             Edit
                         </button>
-                        <button className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+                        >
                             <MdDelete className="h-4 w-4" />
                             Delete
                         </button>
@@ -139,11 +193,27 @@ const ParkTable: React.FC<Props> = ({ tableContent, loading }) => {
                         Total: {data.length} parks
                     </p>
                 </div>
-                <button className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+                <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                >
                     <MdAdd className="h-5 w-5" />
                     Add Park
                 </button>
             </div>
+
+            {/* Modals */}
+            <CreateParkModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={onRefresh}
+            />
+            <EditParkModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                park={selectedPark}
+                onSuccess={onRefresh}
+            />
 
             {/* Table */}
             <div className="overflow-x-auto">

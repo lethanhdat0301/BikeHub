@@ -9,6 +9,7 @@ interface Bike {
   price: number;
   park_id: number;
   image?: string;
+  license_plate?: string;
 }
 
 class BikeService {

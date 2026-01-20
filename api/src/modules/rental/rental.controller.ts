@@ -198,17 +198,28 @@ export class RentalController {
   private async checkDealerOwnRental(
     rentalId: number,
     user: any,
-  ): Promise<RentalModel> {
-    const rental = await this.rentalService.findOne({ id: rentalId });
+  ): Promise<any> {
+    const rental = await this.rentalService.findOne({ id: rentalId }) as any;
 
     if (!rental) {
       throw new ForbiddenException('Rental not found');
     }
 
-    if (
-      user.role !== ROLES_ENUM.ADMIN &&
-      rental.user_id !== user.id
-    ) {
+    // Admin can access any rental
+    if (user.role === ROLES_ENUM.ADMIN) {
+      return rental;
+    }
+
+    // Dealer can only access rentals for bikes they own
+    if (user.role === ROLES_ENUM.DEALER) {
+      if (rental.Bike?.dealer_id !== user.id) {
+        throw new ForbiddenException('You do not own this rental - bike belongs to different dealer');
+      }
+      return rental;
+    }
+
+    // Regular users can only access their own rentals
+    if (rental.user_id !== user.id) {
       throw new ForbiddenException('You do not own this rental');
     }
 

@@ -74,7 +74,7 @@
     "taxesFees": "Steuern & Gebühren",
     "total": "Gesamt",
     "processing": "Wird verarbeitet...",
-    "assignedToDealer": "Zugewiesen an Händler {{dealerName}}{{#if dealerPhone}} (Tel.: {{dealerPhone}}){{/if}}",
+    "assignedToDealer": "Zugewiesen an Händler {{dealerName}}{{dealerPhone}}",
     "rentalSuccessTitle": "Buchung erfolgreich! 🎉",
     "rentalSuccessDescription": "Buchungs-ID: {{bookingId}}. {{dealerInfo}} Wir liefern das Motorrad bald zu Ihnen. Bitte überprüfen Sie Ihre E-Mails für detaillierte Informationen.",
     "redirectingTitle": "Weiterleitung...",
