@@ -71,7 +71,7 @@ const SearchBikeVietnam: React.FC = () => {
     return (
         <Box
             position="relative"
-            minH={{ base: "650px", md: "750px" }}
+            minH={{ base: "550px", md: "750px" }}
             display="flex"
             alignItems="center"
             width="100%"
@@ -92,28 +92,28 @@ const SearchBikeVietnam: React.FC = () => {
                 zIndex: 1
             }}
         >
-            <Container maxW="container.xl" position="relative" zIndex={2}>
-                <VStack spacing={12} align="center">
+            <Container maxW="container.xl" position="relative" zIndex={2} pt={{ base: 6, md: 0 }} px={{ base: 4, md: 4 }}>
+                <VStack spacing={{ base: 6, md: 12 }} align="center">
                     {/* Hero Text Section */}
-                    <VStack spacing={6} textAlign="center">
+                    <VStack spacing={{ base: 3, md: 6 }} textAlign="center">
                         <Heading
                             as="h1"
-                            size={{ base: "2xl", md: "3xl", lg: "4xl" }}
+                            size={{ base: "lg", md: "3xl", lg: "4xl" }}
                             color="white"
                             fontWeight="bold"
-                            lineHeight="1.1"
+                            lineHeight={{ base: "1.2", md: "1.1" }}
                             textShadow="2px 2px 8px rgba(0,0,0,0.8)"
                             letterSpacing="-0.02em"
                         >
                             {t('home.heroTitle')}
                         </Heading>
                         <Text
-                            fontSize={{ base: "xl", md: "2xl" }}
+                            fontSize={{ base: "sm", md: "2xl" }}
                             color="white"
                             fontWeight="medium"
                             maxW="3xl"
                             textShadow="2px 2px 6px rgba(0,0,0,0.8)"
-                            lineHeight="1.4"
+                            lineHeight={{ base: "1.3", md: "1.4" }}
                         >
                             {t('home.heroTagline')}
                         </Text>
@@ -144,12 +144,12 @@ const SearchBikeVietnam: React.FC = () => {
                     <Box
                         bg="rgba(255, 255, 255, 0.92)"
                         backdropFilter="blur(25px)"
-                        p={{ base: 8, md: 10, lg: 12 }}
-                        borderRadius="3xl"
-                        boxShadow="0 30px 60px -15px rgba(0, 50, 100, 0.4)"
-                        w="full"
-                        maxW="1000px"
-                        border="2px solid"
+                        p={{ base: 3.5, md: 10, lg: 12 }}
+                        borderRadius={{ base: "lg", md: "3xl" }}
+                        boxShadow="0 20px 40px -10px rgba(0, 50, 100, 0.3)"
+                        w={{ base: "80%", md: "full" }}
+                        maxW={{ base: "450px", md: "1000px" }}
+                        border={{ base: "1px solid", md: "2px solid" }}
                         borderColor="rgba(255,255,255,0.4)"
                         position="relative"
                         _before={{
@@ -160,16 +160,16 @@ const SearchBikeVietnam: React.FC = () => {
                             right: "-3px",
                             bottom: "-3px",
                             background: "linear-gradient(135deg, rgba(56, 178, 172, 0.2), rgba(59, 130, 246, 0.15))",
-                            borderRadius: "3xl",
+                            borderRadius: { base: "2xl", md: "3xl" },
                             zIndex: -1
                         }}
                     >
-                        <VStack spacing={8}>
+                        <VStack spacing={{ base: 2.5, md: 8 }}>
                             {/* Form Fields Container */}
                             <Flex
                                 w="full"
                                 direction={{ base: "column", lg: "row" }}
-                                gap={6}
+                                gap={{ base: 2.5, md: 6 }}
                                 align="flex-end"
                             >
                                 {/* Location Field */}
@@ -177,8 +177,8 @@ const SearchBikeVietnam: React.FC = () => {
                                     <FormLabel
                                         fontWeight="700"
                                         color="gray.800"
-                                        fontSize="md"
-                                        mb={3}
+                                        fontSize={{ base: "xs", md: "md" }}
+                                        mb={{ base: 1.5, md: 3 }}
                                         display="flex"
                                         alignItems="center"
                                         gap={2}
@@ -190,10 +190,10 @@ const SearchBikeVietnam: React.FC = () => {
                                         placeholder={loading ? "Loading locations..." : t('home.selectLocation')}
                                         value={parkId}
                                         onChange={(e) => setParkId(e.target.value)}
-                                        size="lg"
+                                        size="md"
                                         borderColor="gray.300"
-                                        borderWidth="2px"
-                                        borderRadius="xl"
+                                        borderWidth={{ base: "1px", md: "2px" }}
+                                        borderRadius={{ base: "lg", md: "xl" }}
                                         _hover={{ borderColor: "blue.400" }}
                                         _focus={{
                                             borderColor: "blue.500",
@@ -203,8 +203,8 @@ const SearchBikeVietnam: React.FC = () => {
                                         bg="white"
                                         color="gray.700"
                                         fontWeight="500"
-                                        h="60px"
-                                        fontSize="md"
+                                        h={{ base: "42px", md: "60px" }}
+                                        fontSize={{ base: "sm", md: "md" }}
                                     >
                                         {parks.map((park) => (
                                             <option key={park.id} value={park.id.toString()}>
@@ -216,7 +216,7 @@ const SearchBikeVietnam: React.FC = () => {
 
                                 {/* Date Fields */}
                                 <HStack
-                                    spacing={6}
+                                    spacing={{ base: 2.5, md: 6 }}
                                     w={{ base: "full", lg: "auto" }}
                                     flex={{ base: "none", lg: 1 }}
                                     flexDirection={{ base: "column", md: "row" }}
@@ -225,8 +225,8 @@ const SearchBikeVietnam: React.FC = () => {
                                         <FormLabel
                                             fontWeight="700"
                                             color="gray.800"
-                                            fontSize="md"
-                                            mb={3}
+                                            fontSize={{ base: "xs", md: "md" }}
+                                            mb={{ base: 1.5, md: 3 }}
                                             display="flex"
                                             alignItems="center"
                                             gap={2}
@@ -238,18 +238,18 @@ const SearchBikeVietnam: React.FC = () => {
                                             type="date"
                                             value={startDate}
                                             onChange={(e) => setStartDate(e.target.value)}
-                                            size="lg"
+                                            size="md"
                                             borderColor="gray.300"
-                                            borderWidth="2px"
-                                            borderRadius="xl"
+                                            borderWidth={{ base: "1px", md: "2px" }}
+                                            borderRadius={{ base: "lg", md: "xl" }}
                                             _hover={{ borderColor: "blue.400" }}
                                             _focus={{
                                                 borderColor: "blue.500",
                                                 boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.15)"
                                             }}
                                             bg="white"
-                                            h="60px"
-                                            fontSize="md"
+                                            h={{ base: "42px", md: "60px" }}
+                                            fontSize={{ base: "sm", md: "md" }}
                                             min={new Date().toISOString().split('T')[0]}
                                         />
                                     </FormControl>
@@ -258,8 +258,8 @@ const SearchBikeVietnam: React.FC = () => {
                                         <FormLabel
                                             fontWeight="700"
                                             color="gray.800"
-                                            fontSize="md"
-                                            mb={3}
+                                            fontSize={{ base: "xs", md: "md" }}
+                                            mb={{ base: 1.5, md: 3 }}
                                             display="flex"
                                             alignItems="center"
                                             gap={2}
@@ -271,18 +271,18 @@ const SearchBikeVietnam: React.FC = () => {
                                             type="date"
                                             value={endDate}
                                             onChange={(e) => setEndDate(e.target.value)}
-                                            size="lg"
+                                            size="md"
                                             borderColor="gray.300"
-                                            borderWidth="2px"
-                                            borderRadius="xl"
+                                            borderWidth={{ base: "1px", md: "2px" }}
+                                            borderRadius={{ base: "lg", md: "xl" }}
                                             _hover={{ borderColor: "blue.400" }}
                                             _focus={{
                                                 borderColor: "blue.500",
                                                 boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.15)"
                                             }}
                                             bg="white"
-                                            h="60px"
-                                            fontSize="md"
+                                            h={{ base: "42px", md: "60px" }}
+                                            fontSize={{ base: "sm", md: "md" }}
                                             min={startDate || new Date().toISOString().split('T')[0]}
                                         />
                                     </FormControl>
@@ -290,15 +290,15 @@ const SearchBikeVietnam: React.FC = () => {
 
                                 {/* Search Button */}
                                 <Button
-                                    size="lg"
-                                    px={10}
-                                    h="60px"
+                                    size="md"
+                                    px={{ base: 5, md: 10 }}
+                                    h={{ base: "42px", md: "60px" }}
                                     leftIcon={<SearchIcon />}
                                     onClick={handleSearch}
                                     bgGradient="linear(to-r, blue.500, cyan.500)"
                                     color="white"
-                                    borderRadius="xl"
-                                    fontSize="lg"
+                                    borderRadius={{ base: "lg", md: "xl" }}
+                                    fontSize={{ base: "sm", md: "lg" }}
                                     fontWeight="700"
                                     _hover={{
                                         bgGradient: "linear(to-r, blue.600, cyan.600)",
@@ -310,7 +310,7 @@ const SearchBikeVietnam: React.FC = () => {
                                     }}
                                     transition="all 0.3s ease"
                                     w={{ base: "full", lg: "auto" }}
-                                    minW="250px"
+                                    minW={{ base: "auto", md: "250px" }}
                                     boxShadow="0 15px 20px -5px rgba(59, 130, 246, 0.3), 0 8px 10px -5px rgba(6, 182, 212, 0.2)"
                                 >
                                     {t('home.findMotorbike')}
@@ -319,7 +319,7 @@ const SearchBikeVietnam: React.FC = () => {
 
                             {/* Same-day booking info */}
                             <Text
-                                fontSize="sm"
+                                fontSize={{ base: "xs", md: "sm" }}
                                 color="gray.600"
                                 textAlign="center"
                                 fontStyle="italic"

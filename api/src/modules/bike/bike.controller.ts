@@ -114,12 +114,13 @@ export class BikeController {
       seats?: number;
       fuel_type?: string;
       transmission?: string;
+      license_plate?: string;
     },
     @CurrentUser() user: any,
   ): Promise<BikeModel> {
     const { model, status, lock, location, price, park_id, dealer_id, image,
       rating, review_count, dealer_name, dealer_contact,
-      seats, fuel_type, transmission } = bikeData;
+      seats, fuel_type, transmission, license_plate } = bikeData;
 
     if (!model) {
       throw new UnprocessableEntityException({ message: "Argument `model` is missing." });
@@ -148,6 +149,7 @@ export class BikeController {
       seats,
       fuel_type,
       transmission,
+      license_plate,
       Park: {
         connect: { id: park_id },
       },

@@ -81,7 +81,7 @@ export class UserService {
       const rentals = Rental ?? [];
       const totalRentals = rentals.length;
       const totalSpent = rentals.reduce((sum: Decimal, r: any) => {
-        console.log('Rental price:', r.price);
+        // console.log('Rental price:', r.price);
         return sum.plus(new Decimal(r.price));
       }, new Decimal(0));
       const lastRental = rentals.reduce((latest: string | null, r: any) => {
@@ -108,7 +108,7 @@ export class UserService {
       payload.password = await AuthHelpers.hash(payload.password as string);
     }
 
-    console.log('Creating user with data:', payload);
+    // console.log('Creating user with data:', payload);
 
     try {
       const user = await this.prisma.user.create({ data: payload });

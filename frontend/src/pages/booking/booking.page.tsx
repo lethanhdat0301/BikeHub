@@ -63,61 +63,24 @@ const RequestBookingPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [useAutoFill, setUseAutoFill] = useState(false);
 
-  // Save form data to localStorage
+  // Save form data to sessionStorage (cleared when tab closes)
   const saveFormData = (data: typeof formData) => {
-    localStorage.setItem('bookingFormData', JSON.stringify(data));
+    sessionStorage.setItem('bookingFormData', JSON.stringify(data));
   };
 
-  // Restore form data from localStorage
-  const restoreFormData = () => {
-    const savedData = localStorage.getItem('bookingFormData');
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        setFormData(parsed);
-      } catch (error) {
-        console.error('Error restoring form data:', error);
-      }
-    }
-  };
-
-  // Auto-fill from user profile or restore from localStorage
+  // Restore from sessionStorage on mount (if user refreshed during typing)
   useEffect(() => {
-    // First try to restore from localStorage
-    const savedData = localStorage.getItem('bookingFormData');
+    const savedData = sessionStorage.getItem('bookingFormData');
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
         setFormData(parsed);
-        return;
       } catch (error) {
         console.error('Error restoring form data:', error);
       }
     }
-
-    // If no saved data and user wants auto-fill
-    if (useAutoFill) {
-      const userString = localStorage.getItem("user");
-      if (userString) {
-        try {
-          const user = JSON.parse(userString);
-          const autoFilledData = {
-            name: user.name || "",
-            email: user.email || "",
-            contactMethod: "phone",
-            contactDetails: user.phone || "",
-            pickupLocation: "",
-          };
-          setFormData(autoFilledData);
-          saveFormData(autoFilledData);
-        } catch (error) {
-          console.error("Error parsing user data:", error);
-        }
-      }
-    }
-  }, [useAutoFill]);
+  }, []);
 
   // Save form data whenever it changes
   useEffect(() => {
@@ -248,7 +211,7 @@ const RequestBookingPage: React.FC = () => {
         pickupLocation: "",
       });
       setAgreedToTerms(false);
-      localStorage.removeItem('bookingFormData');
+      sessionStorage.removeItem('bookingFormData');
 
       // Reset requestSent after 5 seconds
       setTimeout(() => setRequestSent(false), 5000);

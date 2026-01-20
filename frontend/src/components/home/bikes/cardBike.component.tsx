@@ -38,6 +38,7 @@ export type Bike = {
   seats?: number;
   fuel_type?: string;
   transmission?: string;
+  license_plate?: string;
   Park?: {
     id: number;
     name: string;
@@ -93,7 +94,7 @@ const CardBike = ({
       <Box
         className="w-full relative"
         h={{ base: "120px", sm: "180px", md: "200px" }}
-        bgImage={bike.image ? bike.image : bikeImage}
+        bgImage={bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : bikeImage}
         bgPosition={"center"}
         bgRepeat={"no-repeat"}
         bgSize={"cover"}
@@ -126,6 +127,11 @@ const CardBike = ({
           <Heading as="h3" size={{ base: "xs", md: "md" }} fontWeight={600} className="capitalize" noOfLines={1}>
             {bike.model}
           </Heading>
+          {bike.license_plate && (
+            <Badge colorScheme="purple" fontSize="xs" mt={1} px={2} py={0.5} borderRadius="md">
+              🏍️ {bike.license_plate}
+            </Badge>
+          )}
           {bike.code && (
             <Text fontSize="xs" color="gray.500" mt={1}>
               Code: {bike.code}

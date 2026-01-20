@@ -54,6 +54,44 @@ const BikeDetailsPage: React.FC = () => {
     const [contactPhone, setContactPhone] = useState("");
     const [pickupLocation, setPickupLocation] = useState("");
 
+    // Save form data to sessionStorage (cleared when tab closes)
+    const saveFormData = () => {
+        const formData = {
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            contactName,
+            contactEmail,
+            contactPhone,
+            pickupLocation,
+            referrerPhone,
+        };
+        sessionStorage.setItem('bikeDetailsFormData', JSON.stringify(formData));
+    };
+
+    // Restore form data from sessionStorage on mount (if user refreshed during typing)
+    useEffect(() => {
+        const savedData = sessionStorage.getItem('bikeDetailsFormData');
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                setStartDate(parsed.startDate || "");
+                setEndDate(parsed.endDate || "");
+                setStartTime(parsed.startTime || "09:00");
+                setEndTime(parsed.endTime || "18:00");
+                setContactName(parsed.contactName || "");
+                setContactEmail(parsed.contactEmail || "");
+                setContactPhone(parsed.contactPhone || "");
+                setPickupLocation(parsed.pickupLocation || "");
+                setReferrerPhone(parsed.referrerPhone || "");
+            } catch (error) {
+                console.error('Error restoring form data:', error);
+            }
+        }
+    }, []);
+
+    // Fetch bike details and optionally restore dates from URL
     useEffect(() => {
         const fetchBikeDetails = async () => {
             try {
@@ -78,31 +116,28 @@ const BikeDetailsPage: React.FC = () => {
             fetchBikeDetails();
         }
 
-        // Auto-fill dates from URL search params if available
-        const searchParams = new URLSearchParams(location.search);
-        const urlStartDate = searchParams.get('startDate');
-        const urlEndDate = searchParams.get('endDate');
+        // Only restore dates from URL if sessionStorage is empty (first visit)
+        const savedData = sessionStorage.getItem('bikeDetailsFormData');
+        if (!savedData) {
+            const searchParams = new URLSearchParams(location.search);
+            const urlStartDate = searchParams.get('startDate');
+            const urlEndDate = searchParams.get('endDate');
 
-        if (urlStartDate) {
-            setStartDate(urlStartDate);
-        }
-        if (urlEndDate) {
-            setEndDate(urlEndDate);
-        }
-
-        // Auto-fill contact info from logged-in user
-        const userString = localStorage.getItem("user");
-        if (userString) {
-            try {
-                const user = JSON.parse(userString);
-                if (user.name) setContactName(user.name);
-                if (user.email) setContactEmail(user.email);
-                if (user.phone) setContactPhone(user.phone);
-            } catch (error) {
-                console.error("Error parsing user data:", error);
+            if (urlStartDate) {
+                setStartDate(urlStartDate);
+            }
+            if (urlEndDate) {
+                setEndDate(urlEndDate);
             }
         }
     }, [id, location.search]);
+
+    // Save form data whenever it changes
+    useEffect(() => {
+        if (startDate || endDate || contactName || contactEmail || contactPhone || pickupLocation || referrerPhone) {
+            saveFormData();
+        }
+    }, [startDate, endDate, startTime, endTime, contactName, contactEmail, contactPhone, pickupLocation, referrerPhone]);
 
     const handleBookNow = async () => {
         if (!startDate || !endDate) {
@@ -310,7 +345,12 @@ const BikeDetailsPage: React.FC = () => {
             const toastDuration = null;
             const navigateDelay = isMobile ? 4000 : 2000;  // 4s on mobile, 2s on desktop
 
-            const dealerInfo = bookingData?.dealerName ? t('booking.assignedToDealer', { dealerName: bookingData.dealerName, dealerPhone: bookingData.dealerPhone || '' }) : '';
+            const dealerPhoneFormatted = bookingData?.dealerPhone ? ` (Phone: ${bookingData.dealerPhone})` : '';
+            const dealerInfo = bookingData?.dealerName ? t('booking.assignedToDealer', { dealerName: bookingData.dealerName, dealerPhone: dealerPhoneFormatted }) : '';
+            
+            // Clear sessionStorage on successful booking
+            sessionStorage.removeItem('bikeDetailsFormData');
+            
             toast({
                 title: t('booking.rentalSuccessTitle'),
                 description: t('booking.rentalSuccessDescription', { bookingId: bookingData?.bookingId || 'N/A', dealerInfo }),
@@ -481,6 +521,15 @@ const BikeDetailsPage: React.FC = () => {
                                     <Text fontSize="sm" textTransform="capitalize">{bike.transmission || 'Automatic'}</Text>
                                 </HStack>
                             </HStack>
+
+                            {/* License Plate */}
+                            {bike.license_plate && (
+                                <Box mb={4}>
+                                    <Badge colorScheme="purple" fontSize="md" px={3} py={1} borderRadius="md">
+                                        🏍️ {bike.license_plate}
+                                    </Badge>
+                                </Box>
+                            )}
 
                             <Divider my={4} />
 

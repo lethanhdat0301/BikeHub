@@ -74,7 +74,7 @@
     "taxesFees": "Taxes & Fees",
     "total": "Total",
     "processing": "Processing...",
-    "assignedToDealer": "Assigned to dealer {{dealerName}}{{#if dealerPhone}} (Phone: {{dealerPhone}}){{/if}}",
+    "assignedToDealer": "Assigned to dealer {{dealerName}}{{dealerPhone}}",
     "rentalSuccessTitle": "Booking Successful! 🎉",
     "rentalSuccessDescription": "Booking ID: {{bookingId}}. {{dealerInfo}} We will deliver the bike to you soon. Please check your email for detailed information.",
     "redirectingTitle": "Redirecting...",

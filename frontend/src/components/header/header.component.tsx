@@ -235,13 +235,15 @@ const Header: React.FC = () => {
           value={language}
           onChange={(e) => changeLanguageTo(e.target.value)}
           size="sm"
-          width="80px"
+          width="70px"
           borderColor="teal.300"
           _hover={{ borderColor: "teal.500" }}
           focusBorderColor="teal.500"
         >
           <option value="en">EN</option>
           <option value="ru">RU</option>
+          <option value="vi">VI</option>
+          <option value="de">DE</option>
         </Select>
       </Box>
 
@@ -315,10 +317,10 @@ const Header: React.FC = () => {
         focusBorderColor="teal.500"
         flexShrink={0}
       >
-        <option value="en">{t('lang.en')}</option>
-        <option value="ru">{t('lang.ru')}</option>
-        <option value="vi">{t('lang.vi')}</option>
-        <option value="de">{t('lang.de')}</option>
+        <option value="en">EN</option>
+        <option value="ru">RU</option>
+        <option value="vi">VI</option>
+        <option value="de">DE</option>
       </Select>
 
 
@@ -507,6 +509,12 @@ const Header: React.FC = () => {
                   </MenuItem>
                   <MenuItem onClick={() => changeLanguageTo('ru')}>
                     🇷🇺 {t('lang.ru')}
+                  </MenuItem>
+                  <MenuItem onClick={() => changeLanguageTo('vi')}>
+                    🇻🇳 {t('lang.vi')}
+                  </MenuItem>
+                  <MenuItem onClick={() => changeLanguageTo('de')}>
+                    🇩🇪 {t('lang.de')}
                   </MenuItem>
                 </MenuList>
               </Menu>

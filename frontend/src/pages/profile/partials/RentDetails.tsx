@@ -15,8 +15,9 @@ import QRCodeComponent from "../../../components/qrcode/qrcode";
 
 enum Status {
   completed = "green",
-  ongoing = "blue",
-  lost = "red",
+  active = "blue",
+  pending = "orange",
+  cancelled = "red",
 }
 
 const RentDetails = ({ rent }: { rent: Rental | null }) => {

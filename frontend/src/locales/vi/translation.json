@@ -74,7 +74,7 @@
     "taxesFees": "Thuế & Phí",
     "total": "Tổng cộng",
     "processing": "Đang xử lý...",
-    "assignedToDealer": "Được giao cho đại lý {{dealerName}}{{#if dealerPhone}} (SĐT: {{dealerPhone}}){{/if}}",
+    "assignedToDealer": "Được giao cho đại lý {{dealerName}}{{dealerPhone}}",
     "rentalSuccessTitle": "Đặt xe thành công! 🎉",
     "rentalSuccessDescription": "Mã đặt: {{bookingId}}. {{dealerInfo}} Chúng tôi sẽ giao xe cho bạn sớm. Vui lòng kiểm tra email để biết thông tin chi tiết.",
     "redirectingTitle": "Đang chuyển hướng...",

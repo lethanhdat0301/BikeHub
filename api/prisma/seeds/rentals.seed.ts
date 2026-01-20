@@ -37,7 +37,7 @@ export async function seedRentals(prisma: PrismaClient, users: User[], bikes: Bi
           bike_id: bike.id,
           start_time: startTime,
           end_time: endTime,
-          status: faker.helpers.arrayElement(['completed', 'ongoing', 'cancelled']),
+          status: faker.helpers.arrayElement(['completed', 'active', 'cancelled']),
           price: bike.price * 2, // Giá 2 ngày
           qrcode: '',
           booking_code: bookingCode,

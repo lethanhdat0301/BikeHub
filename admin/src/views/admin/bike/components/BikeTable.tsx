@@ -84,7 +84,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "price",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        `${(value || 0).toLocaleString('vi-VN')} VNĐ`
+                        {(value || 0).toLocaleString('vi-VN')} VNĐ
                     </p>
                 ),
             },
@@ -94,6 +94,15 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 Cell: ({ value }: any) => (
                     <p className="text-sm text-navy-700 dark:text-white">
                         {value || "N/A"}
+                    </p>
+                ),
+            },
+            {
+                Header: "License Plate",
+                accessor: "license_plate",
+                Cell: ({ value }: any) => (
+                    <p className="text-sm font-semibold text-navy-700 dark:text-white">
+                        {value || "-"}
                     </p>
                 ),
             },

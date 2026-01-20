@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdClose } from "react-icons/md";
 
 type Props = {
@@ -13,11 +13,33 @@ const CreateDealerModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
         email: "",
         phone: "",
         telegram: "",
-        park: "",
+        park_id: "",
+        location: "",
         password: "",
     });
+    const [parks, setParks] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // Fetch parks when modal opens
+    useEffect(() => {
+        const fetchParks = async () => {
+            try {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}parks`, {
+                    credentials: "include",
+                });
+                const data = await response.json();
+                setParks(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error("Failed to fetch parks:", err);
+                setParks([]);
+            }
+        };
+
+        if (isOpen) {
+            fetchParks();
+        }
+    }, [isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,6 +47,11 @@ const CreateDealerModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
         setError("");
 
         try {
+            // Validate park_id
+            if (!formData.park_id) {
+                throw new Error("Please select a park for the dealer");
+            }
+
             // Tạo dealer account + dealer record trong một call
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}dealers/create-account`,
@@ -38,7 +65,8 @@ const CreateDealerModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
                         password: formData.password,
                         phone: formData.phone,
                         telegram: formData.telegram,
-                        location: formData.park,
+                        park_id: parseInt(formData.park_id),
+                        location: formData.location,
                     }),
                 }
             );
@@ -57,7 +85,8 @@ const CreateDealerModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
                 email: "",
                 phone: "",
                 telegram: "",
-                park: "",
+                park_id: "",
+                location: "",
                 password: "",
             });
         } catch (err: any) {
@@ -158,14 +187,33 @@ const CreateDealerModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
 
                     <div>
                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Park Area
+                            Park (Required) *
+                        </label>
+                        <select
+                            required
+                            value={formData.park_id}
+                            onChange={(e) => setFormData({ ...formData, park_id: e.target.value })}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-navy-700 dark:text-white"
+                        >
+                            <option value="">-- Select a Park --</option>
+                            {parks.map((park) => (
+                                <option key={park.id} value={park.id}>
+                                    {park.name} - {park.location}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Location (Optional)
                         </label>
                         <input
                             type="text"
-                            value={formData.park}
-                            onChange={(e) => setFormData({ ...formData, park: e.target.value })}
+                            value={formData.location}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-navy-700 dark:text-white"
-                            placeholder="e.g., Phu Quoc, Saigon, Hanoi"
+                            placeholder="Additional location details"
                         />
                     </div>
 

@@ -96,6 +96,14 @@ const routes = [
     roles: ["admin", "dealer"],
   },
   {
+    name: "Parks",
+    layout: "/admin",
+    icon: <MdLocalParking className="h-6 w-6" />,
+    path: "parks",
+    component: <ManageParks />,
+    roles: ["admin"],
+  },
+  {
     name: "Accounts",
     layout: "/admin",
     icon: <MdAccountCircle className="h-6 w-6" />,

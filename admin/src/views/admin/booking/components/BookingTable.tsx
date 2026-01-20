@@ -72,10 +72,17 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => 
             {
                 Header: "Vehicle",
                 accessor: "vehicle_model",
-                Cell: ({ value }: any) => (
-                    <p className="text-sm text-navy-700 dark:text-white">
-                        {value || "N/A"}
-                    </p>
+                Cell: ({ row }: any) => (
+                    <div>
+                        <p className="text-sm font-bold text-navy-700 dark:text-white">
+                            {row.original.vehicle_model || "N/A"}
+                        </p>
+                        {row.original.vehicle_license_plate && (
+                            <p className="text-xs text-black-600 dark:text-black-400 font-medium">
+                                {row.original.vehicle_license_plate}
+                            </p>
+                        )}
+                    </div>
                 ),
             },
             {
