@@ -100,89 +100,6 @@ const TrackOrderPage: React.FC = () => {
         };
     }, [autoRefresh, orders.length, lastSearchQuery]);
 
-    // Mock data for orders
-    const mockOrders: Order[] = [
-        {
-            id: 1,
-            bookingId: "ORD001234",
-            bikeName: "Honda SH 150i",
-            bikeModel: "Scooter",
-            bikeImage: bike1,
-            customerName: "John Doe",
-            phoneNumber: "+84 123 456 789",
-            deliveryAddress: "123 Beach Road, Phu Quoc",
-            orderDate: "2024-12-25 10:30 AM",
-            expectedDelivery: "2024-12-26 02:00 PM",
-            currentStatus: 2,
-            totalPrice: 350,
-            dealerInfo: {
-                name: "Phu Quoc Bike Center",
-                phone: "+84 297 123 4567",
-                email: "phuquoc@bikehub.vn"
-            },
-            trackingSteps: [
-                {
-                    title: t('orderTracking.orderConfirmed'),
-                    description: t('orderTracking.orderConfirmedDesc'),
-                    timestamp: "2024-12-25 10:30 AM",
-                },
-                {
-                    title: t('orderTracking.preparingMotorcycle'),
-                    description: t('orderTracking.preparingMotorcycleDesc'),
-                    timestamp: "2024-12-25 11:00 AM",
-                },
-                {
-                    title: t('orderTracking.outForDelivery'),
-                    description: t('orderTracking.outForDeliveryDesc'),
-                    timestamp: "2024-12-26 09:00 AM",
-                },
-                {
-                    title: t('orderTracking.delivered'),
-                    description: t('orderTracking.deliveredDesc'),
-                },
-            ],
-        },
-        {
-            id: 2,
-            bookingId: "ORD001235",
-            bikeName: "Yamaha Exciter 155",
-            bikeModel: "Standard",
-            bikeImage: bike2,
-            customerName: "Jane Smith",
-            phoneNumber: "+84 987 654 321",
-            deliveryAddress: "456 Hotel Street, Nha Trang",
-            orderDate: "2024-12-26 08:00 AM",
-            expectedDelivery: "2024-12-26 04:00 PM",
-            currentStatus: 1,
-            totalPrice: 245,
-            dealerInfo: {
-                name: "Nha Trang Motor Station",
-                phone: "+84 258 987 6543",
-                email: "nhatrang@bikehub.vn"
-            },
-            trackingSteps: [
-                {
-                    title: t('orderTracking.orderConfirmed'),
-                    description: t('orderTracking.orderConfirmedDesc'),
-                    timestamp: "2024-12-26 08:00 AM",
-                },
-                {
-                    title: t('orderTracking.preparingMotorcycle'),
-                    description: t('orderTracking.preparingMotorcycleDesc'),
-                    timestamp: "2024-12-26 08:30 AM",
-                },
-                {
-                    title: t('orderTracking.outForDelivery'),
-                    description: t('orderTracking.outForDeliveryDesc'),
-                },
-                {
-                    title: t('orderTracking.delivered'),
-                    description: t('orderTracking.deliveredDesc'),
-                },
-            ],
-        },
-    ];
-
     const searchOrders = async (query?: string, silentRefresh = false) => {
         const queryToSearch = query || searchQuery;
 
@@ -221,7 +138,7 @@ const TrackOrderPage: React.FC = () => {
                     bookingId: booking.booking_code || `BK${String(booking.id).padStart(6, '0')}`,
                     bikeName: booking.Bike?.model || 'N/A',
                     bikeModel: booking.Bike?.transmission || 'N/A',
-                    bikeImage: booking.Bike?.image || bike1,
+                    bikeImage: booking.Bike?.image ? `https://storage.googleapis.com/bike_images/${booking.Bike.image}` : bike1,
                     licensePlate: booking.Bike?.license_plate,
                     customerName: booking.name || 'Guest',
                     phoneNumber: booking.contact_details || 'N/A',
@@ -263,7 +180,7 @@ const TrackOrderPage: React.FC = () => {
                     bookingId: rental.booking_code || `BK${String(rental.id).padStart(6, '0')}`,
                     bikeName: rental.Bike?.model || 'N/A',
                     bikeModel: rental.Bike?.transmission || 'N/A',
-                    bikeImage: rental.Bike?.image || bike1,
+                    bikeImage: rental.Bike?.image ? `https://storage.googleapis.com/bike_images/${rental.Bike.image}` : bike1,
                     licensePlate: rental.Bike?.license_plate,
                     customerName: rental.User?.name || rental.contact_name || 'Guest',
                     phoneNumber: rental.User?.phone || rental.contact_phone || 'N/A',

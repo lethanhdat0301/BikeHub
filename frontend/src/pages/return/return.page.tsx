@@ -172,7 +172,7 @@ const ReturnPage: React.FC = () => {
                         bookingId: rental.booking_code || `BK${String(rental.booking_request_id || rental.id).padStart(6, '0')}`,
                         bikeName: rental.Bike?.model || 'N/A',
                         bikeModel: rental.Bike?.transmission || 'N/A',
-                        bikeImage: rental.Bike?.image || bike1,
+                        bikeImage: rental.Bike?.image ? `https://storage.googleapis.com/bike_images/${rental.Bike.image}` : bike1,
                         licensePlate: rental.Bike?.license_plate,
                         startDate: startDate.toLocaleDateString(),
                         endDate: endDate.toLocaleDateString(),
