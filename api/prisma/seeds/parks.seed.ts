@@ -43,6 +43,12 @@ export async function seedParks(prisma: PrismaClient, dealers: User[]) {
       dealer_id: dnDealer.id,
       image: 'https://picsum.photos/800/600?random=5'
     },
+    {
+      name: 'Ha Noi City',
+      location: 'Hoan Kiem District, Hanoi City',
+      dealer_id: pqDealer.id,
+      image: 'https://picsum.photos/800/600?random=6'
+    },
   ];
 
   const createdParks: Park[] = [];
