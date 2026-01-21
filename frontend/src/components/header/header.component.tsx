@@ -79,8 +79,8 @@ const Header: React.FC = () => {
 
   const socialLinks = {
     telegram: "https://t.me/yourusername", // Thay bằng Telegram username
-    whatsapp: "https://wa.me/84123456789", // Thay bằng số điện thoại (84XXXXXXXXX)
-    messenger: "https://m.me/yourpageid"    // Thay bằng Facebook Page ID
+    whatsapp: "https://wa.me/84388817935", // Thay bằng số điện thoại (84XXXXXXXXX)
+    messenger: "https://m.me/61586851197817"    // Thay bằng Facebook Page ID
   };
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

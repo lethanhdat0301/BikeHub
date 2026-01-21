@@ -462,7 +462,7 @@ const RequestBookingPage: React.FC = () => {
                     >
                       {t('booking.termsLink')}
                     </Link>
-                    {" "}{t('booking.agreeText2')}{" "}
+                    {/* {" "}{t('booking.agreeText2')}{" "}
                     <Link
                       href="/rental-guide"
                       color="teal.600"
@@ -471,7 +471,7 @@ const RequestBookingPage: React.FC = () => {
                       _hover={{ textDecoration: "underline" }}
                     >
                       {t('booking.rentalGuideLink')}
-                    </Link>
+                    </Link> */}
                   </Text>
                 </Checkbox>
                 <FormHelperText fontSize="xs" color="gray.500" ml={6}>
