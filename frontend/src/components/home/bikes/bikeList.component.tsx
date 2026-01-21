@@ -21,72 +21,8 @@ interface Bike {
     license_plate?: string;
 }
 
-// Default images nếu xe không có ảnh
-const defaultImages = [bike1, bike2, bike3];
-
-// Mock data để hiển thị khi database trống
-const mockBikes: Bike[] = [
-    {
-        id: 1,
-        model: "Mountain Bike Pro",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Downtown",
-        price: 50,
-        park_id: 1,
-        image: bike1
-    },
-    {
-        id: 2,
-        model: "City Cruiser",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Beach Area",
-        price: 30,
-        park_id: 2,
-        image: bike2
-    },
-    {
-        id: 3,
-        model: "Sport Racing",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Mountain Trail",
-        price: 70,
-        park_id: 3,
-        image: bike3
-    },
-    {
-        id: 4,
-        model: "Urban Commuter",
-        status: "AVAILABLE",
-        lock: false,
-        location: "City Center",
-        price: 40,
-        park_id: 1,
-        image: bike1
-    },
-    {
-        id: 5,
-        model: "Electric Bike",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Riverside",
-        price: 80,
-        park_id: 2,
-        image: bike2
-    },
-    {
-        id: 6,
-        model: "Folding Bike",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Station",
-        price: 35,
-        park_id: 3,
-        image: bike3
-    }
-];
+// Placeholder image
+const placeholderImage = bike1;
 
 const BikeList: React.FC = () => {
     // console.log("🔵 BikeList component rendered!");
@@ -107,42 +43,26 @@ const BikeList: React.FC = () => {
                 let data = await bikeService.getBikesByStatus('available', 20); // Lấy nhiều xe hơn để phân trang
 
                 if (!data || (Array.isArray(data) && data.length === 0)) {
-                    console.warn("⚠️ API trả về rỗng, sử dụng Mock Data");
-                    data = mockBikes;
+                    console.warn("⚠️ API trả về rỗng, không có xe");
+                    setBikes([]);
+                    setError(null);
+                    setLoading(false);
+                    return;
                 }
 
-                // Thêm ảnh mặc định nếu cần
-                const bikesWithImages = data.map((bike: any, index: number) => {
-                    let processedImage = defaultImages[index % defaultImages.length]
-
-                    if (bike.image) {
-                        if (bike.image.startsWith('http') || bike.image.startsWith('data:')) {
-                            processedImage = bike.image
-                        }
-                        else {
-                            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000/';
-
-                            const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-
-                            processedImage = `${baseUrl}uploads/image/${bike.image}`;
-                        }
-                    }
-
-                    return {
-                        ...bike,
-                        image: processedImage
-                    };
-                });
+                // Xử lý ảnh giống bikeDetails - sử dụng Google Cloud Storage
+                const bikesWithImages = data.map((bike: any) => ({
+                    ...bike,
+                    image: bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : placeholderImage
+                }));
 
                 setBikes(bikesWithImages);
                 setError(null);
             } catch (err: any) {
                 console.error("❌ Error loading bikes:", err);
                 console.error("❌ Error details:", err.response?.data || err.message);
-                // console.log("⚠️ Lỗi khi tải từ API, sử dụng mock data");
-                // Nếu có lỗi, dùng mock data
-                setBikes(mockBikes);
-                setError(null);
+                setBikes([]);
+                setError("Failed to load bikes. Please try again later.");
             } finally {
                 setLoading(false);
             }

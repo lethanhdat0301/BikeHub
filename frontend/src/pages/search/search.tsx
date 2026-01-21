@@ -74,10 +74,10 @@ const SearchPage: React.FC = () => {
                     // console.log(`✅ Đã tải ${data.length} xe available`);
                 }
 
-                // Hiển thị tất cả xe
-                const allBikes = data.map((bike, index) => ({
+                // Hiển thị tất cả xe với Google Cloud Storage URL
+                const allBikes = data.map((bike) => ({
                     ...bike,
-                    image: bike.image || defaultImages[index % defaultImages.length],
+                    image: bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : defaultImages[0],
                 }));
 
                 // console.log(`📊 Hiển thị ${allBikes.length} xe`);
