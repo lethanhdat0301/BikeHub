@@ -19,6 +19,19 @@ import {
     Icon,
     Alert,
     AlertIcon,
+    Accordion,
+    AccordionItem,
+    AccordionButton,
+    AccordionPanel,
+    AccordionIcon,
+    Drawer,
+    DrawerBody,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { FaArrowLeft, FaCheckCircle, FaUsers, FaGasPump, FaBolt } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
@@ -36,6 +49,7 @@ const BikeDetailsPage: React.FC = () => {
     const toast = useToast();
     const { t } = useTranslation();
     const { executeRecaptcha } = useGoogleReCaptcha();
+    const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
 
     const [bike, setBike] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -347,10 +361,10 @@ const BikeDetailsPage: React.FC = () => {
 
             const dealerPhoneFormatted = bookingData?.dealerPhone ? ` (Phone: ${bookingData.dealerPhone})` : '';
             const dealerInfo = bookingData?.dealerName ? t('booking.assignedToDealer', { dealerName: bookingData.dealerName, dealerPhone: dealerPhoneFormatted }) : '';
-            
+
             // Clear sessionStorage on successful booking
             sessionStorage.removeItem('bikeDetailsFormData');
-            
+
             toast({
                 title: t('booking.rentalSuccessTitle'),
                 description: t('booking.rentalSuccessDescription', { bookingId: bookingData?.bookingId || 'N/A', dealerInfo }),
@@ -533,131 +547,155 @@ const BikeDetailsPage: React.FC = () => {
 
                             <Divider my={4} />
 
-                            {/* Description */}
-                            <Heading as="h3" size="md" mb={3}>
-                                {t('bike.descriptionTitle')}
-                            </Heading>
-                            <Text color="gray.700" mb={4}>
-                                {bike.description || t('bike.descriptionDefault', { model: bike.model })}
-                            </Text>
+                            {/* Accordion for Description, Highlights, Features */}
+                            <Accordion allowMultiple defaultIndex={[0]}>
+                                {/* Description */}
+                                <AccordionItem border="none">
+                                    <AccordionButton px={0} _hover={{ bg: "transparent" }}>
+                                        <Heading as="h3" size="md" flex="1" textAlign="left">
+                                            {t('bike.descriptionTitle')}
+                                        </Heading>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <AccordionPanel px={0} pb={4}>
+                                        <Text color="gray.700">
+                                            {bike.description || t('bike.descriptionDefault', { model: bike.model })}
+                                        </Text>
+                                    </AccordionPanel>
+                                </AccordionItem>
 
-                            {/* Highlights */}
-                            <Heading as="h3" size="md" mb={3}>
-                                {t('bike.highlightsTitle')}
-                            </Heading>
-                            <SimpleGrid columns={2} spacing={4}>
-                                <HStack>
-                                    <Icon as={FaCheckCircle} color="green.500" />
-                                    <Text fontSize="sm">
-                                        {bike.rating && bike.rating >= 4.5 ? t('bike.rating.excellent') : bike.rating && bike.rating >= 3.5 ? t('bike.rating.good') : t('bike.rating.fair')} {t('bike.rating.condition')}
-                                    </Text>
-                                </HStack>
-                                <HStack>
-                                    <Icon as={FaCheckCircle} color="green.500" />
-                                    <Text fontSize="sm">{t('bike.highlight.recentlyServiced')}</Text>
-                                </HStack>
-                                <HStack>
-                                    <Icon as={FaCheckCircle} color="green.500" />
-                                    <Text fontSize="sm">{t('bike.highlight.professionallyCleaned')}</Text>
-                                </HStack>
-                                {bike.fuel_type === 'electric' && (
-                                    <HStack>
-                                        <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">{t('bike.highlight.ecoFriendly')}</Text>
-                                    </HStack>
-                                )}
-                                {bike.transmission === 'Manual' && bike.price > 400000 && (
-                                    <HStack>
-                                        <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">{t('bike.highlight.offroadCapable')}</Text>
-                                    </HStack>
-                                )}
-                            </SimpleGrid>
+                                {/* Highlights */}
+                                <AccordionItem border="none">
+                                    <AccordionButton px={0} _hover={{ bg: "transparent" }}>
+                                        <Heading as="h3" size="md" flex="1" textAlign="left">
+                                            {t('bike.highlightsTitle')}
+                                        </Heading>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <AccordionPanel px={0} pb={4}>
+                                        <SimpleGrid columns={2} spacing={4}>
+                                            <HStack>
+                                                <Icon as={FaCheckCircle} color="green.500" />
+                                                <Text fontSize="sm">
+                                                    {bike.rating && bike.rating >= 4.5 ? t('bike.rating.excellent') : bike.rating && bike.rating >= 3.5 ? t('bike.rating.good') : t('bike.rating.fair')} {t('bike.rating.condition')}
+                                                </Text>
+                                            </HStack>
+                                            <HStack>
+                                                <Icon as={FaCheckCircle} color="green.500" />
+                                                <Text fontSize="sm">{t('bike.highlight.recentlyServiced')}</Text>
+                                            </HStack>
+                                            <HStack>
+                                                <Icon as={FaCheckCircle} color="green.500" />
+                                                <Text fontSize="sm">{t('bike.highlight.professionallyCleaned')}</Text>
+                                            </HStack>
+                                            {bike.fuel_type === 'electric' && (
+                                                <HStack>
+                                                    <Icon as={FaCheckCircle} color="green.500" />
+                                                    <Text fontSize="sm">{t('bike.highlight.ecoFriendly')}</Text>
+                                                </HStack>
+                                            )}
+                                            {bike.transmission === 'Manual' && bike.price > 400000 && (
+                                                <HStack>
+                                                    <Icon as={FaCheckCircle} color="green.500" />
+                                                    <Text fontSize="sm">{t('bike.highlight.offroadCapable')}</Text>
+                                                </HStack>
+                                            )}
+                                        </SimpleGrid>
+                                    </AccordionPanel>
+                                </AccordionItem>
 
-                            {/* Features */}
-                            <Heading as="h3" size="md" mt={6} mb={3}>
-                                {t('bike.featuresTitle')}
-                            </Heading>
-                            <SimpleGrid columns={2} spacing={4}>
-                                {/* Premium bikes (>200k) get Smart Key */}
-                                {bike.price > 200000 && (
-                                    <HStack>
-                                        <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">{t('bike.feature.smartKey')}</Text>
-                                    </HStack>
-                                )}
+                                {/* Features */}
+                                <AccordionItem border="none">
+                                    <AccordionButton px={0} _hover={{ bg: "transparent" }}>
+                                        <Heading as="h3" size="md" flex="1" textAlign="left">
+                                            {t('bike.featuresTitle')}
+                                        </Heading>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <AccordionPanel px={0} pb={4}>
+                                        <SimpleGrid columns={2} spacing={4}>
+                                            {/* Premium bikes (>200k) get Smart Key */}
+                                            {bike.price > 200000 && (
+                                                <HStack>
+                                                    <Icon as={FaCheckCircle} color="green.500" />
+                                                    <Text fontSize="sm">{t('bike.feature.smartKey')}</Text>
+                                                </HStack>
+                                            )}
 
-                                {/* Modern bikes get LED Lighting */}
-                                {(bike.price > 150000 || bike.fuel_type === 'electric') && (
-                                    <HStack>
-                                        <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">{t('bike.feature.fullLed')}</Text>
-                                    </HStack>
-                                )}
+                                            {/* Modern bikes get LED Lighting */}
+                                            {(bike.price > 150000 || bike.fuel_type === 'electric') && (
+                                                <HStack>
+                                                    <Icon as={FaCheckCircle} color="green.500" />
+                                                    <Text fontSize="sm">{t('bike.feature.fullLed')}</Text>
+                                                </HStack>
+                                            )}
 
-                                {/* Mid-range and premium bikes get USB Charger */}
-                                {bike.price > 120000 && (
-                                    <HStack>
-                                        <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">{t('bike.feature.usbCharger')}</Text>
-                                    </HStack>
-                                )}
+                                            {/* Mid-range and premium bikes get USB Charger */}
+                                            {bike.price > 120000 && (
+                                                <HStack>
+                                                    <Icon as={FaCheckCircle} color="green.500" />
+                                                    <Text fontSize="sm">{t('bike.feature.usbCharger')}</Text>
+                                                </HStack>
+                                            )}
 
-                                {/* Premium bikes get ABS */}
-                                {bike.price > 200000 && (
-                                    <HStack>
-                                        <Icon as={FaCheckCircle} color="green.500" />
-                                        <Text fontSize="sm">{t('bike.feature.abs')}</Text>
-                                    </HStack>
-                                )}
+                                            {/* Premium bikes get ABS */}
+                                            {bike.price > 200000 && (
+                                                <HStack>
+                                                    <Icon as={FaCheckCircle} color="green.500" />
+                                                    <Text fontSize="sm">{t('bike.feature.abs')}</Text>
+                                                </HStack>
+                                            )}
 
-                                {/* Adventure bikes get additional features */}
-                                {bike.transmission === 'Manual' && bike.price > 400000 && (
-                                    <>
-                                        <HStack>
-                                            <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">{t('bike.feature.highGround')}</Text>
-                                        </HStack>
-                                        <HStack>
-                                            <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">{t('bike.feature.knobbyTires')}</Text>
-                                        </HStack>
-                                    </>
-                                )}
+                                            {/* Adventure bikes get additional features */}
+                                            {bike.transmission === 'Manual' && bike.price > 400000 && (
+                                                <>
+                                                    <HStack>
+                                                        <Icon as={FaCheckCircle} color="green.500" />
+                                                        <Text fontSize="sm">{t('bike.feature.highGround')}</Text>
+                                                    </HStack>
+                                                    <HStack>
+                                                        <Icon as={FaCheckCircle} color="green.500" />
+                                                        <Text fontSize="sm">{t('bike.feature.knobbyTires')}</Text>
+                                                    </HStack>
+                                                </>
+                                            )}
 
-                                {/* Budget bikes get basic features */}
-                                {bike.price <= 120000 && (
-                                    <>
-                                        <HStack>
-                                            <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">{t('bike.feature.fuelEfficient')}</Text>
-                                        </HStack>
-                                        <HStack>
-                                            <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">{t('bike.feature.easyToRide')}</Text>
-                                        </HStack>
-                                    </>
-                                )}
+                                            {/* Budget bikes get basic features */}
+                                            {bike.price <= 120000 && (
+                                                <>
+                                                    <HStack>
+                                                        <Icon as={FaCheckCircle} color="green.500" />
+                                                        <Text fontSize="sm">{t('bike.feature.fuelEfficient')}</Text>
+                                                    </HStack>
+                                                    <HStack>
+                                                        <Icon as={FaCheckCircle} color="green.500" />
+                                                        <Text fontSize="sm">{t('bike.feature.easyToRide')}</Text>
+                                                    </HStack>
+                                                </>
+                                            )}
 
-                                {/* Electric bikes */}
-                                {bike.fuel_type === 'electric' && (
-                                    <>
-                                        <HStack>
-                                            <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">{t('bike.feature.zeroEmissions')}</Text>
-                                        </HStack>
-                                        <HStack>
-                                            <Icon as={FaCheckCircle} color="green.500" />
-                                            <Text fontSize="sm">{t('bike.feature.silentOperation')}</Text>
-                                        </HStack>
-                                    </>
-                                )}
-                            </SimpleGrid>
+                                            {/* Electric bikes */}
+                                            {bike.fuel_type === 'electric' && (
+                                                <>
+                                                    <HStack>
+                                                        <Icon as={FaCheckCircle} color="green.500" />
+                                                        <Text fontSize="sm">{t('bike.feature.zeroEmissions')}</Text>
+                                                    </HStack>
+                                                    <HStack>
+                                                        <Icon as={FaCheckCircle} color="green.500" />
+                                                        <Text fontSize="sm">{t('bike.feature.silentOperation')}</Text>
+                                                    </HStack>
+                                                </>
+                                            )}
+                                        </SimpleGrid>
+                                    </AccordionPanel>
+                                </AccordionItem>
+                            </Accordion>
                         </Box>
                     </VStack>
 
-                    {/* Right Side - Booking Form */}
-                    <Box position="sticky" top={4} h="fit-content">
+                    {/* Right Side - Booking Form (Hidden on mobile, shown in drawer) */}
+                    <Box position="sticky" top={4} h="fit-content" display={{ base: "none", lg: "block" }}>
                         <Box bg="white" p={6} borderRadius="xl" shadow="lg">
                             <Heading as="h2" size="lg" mb={2}>
                                 {t('bike.bookThis')}
@@ -869,6 +907,269 @@ const BikeDetailsPage: React.FC = () => {
                         </Box>
                     </Box>
                 </SimpleGrid>
+
+                {/* Sticky Bottom Bar - Mobile Only */}
+                <Box
+                    position="fixed"
+                    bottom={0}
+                    left={0}
+                    right={0}
+                    bg="white"
+                    borderTop="1px"
+                    borderColor="gray.200"
+                    p={4}
+                    display={{ base: "flex", lg: "none" }}
+                    justifyContent="space-between"
+                    alignItems="center"
+                    zIndex={10}
+                    shadow="lg"
+                >
+                    <VStack align="start" spacing={0}>
+                        <Text fontSize="md" fontWeight="semibold" color="gray.600">
+                            {bike.model}
+                        </Text>
+                        <HStack spacing={1}>
+                            <Heading as="h3" size="md" color="teal.600">
+                                {bike.price.toLocaleString('vi-VN')}
+                            </Heading>
+                            <Text fontSize="sm" color="gray.600">VNĐ/day</Text>
+                        </HStack>
+                        {startDate && endDate && getRentalPeriod().days > 0 && (
+                            <Text fontSize="xs" color="green.600">
+                                Total: {calculateTotal().toLocaleString('vi-VN')} VNĐ
+                            </Text>
+                        )}
+                    </VStack>
+                    <Button
+                        colorScheme="teal"
+                        size="lg"
+                        onClick={onDrawerOpen}
+                        isDisabled={bike.status !== 'available'}
+                    >
+                        {t('bike.bookNow')}
+                    </Button>
+                </Box>
+
+                {/* Booking Drawer - Mobile Only */}
+                <Drawer
+                    isOpen={isDrawerOpen}
+                    placement="bottom"
+                    onClose={onDrawerClose}
+                    size="full"
+                >
+                    <DrawerOverlay />
+                    <DrawerContent borderTopRadius="xl" maxH="90vh">
+                        <DrawerCloseButton />
+                        <DrawerHeader borderBottomWidth="1px">
+                            <VStack align="start" spacing={1}>
+                                <Heading as="h2" size="md">
+                                    {t('bike.bookThis')}
+                                </Heading>
+                                <HStack>
+                                    <Heading as="h3" size="lg" color="teal.600">
+                                        {bike.price.toLocaleString('vi-VN')} VNĐ
+                                    </Heading>
+                                    <Text color="gray.600" fontSize="sm">/day</Text>
+                                </HStack>
+                            </VStack>
+                        </DrawerHeader>
+
+                        <DrawerBody overflowY="auto">
+                            <VStack spacing={4} align="stretch" pb={6}>
+                                {/* Pick-up / Drop-off */}
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">{t('booking.pickupDropoff')}</FormLabel>
+                                    <VStack spacing={2}>
+                                        <Input
+                                            type="date"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                        <Text fontSize="sm" color="gray.600">to</Text>
+                                        <Input
+                                            type="date"
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            min={startDate || new Date().toISOString().split('T')[0]}
+                                        />
+                                    </VStack>
+                                </FormControl>
+
+                                {/* Time picker for same day rentals */}
+                                {startDate && endDate && startDate === endDate && (
+                                    <FormControl isRequired>
+                                        <FormLabel fontWeight="semibold">{t('booking.timeRangeLabel')}</FormLabel>
+                                        <VStack spacing={2}>
+                                            <Input
+                                                type="time"
+                                                value={startTime}
+                                                onChange={(e) => setStartTime(e.target.value)}
+                                            />
+                                            <Text fontSize="sm">to</Text>
+                                            <Input
+                                                type="time"
+                                                value={endTime}
+                                                onChange={(e) => setEndTime(e.target.value)}
+                                            />
+                                        </VStack>
+                                        <Alert status="info" mt={2}>
+                                            <AlertIcon />
+                                            <Text fontSize="sm">
+                                                {(() => {
+                                                    const period = getRentalPeriod();
+                                                    if (period.hours > 3) {
+                                                        return `${period.hours} hours rental will be charged as 1 full day (${bike.price.toLocaleString('vi-VN')} VNĐ)`;
+                                                    }
+                                                    const hourlyRate = Math.ceil(bike.price / 8);
+                                                    return `${period.hours} hours rental: ${hourlyRate.toLocaleString('vi-VN')} VNĐ/hour`;
+                                                })()}
+                                            </Text>
+                                        </Alert>
+                                    </FormControl>
+                                )}
+
+                                {/* Rental period display */}
+                                {startDate && endDate && (
+                                    <Box p={3} bg="gray.50" borderRadius="md">
+                                        <Text fontSize="sm" color="gray.600" fontWeight="semibold">
+                                            {t('booking.rentalPeriodLabel')}: {getRentalPeriod().displayText}
+                                        </Text>
+                                        {getRentalPeriod().days > 0 && getDiscountPercentage() > 0 && (
+                                            <Text fontSize="sm" color="green.600">
+                                                {getDiscountPercentage()}% discount applied for long-term rental
+                                            </Text>
+                                        )}
+                                    </Box>
+                                )}
+
+                                {/* Contact Info */}
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.nameLabel')}</FormLabel>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter your full name"
+                                        value={contactName}
+                                        onChange={(e) => setContactName(e.target.value)}
+                                    />
+                                </FormControl>
+
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.emailLabel')}</FormLabel>
+                                    <Input
+                                        type="email"
+                                        placeholder="your.email@example.com"
+                                        value={contactEmail}
+                                        onChange={(e) => setContactEmail(e.target.value)}
+                                    />
+                                </FormControl>
+
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.phoneLabel')}</FormLabel>
+                                    <Input
+                                        type="tel"
+                                        placeholder="Enter your phone number"
+                                        value={contactPhone}
+                                        onChange={(e) => setContactPhone(e.target.value)}
+                                    />
+                                </FormControl>
+
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="semibold">{t('booking.form.pickupLabel')}</FormLabel>
+                                    <Input
+                                        type="text"
+                                        placeholder={t('booking.form.pickupPlaceholder')}
+                                        value={pickupLocation}
+                                        onChange={(e) => setPickupLocation(e.target.value)}
+                                    />
+                                </FormControl>
+
+                                {/* Referrer Phone (Optional) */}
+                                <FormControl>
+                                    <FormLabel fontWeight="semibold">
+                                        Referrer's Phone (Optional)
+                                    </FormLabel>
+                                    <Input
+                                        type="tel"
+                                        placeholder={t('booking.contact.placeholder.phone')}
+                                        value={referrerPhone}
+                                        onChange={(e) => setReferrerPhone(e.target.value)}
+                                    />
+                                </FormControl>
+
+                                <Divider />
+
+                                {/* Pricing Summary */}
+                                {(getRentalDays() > 0 || getRentalPeriod().hours > 0) && (
+                                    <>
+                                        <HStack justify="space-between">
+                                            <Text>Rental Duration</Text>
+                                            <Text fontWeight="semibold">{getRentalPeriod().displayText}</Text>
+                                        </HStack>
+                                        <HStack justify="space-between">
+                                            <Text>Base Price</Text>
+                                            <Text
+                                                fontWeight="semibold"
+                                                color={getDiscountPercentage() > 0 ? "gray.500" : "inherit"}
+                                            >
+                                                {getBasePrice().toLocaleString('vi-VN')} VNĐ
+                                            </Text>
+                                        </HStack>
+
+                                        {getDiscountPercentage() > 0 && (
+                                            <HStack justify="space-between" bg="green.50" p={2} borderRadius="md">
+                                                <HStack>
+                                                    <Text color="green.600" fontWeight="bold">🎉 Discount</Text>
+                                                    <Text fontSize="xs" color="green.600">
+                                                        ({getDiscountPercentage()}% off for {getRentalDays()}+ days)
+                                                    </Text>
+                                                </HStack>
+                                                <Text color="green.600" fontWeight="bold">
+                                                    -{(getBasePrice() - calculateTotal()).toLocaleString('vi-VN')} VNĐ
+                                                </Text>
+                                            </HStack>
+                                        )}
+                                    </>
+                                )}
+
+                                <HStack justify="space-between">
+                                    <Text>{t('booking.taxesFees')}</Text>
+                                    <Text fontWeight="semibold">0 VNĐ</Text>
+                                </HStack>
+                                <Divider />
+                                <HStack justify="space-between">
+                                    <Heading as="h4" size="md">{t('booking.total')}</Heading>
+                                    <Heading as="h4" size="md" color="teal.600">
+                                        {calculateTotal().toLocaleString('vi-VN')} VNĐ
+                                    </Heading>
+                                </HStack>
+
+                                {getRentalDays() === 0 && getRentalPeriod().hours === 0 && (
+                                    <Text fontSize="xs" color="gray.500" textAlign="center">
+                                        {t('bike.selectDatesToSeePricing')}
+                                    </Text>
+                                )}
+                            </VStack>
+                        </DrawerBody>
+
+                        <DrawerFooter borderTopWidth="1px">
+                            <Button
+                                colorScheme="teal"
+                                size="lg"
+                                w="full"
+                                onClick={() => {
+                                    handleBookNow();
+                                    onDrawerClose();
+                                }}
+                                isLoading={isSubmitting}
+                                loadingText={t('booking.processing')}
+                                isDisabled={!startDate || !endDate || bike.status !== 'available'}
+                            >
+                                {t('bike.bookNow')}
+                            </Button>
+                        </DrawerFooter>
+                    </DrawerContent>
+                </Drawer>
             </Container>
         </Box>
     );

@@ -63,7 +63,7 @@ const Footer = () => {
             <HStack spacing={3} pt={2}>
               <IconButton
                 as="a"
-                href="https://www.facebook.com/rentnride"
+                href="https://www.facebook.com/share/1C9eBPouDu/"
                 target="_blank"
                 aria-label="Facebook"
                 icon={<FaFacebookF />}
@@ -74,7 +74,7 @@ const Footer = () => {
               />
               <IconButton
                 as="a"
-                href="https://www.instagram.com/rentnride"
+                href="https://www.instagram.com/rentnride.travel/"
                 target="_blank"
                 aria-label="Instagram"
                 icon={<FaInstagram />}
@@ -134,9 +134,9 @@ const Footer = () => {
               Support
             </Heading>
             {supportLinks.map((item, i) => (
-              <Link 
-                key={i} 
-                to={item.path} 
+              <Link
+                key={i}
+                to={item.path}
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 style={{ textDecoration: 'none' }}
               >
@@ -158,9 +158,9 @@ const Footer = () => {
               Explore
             </Heading>
             {exploreLinks.map((item, i) => (
-              <Link 
-                key={i} 
-                to={item.path} 
+              <Link
+                key={i}
+                to={item.path}
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 style={{ textDecoration: 'none' }}
               >

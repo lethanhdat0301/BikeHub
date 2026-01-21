@@ -53,6 +53,7 @@ interface Order {
     bikeName: string;
     bikeModel: string;
     bikeImage: string;
+    licensePlate?: string;
     customerName: string;
     phoneNumber: string;
     deliveryAddress: string;
@@ -221,6 +222,7 @@ const TrackOrderPage: React.FC = () => {
                     bikeName: booking.Bike?.model || 'N/A',
                     bikeModel: booking.Bike?.transmission || 'N/A',
                     bikeImage: booking.Bike?.image || bike1,
+                    licensePlate: booking.Bike?.license_plate,
                     customerName: booking.name || 'Guest',
                     phoneNumber: booking.contact_details || 'N/A',
                     deliveryAddress: booking.pickup_location || 'N/A',
@@ -262,6 +264,7 @@ const TrackOrderPage: React.FC = () => {
                     bikeName: rental.Bike?.model || 'N/A',
                     bikeModel: rental.Bike?.transmission || 'N/A',
                     bikeImage: rental.Bike?.image || bike1,
+                    licensePlate: rental.Bike?.license_plate,
                     customerName: rental.User?.name || rental.contact_name || 'Guest',
                     phoneNumber: rental.User?.phone || rental.contact_phone || 'N/A',
                     deliveryAddress: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
@@ -469,6 +472,11 @@ const TrackOrderPage: React.FC = () => {
                                                         <Heading size="md" color="gray.700">
                                                             {order.bikeName}
                                                         </Heading>
+                                                        {order.licensePlate && (
+                                                            <Badge colorScheme="purple" fontSize="sm">
+                                                                🏍️ {order.licensePlate}
+                                                            </Badge>
+                                                        )}
                                                         <Text fontSize="sm" color="gray.600">
                                                             {order.bikeModel}
                                                         </Text>

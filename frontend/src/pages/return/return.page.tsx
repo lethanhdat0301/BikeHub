@@ -46,6 +46,7 @@ interface Rental {
     bikeName: string;
     bikeModel: string;
     bikeImage: string;
+    licensePlate?: string;
     startDate: string;
     endDate: string;
     pickupLocation: string;
@@ -172,6 +173,7 @@ const ReturnPage: React.FC = () => {
                         bikeName: rental.Bike?.model || 'N/A',
                         bikeModel: rental.Bike?.transmission || 'N/A',
                         bikeImage: rental.Bike?.image || bike1,
+                        licensePlate: rental.Bike?.license_plate,
                         startDate: startDate.toLocaleDateString(),
                         endDate: endDate.toLocaleDateString(),
                         pickupLocation: rental.pickup_location || rental.Bike?.Park?.location || 'N/A',
@@ -385,6 +387,14 @@ const ReturnPage: React.FC = () => {
                                                     </Badge>
                                                 </Flex>
 
+                                                {rental.licensePlate && (
+                                                    <HStack spacing={2}>
+                                                        <Badge colorScheme="purple" fontSize="sm" px={2} py={1}>
+                                                            🏍️ {rental.licensePlate}
+                                                        </Badge>
+                                                    </HStack>
+                                                )}
+
                                                 <Text fontSize="sm" color="gray.600">
                                                     Booking ID: <strong>{rental.bookingId}</strong>
                                                 </Text>
@@ -397,6 +407,7 @@ const ReturnPage: React.FC = () => {
                                                         {rental.bikeModel}
                                                     </Text>
                                                 </HStack>
+
 
                                                 {rental.dealerName && (
                                                     <HStack spacing={2}>
@@ -462,7 +473,7 @@ const ReturnPage: React.FC = () => {
             {/* Return Confirmation Modal */}
             <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
                 <ModalOverlay />
-                <ModalContent 
+                <ModalContent
                     maxH="90vh"
                     sx={{
                         overflow: 'hidden',
@@ -475,7 +486,7 @@ const ReturnPage: React.FC = () => {
                     }}>
                     <ModalHeader>{t('return.confirmReturn')}</ModalHeader>
                     <ModalCloseButton />
-                    <ModalBody 
+                    <ModalBody
                         sx={{
                             overflow: 'auto',
                             '&::-webkit-scrollbar': {
