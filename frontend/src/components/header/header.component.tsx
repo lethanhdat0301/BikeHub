@@ -363,6 +363,22 @@ const Header: React.FC = () => {
               </Flex>
             )}
           </div> */}
+
+      {/* Mobile Phone Number - Show on mobile only, before hamburger menu */}
+      <IconButton
+        as="a"
+        href={`tel:${phoneNumbers[0].number}`}
+        aria-label="Call us"
+        icon={<FaPhone />}
+        display={{ base: "flex", md: "none" }}
+        size="sm"
+        colorScheme="teal"
+        variant="solid"
+        rounded="full"
+        _hover={{ transform: "scale(1.1)" }}
+        transition="all 0.2s"
+      />
+
       <IconButton
         size={"sm"}
         aria-label="Toggle navigation"
