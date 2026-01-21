@@ -125,7 +125,7 @@ export async function seedBikes(
       lock: false,
       location: `Parking Slot ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(Math.random() * 99) + 1}`,
       price: Number(bikeTemplate.basePrice), // Add variation of up to 50,000 VND
-      image: bikeTemplate.image,
+      image_url: bikeTemplate.image_url,
       description: bikeTemplate.description,
       fuel_type: bikeTemplate.fuel_type,
       transmission: bikeTemplate.transmission,

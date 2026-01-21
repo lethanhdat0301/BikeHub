@@ -240,13 +240,14 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                             {/* Dealer */}
                             <div className="col-span-2">
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Dealer (Optional) {dealers.length > 0 && `(${dealers.length} available)`}
+                                    Dealer {dealers.length > 0 && `(${dealers.length} available)`}
                                 </label>
                                 <select
                                     name="dealer_id"
                                     value={formData.dealer_id}
                                     onChange={handleInputChange}
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
                                 >
                                     <option value="">
                                         {dealers.length === 0 ? "No dealers available" : "Select a dealer (optional)"}
@@ -287,7 +288,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                     name="price"
                                     value={formData.price}
                                     onChange={handleInputChange}
-                                    placeholder="0.00"
+                                    placeholder="000.000"
                                     step="0.01"
                                     min="0"
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -359,6 +360,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                     onChange={handleInputChange}
                                     placeholder="e.g., 29A-12345, 51F-67890"
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
                                 />
                             </div>
 
@@ -413,7 +415,11 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                             });
                                             const payload = await res.json();
                                             if (!res.ok) throw new Error(payload?.message || 'Upload failed');
-                                            setFormData({ ...formData, image: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                image: payload.name || payload.url,
+                                                image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined)
+                                            }));
                                         } catch (err) {
                                             console.error('Upload failed', err);
                                             alert('Upload failed');

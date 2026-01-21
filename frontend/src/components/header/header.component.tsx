@@ -179,74 +179,6 @@ const Header: React.FC = () => {
         ))}
       </HStack>
 
-      {/* Mobile: Language & Contact (right of logo) */}
-      <Box display={{ base: 'flex', md: 'none' }} alignItems="center" gap={2} ml={2}>
-        {/* Language selector */}
-        {/* Social icons */}
-        <HStack spacing={1}>
-          <IconButton
-            as="a"
-            href={socialLinks.telegram}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Telegram"
-            icon={<FaTelegram />}
-            size="sm"
-            variant="ghost"
-            colorScheme="telegram"
-            _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
-            transition="all 0.2s"
-          />
-          <IconButton
-            as="a"
-            href={socialLinks.whatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="WhatsApp"
-            icon={<FaWhatsapp />}
-            size="sm"
-            variant="ghost"
-            colorScheme="whatsapp"
-            _hover={{ bg: "green.50", transform: "scale(1.1)" }}
-            transition="all 0.2s"
-          />
-          <IconButton
-            as="a"
-            href={socialLinks.messenger}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Messenger"
-            icon={<FaFacebookMessenger />}
-            size="sm"
-            variant="ghost"
-            colorScheme="messenger"
-            _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
-            transition="all 0.2s"
-          />
-        </HStack>
-        {/* Phone number (first) */}
-        <HStack spacing={1}>
-          <FaPhone size={12} color="#319795" />
-          <Text fontSize="xs" fontWeight="medium" color="teal.600">
-            <a href={`tel:${phoneNumbers[0].number}`}>{phoneNumbers[0].display}</a>
-          </Text>
-        </HStack>
-        <Select
-          value={language}
-          onChange={(e) => changeLanguageTo(e.target.value)}
-          size="sm"
-          width="70px"
-          borderColor="teal.300"
-          _hover={{ borderColor: "teal.500" }}
-          focusBorderColor="teal.500"
-        >
-          <option value="en">EN</option>
-          <option value="ru">RU</option>
-          <option value="vi">VI</option>
-          <option value="de">DE</option>
-        </Select>
-      </Box>
-
       {/* Social Media Icons */}
       {/* Desktop social icons */}
       <HStack spacing={2} display={{ base: "none", lg: "flex" }} flexShrink={0}>
@@ -435,7 +367,7 @@ const Header: React.FC = () => {
         size={"sm"}
         aria-label="Toggle navigation"
         icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-        onClick={onOpen}
+        onClick={isOpen ? onClose : onOpen}
         display={{ base: "block", md: "none" }}
       />
       <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>

@@ -74,15 +74,15 @@ const SearchPage: React.FC = () => {
                     // console.log(`✅ Đã tải ${data.length} xe available`);
                 }
 
-                // Chỉ lấy 12 xe đầu tiên
-                const limitedData = data.slice(0, 12).map((bike, index) => ({
+                // Hiển thị tất cả xe
+                const allBikes = data.map((bike, index) => ({
                     ...bike,
                     image: bike.image || defaultImages[index % defaultImages.length],
                 }));
 
-                // console.log(`📊 Hiển thị ${limitedData.length} xe`);
-                setBikes(limitedData);
-                setFilteredBikes(limitedData);
+                // console.log(`📊 Hiển thị ${allBikes.length} xe`);
+                setBikes(allBikes);
+                setFilteredBikes(allBikes);
             } catch (error) {
                 console.error("❌ Error fetching bikes:", error);
                 setBikes([]);
