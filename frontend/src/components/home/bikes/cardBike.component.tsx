@@ -94,7 +94,7 @@ const CardBike = ({
       <Box
         className="w-full relative"
         h={{ base: "120px", sm: "180px", md: "200px" }}
-        bgImage={bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : bikeImage}
+        bgImage={bike.image || bikeImage}
         bgPosition={"center"}
         bgRepeat={"no-repeat"}
         bgSize={"cover"}
