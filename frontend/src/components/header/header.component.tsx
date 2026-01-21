@@ -365,19 +365,23 @@ const Header: React.FC = () => {
           </div> */}
 
       {/* Mobile Phone Number - Show on mobile only, before hamburger menu */}
-      <IconButton
-        as="a"
-        href={`tel:${phoneNumbers[0].number}`}
-        aria-label="Call us"
-        icon={<FaPhone />}
-        display={{ base: "flex", md: "none" }}
-        size="sm"
-        colorScheme="teal"
-        variant="solid"
-        rounded="full"
-        _hover={{ transform: "scale(1.1)" }}
-        transition="all 0.2s"
-      />
+      <HStack spacing={2} display={{ base: "flex", md: "none" }} flexShrink={0}>
+        <Button
+          as="a"
+          href={`tel:${phoneNumbers[0].number}`}
+          leftIcon={<FaPhone size={14} />}
+          size="sm"
+          colorScheme="teal"
+          variant="solid"
+          rounded="full"
+          fontWeight="semibold"
+          fontSize="sm"
+          _hover={{ transform: "scale(1.05)" }}
+          transition="all 0.2s"
+        >
+          {phoneNumbers[0].display}
+        </Button>
+      </HStack>
 
       <IconButton
         size={"sm"}
