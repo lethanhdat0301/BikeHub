@@ -14,11 +14,11 @@ async function main() {
     console.warn('⚠️ Could not create sequence (might already exist or not supported):', error);
   }
 
-  // 1. Users (Admin + Dealers + Customers)
-  const { dealers, users } = await seedUsers(prisma);
+  // 1. Users (Admins only)
+  await seedUsers(prisma);
 
-  // 2. Parks
-  await seedParks(prisma, dealers);
+  // 2. Parks (without dealers - will be assigned by admin later)
+  await seedParks(prisma);
 
   console.log('🏁 Seeding finished.');
 }

@@ -42,34 +42,8 @@ await Promise.all(
   )
 );
 
-  // 2. Tạo dealers cụ thể (Dữ liệu mới)
-  const dealerData = [
-    { name: 'Phú Quốc Motorbike Rental', email: 'phuquoc@rentnride.vn', phone: '0902123456' },
-    { name: 'Nha Trang Adventure Bikes', email: 'nhatrang@rentnride.vn', phone: '0933456789' },
-    { name: 'Hà Giang Loop Motors', email: 'hagiang@rentnride.vn', phone: '0966789012' },
-    { name: 'Hồ Chí Minh City Riders', email: 'saigon@rentnride.vn', phone: '0977123456' },
-    { name: 'Đà Nẵng Bike Station', email: 'danang@rentnride.vn', phone: '0988234567' },
-  ];
+  console.log('✅ Created 3 Super Admins');
+  console.log('ℹ️  Dealers will be created by admin in production');
 
-  const dealers: User[] = [];
-  for (const d of dealerData) {
-    const dealer = await prisma.user.upsert({
-      where: { email: d.email },
-      update: {},
-      create: {
-        name: d.name,
-        email: d.email,
-        password,
-        role: 'dealer',
-        phone: d.phone,
-        image: faker.image.avatar(),
-        birthdate: faker.date.past({ years: 30 }),
-      },
-    });
-    dealers.push(dealer);
-  }
-  // 3. Khai báo user
-  const users: User[] = [];
-
-  return { dealers, users };
+  return { admins };
 }
