@@ -112,19 +112,19 @@ const BikeList: React.FC = () => {
                 }
 
                 // Thêm ảnh mặc định nếu cần
-                const bikesWithImages = data.map((bike, index) => {
+                const bikesWithImages = data.map((bike: any, index: number) => {
                     let processedImage = defaultImages[index % defaultImages.length]
 
-                    if (bike.image) {
-                        if (bike.image.startsWith('http') || bike.image.startsWith('data:')) {
-                            processedImage = bike.image
+                    if (bike.image_url) {
+                        if (bike.image_url.startsWith('http') || bike.image_url.startsWith('data:')) {
+                            processedImage = bike.image_url
                         }
                         else {
                             const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000/';
 
                             const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
 
-                            processedImage = `${baseUrl}uploads/image/${bike.image}`;
+                            processedImage = `${baseUrl}uploads/image/${bike.image_url}`;
                         }
                     }
 
