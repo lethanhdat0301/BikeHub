@@ -203,4 +203,13 @@ export class BikeService {
       where,
     });
   }
+
+  // Get dealer profile to check park assignment
+  async getDealerProfile(userId: number): Promise<{ park_id: number } | null> {
+    const dealer = await this.prisma.dealer.findUnique({
+      where: { user_id: userId },
+      select: { park_id: true }
+    });
+    return dealer;
+  }
 }
