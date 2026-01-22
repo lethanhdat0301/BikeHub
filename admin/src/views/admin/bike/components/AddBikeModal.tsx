@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdClose } from "react-icons/md";
+import useAuth from "utils/auth/AuthHook";
 
 interface AddBikeModalProps {
     isOpen: boolean;
@@ -8,9 +9,12 @@ interface AddBikeModalProps {
 }
 
 const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [parks, setParks] = useState<any[]>([]);
-    const [dealers, setDealers] = useState<any[]>([]);
+    const [allDealers, setAllDealers] = useState<any[]>([]); // All dealers from API
+    const [dealers, setDealers] = useState<any[]>([]); // Filtered dealers based on selected park
+    const [dealerProfile, setDealerProfile] = useState<any>(null);
 
     type BikeFormData = {
         model: string;
@@ -50,8 +54,6 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
 
     useEffect(() => {
         if (isOpen) {
-            fetchParks();
-            fetchDealers();
             // Reset form when opening
             setFormData({
                 model: "",
@@ -69,17 +71,55 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                 transmission: "manual",
                 license_plate: "",
             });
+
+            // Fetch data in proper order
+            fetchDealerProfileAndParks();
+            fetchDealers();
         }
     }, [isOpen]);
 
-    const fetchParks = async () => {
+    // Fetch dealer profile first, then parks (so we can filter parks for dealers)
+    const fetchDealerProfileAndParks = async () => {
+        let profile: any = null;
+
+        // If dealer, get their profile first
+        if (user && user.role === "dealer") {
+            try {
+                const response = await fetch(
+                    `${process.env.REACT_APP_API_URL}dealers`,
+                    { credentials: "include" }
+                );
+                const data = await response.json();
+                // Find the dealer profile that matches current user
+                profile = Array.isArray(data)
+                    ? data.find((d: any) => d.user_id === user.id)
+                    : null;
+                setDealerProfile(profile);
+
+                // Auto-set park_id for dealer
+                if (profile && profile.park_id) {
+                    setFormData(prev => ({ ...prev, park_id: profile.park_id.toString() }));
+                }
+            } catch (error) {
+                console.error("Error fetching dealer profile:", error);
+            }
+        }
+
+        // Now fetch parks with proper filtering
         try {
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}parks`,
                 { credentials: "include" }
             );
             const data = await response.json();
-            setParks(Array.isArray(data) ? data : []);
+            let parksList = Array.isArray(data) ? data : [];
+
+            // If user is dealer and we have their profile, filter to only show their assigned park
+            if (user && user.role === "dealer" && profile) {
+                parksList = parksList.filter((park: any) => park.id === profile.park_id);
+            }
+
+            setParks(parksList);
         } catch (error) {
             console.error("Error fetching parks:", error);
         }
@@ -87,17 +127,24 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
 
     const fetchDealers = async () => {
         try {
-            // console.log('Fetching dealers from:', `${process.env.REACT_APP_API_URL}users/dealers`);
             const response = await fetch(
-                `${process.env.REACT_APP_API_URL}users/dealers`,
+                `${process.env.REACT_APP_API_URL}dealers`,
                 { credentials: "include" }
             );
-            // console.log('Dealers response status:', response.status);
             const data = await response.json();
-            // console.log('Dealers data received:', data);
-            setDealers(Array.isArray(data) ? data : []);
+            const dealersList = Array.isArray(data) ? data : [];
+            setAllDealers(dealersList);
+            
+            // Filter dealers by park if park is already selected
+            if (formData.park_id) {
+                const filtered = dealersList.filter((d: any) => d.park_id === parseInt(formData.park_id));
+                setDealers(filtered);
+            } else {
+                setDealers(dealersList);
+            }
         } catch (error) {
             console.error("Error fetching dealers:", error);
+            setAllDealers([]);
             setDealers([]);
         }
     };
@@ -105,6 +152,18 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        
+        // Filter dealers when park changes (for admin only)
+        if (name === "park_id" && user && user.role === "admin") {
+            if (value) {
+                const filtered = allDealers.filter((d: any) => d.park_id === parseInt(value));
+                setDealers(filtered);
+            } else {
+                setDealers(allDealers);
+            }
+            // Reset dealer selection when park changes
+            setFormData((prev) => ({ ...prev, dealer_id: "" }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -119,6 +178,16 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
         setLoading(true);
 
         try {
+            // Prepare payload - auto-fill dealer info if user is dealer
+            let dealerName = formData.dealer_name || "";
+            let dealerContact = formData.dealer_contact || "";
+
+            // If dealer is submitting, use their profile info
+            if (user && user.role === "dealer" && dealerProfile) {
+                dealerName = dealerProfile.name || "";
+                dealerContact = dealerProfile.phone || dealerProfile.email || "";
+            }
+
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}bikes/bike`,
                 {
@@ -136,8 +205,8 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                         dealer_id: formData.dealer_id ? parseInt(formData.dealer_id) : null,
                         image: formData.image || "",
                         description: formData.description || "",
-                        dealer_name: formData.dealer_name || "",
-                        dealer_contact: formData.dealer_contact || "",
+                        dealer_name: dealerName,
+                        dealer_contact: dealerContact,
                         seats: parseInt(formData.seats),
                         fuel_type: formData.fuel_type,
                         transmission: formData.transmission,
@@ -204,13 +273,19 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                             <div className="col-span-2">
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
                                     Park *
+                                    {user && user.role === "dealer" && (
+                                        <span className="ml-2 text-xs text-blue-600 font-normal">
+                                            (Auto-assigned to your park)
+                                        </span>
+                                    )}
                                 </label>
                                 <select
                                     name="park_id"
                                     value={formData.park_id}
                                     onChange={handleInputChange}
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                                     required
+                                    disabled={user && user.role === "dealer"}
                                 >
                                     <option value="">Select a park</option>
                                     {parks.map((park) => (
@@ -219,6 +294,11 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                         </option>
                                     ))}
                                 </select>
+                                {user && user.role === "dealer" && parks.length === 0 && (
+                                    <p className="mt-1 text-xs text-red-600">
+                                        ⚠️ No park assigned to your account. Please contact administrator.
+                                    </p>
+                                )}
                             </div>
 
                             {/* Location */}
@@ -237,28 +317,29 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                 />
                             </div>
 
-                            {/* Dealer */}
-                            <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Dealer {dealers.length > 0 && `(${dealers.length} available)`}
-                                </label>
-                                <select
-                                    name="dealer_id"
-                                    value={formData.dealer_id}
-                                    onChange={handleInputChange}
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required
-                                >
-                                    <option value="">
-                                        {dealers.length === 0 ? "No dealers available" : "Select a dealer (optional)"}
-                                    </option>
-                                    {dealers.map((dealer) => (
-                                        <option key={dealer.id} value={dealer.id}>
-                                            {dealer.name} - {dealer.email}
+                            {/* Dealer - Only show for admin */}
+                            {user && user.role === "admin" && (
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                        Dealer {dealers.length > 0 && `(${dealers.length} available)`}
+                                    </label>
+                                    <select
+                                        name="dealer_id"
+                                        value={formData.dealer_id}
+                                        onChange={handleInputChange}
+                                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="">
+                                            {dealers.length === 0 ? "No dealers available" : "Select a dealer (optional)"}
                                         </option>
-                                    ))}
-                                </select>
-                            </div>
+                                        {dealers.map((dealer) => (
+                                            <option key={dealer.id} value={dealer.id}>
+                                                {dealer.name} - {dealer.email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
                             {/* Status */}
                             <div>
@@ -364,35 +445,39 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                 />
                             </div>
 
-                            {/* Dealer Name */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Dealer Name (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    name="dealer_name"
-                                    value={formData.dealer_name}
-                                    onChange={handleInputChange}
-                                    placeholder="Shop or Dealer Name"
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
+                            {/* Dealer Name - Only show for admin */}
+                            {user && user.role === "admin" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                        Dealer Name (Optional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="dealer_name"
+                                        value={formData.dealer_name}
+                                        onChange={handleInputChange}
+                                        placeholder="Shop or Dealer Name"
+                                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            )}
 
-                            {/* Dealer Contact */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                                    Dealer Contact (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    name="dealer_contact"
-                                    value={formData.dealer_contact}
-                                    onChange={handleInputChange}
-                                    placeholder="Phone or Email"
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
+                            {/* Dealer Contact - Only show for admin */}
+                            {user && user.role === "admin" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                        Dealer Contact (Optional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="dealer_contact"
+                                        value={formData.dealer_contact}
+                                        onChange={handleInputChange}
+                                        placeholder="Phone or Email"
+                                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            )}
 
                             <div className="col-span-2">
                                 <label className="block text-sm font-medium text-gray-600 mb-1.5">

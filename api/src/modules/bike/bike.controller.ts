@@ -135,6 +135,21 @@ export class BikeController {
       throw new UnprocessableEntityException({ message: "Argument `park_id` is missing." });
     }
 
+    // VALIDATION: Nếu dealer tạo xe, kiểm tra park_id có khớp với park được gán cho dealer
+    if (user && user.role === ROLES_ENUM.DEALER) {
+      const dealerProfile = await this.bikeService.getDealerProfile(user.id);
+      if (!dealerProfile) {
+        throw new UnprocessableEntityException({
+          message: "Dealer profile not found. Please contact administrator."
+        });
+      }
+      if (dealerProfile.park_id !== park_id) {
+        throw new UnprocessableEntityException({
+          message: `You can only add bikes to your assigned park (Park ID: ${dealerProfile.park_id}). Selected park ID ${park_id} is not allowed.`
+        });
+      }
+    }
+
     const data: any = {
       model,
       status,
