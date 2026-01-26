@@ -391,7 +391,7 @@ const TrackOrderPage: React.FC = () => {
                                                         </Heading>
                                                         {order.licensePlate && (
                                                             <Badge colorScheme="purple" fontSize="sm">
-                                                                🏍️ {order.licensePlate}
+                                                                🏍️ xx-xx{order.licensePlate.slice(-3)}
                                                             </Badge>
                                                         )}
                                                         <Text fontSize="sm" color="gray.600">

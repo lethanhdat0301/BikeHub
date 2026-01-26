@@ -390,7 +390,7 @@ const ReturnPage: React.FC = () => {
                                                 {rental.licensePlate && (
                                                     <HStack spacing={2}>
                                                         <Badge colorScheme="purple" fontSize="sm" px={2} py={1}>
-                                                            🏍️ {rental.licensePlate}
+                                                            🏍️ xx-xx{rental.licensePlate.slice(-3)}
                                                         </Badge>
                                                     </HStack>
                                                 )}

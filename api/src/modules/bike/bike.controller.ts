@@ -104,6 +104,7 @@ export class BikeController {
       park_id: number;
       dealer_id?: number; // optional when admin creates for another dealer
       image?: string;
+      description?: string;
       // Thông tin đánh giá
       rating?: number;
       review_count?: number;
@@ -118,7 +119,7 @@ export class BikeController {
     },
     @CurrentUser() user: any,
   ): Promise<BikeModel> {
-    const { model, status, lock, location, price, park_id, dealer_id, image,
+    const { model, status, lock, location, price, park_id, dealer_id, image, description,
       rating, review_count, dealer_name, dealer_contact,
       seats, fuel_type, transmission, license_plate } = bikeData;
 
@@ -157,6 +158,7 @@ export class BikeController {
       location,
       price,
       image,
+      description,
       rating,
       review_count,
       dealer_name,

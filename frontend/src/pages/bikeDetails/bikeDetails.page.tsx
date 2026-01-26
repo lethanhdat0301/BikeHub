@@ -540,7 +540,7 @@ const BikeDetailsPage: React.FC = () => {
                             {bike.license_plate && (
                                 <Box mb={4}>
                                     <Badge colorScheme="purple" fontSize="md" px={3} py={1} borderRadius="md">
-                                        🏍️ {bike.license_plate}
+                                        🏍️ xx-xx{bike.license_plate.slice(-3)}
                                     </Badge>
                                 </Box>
                             )}
