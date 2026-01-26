@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
 import { AiOutlinePlus } from "react-icons/ai";
-import { MdFilterList, MdEdit, MdDelete } from "react-icons/md";
+import { MdFilterList, MdEdit, MdDelete, MdVisibility } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import CreateDealerModal from "./CreateDealerModal";
 import EditDealerModal from "./EditDealerModal";
 
@@ -17,12 +18,20 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedDealer, setSelectedDealer] = useState<any>(null);
+    const navigate = useNavigate();
 
     const data = React.useMemo(() => {
         const validData = Array.isArray(tableContent) ? tableContent : [];
         if (filterTab === "All") return validData;
         return validData.filter((item) => item.status === filterTab);
     }, [tableContent, filterTab]);
+
+    const handleViewRentals = (dealer: any) => {
+        // Navigate to rentals page with dealer filter
+        // Note: dealer.user_id is what Bike.dealer_id references
+        const dealerUserId = dealer.user_id || dealer.User?.id;
+        navigate(`/admin/rentals?dealerUserId=${dealerUserId}&dealerName=${encodeURIComponent(dealer.name)}`);
+    };
 
     const handleEdit = (dealer: any) => {
         setSelectedDealer(dealer);
@@ -119,7 +128,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
             },
             {
                 Header: "Vehicles",
-                accessor: "vehicle_count",
+                accessor: "vehicles",
                 Cell: ({ value }: any) => (
                     <div className="flex items-center gap-2">
                         <svg
@@ -136,7 +145,31 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                             />
                         </svg>
                         <p className="text-sm font-bold text-navy-700 dark:text-white">
-                            {value} vehicles
+                            {value || 0} vehicles
+                        </p>
+                    </div>
+                ),
+            },
+            {
+                Header: "Rentals",
+                accessor: "total_rentals",
+                Cell: ({ value }: any) => (
+                    <div className="flex items-center gap-2">
+                        <svg
+                            className="h-5 w-5 text-blue-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                            />
+                        </svg>
+                        <p className="text-sm font-bold text-blue-600">
+                            {value || 0} rentals
                         </p>
                     </div>
                 ),
@@ -146,7 +179,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "total_revenue",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"}
+                        {Number(value || 0).toLocaleString('vi-VN')} VNĐ
                     </p>
                 ),
             },
@@ -155,7 +188,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "platform_fee",
                 Cell: ({ value }: any) => (
                     <p className="text-sm text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"} per month
+                        {Number(value || 0).toLocaleString('vi-VN')} VNĐ per month
                     </p>
                 ),
             },
@@ -164,7 +197,7 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "current_debt",
                 Cell: ({ value }: any) => (
                     <p className={`text-sm font-bold ${value > 0 ? "text-red-500" : "text-green-500"}`}>
-                        ${value?.toFixed(2) || "0.00"}
+                        {Number(value || 0).toLocaleString('vi-VN')} VNĐ
                     </p>
                 ),
             },
@@ -190,6 +223,14 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 id: "actions",
                 Cell: ({ row }: any) => (
                     <div className="flex gap-2">
+                        <button
+                            onClick={() => handleViewRentals(row.original)}
+                            className="flex items-center gap-1 rounded bg-purple-500 px-3 py-1 text-sm text-white hover:bg-purple-600"
+                            title="View Rentals"
+                        >
+                            <MdVisibility className="h-4 w-4" />
+                            Rentals
+                        </button>
                         <button
                             onClick={() => handleEdit(row.original)}
                             className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"

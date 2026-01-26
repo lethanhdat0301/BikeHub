@@ -19,6 +19,7 @@ import {
 import React, { useState } from "react";
 import axios from "../../../apis/axios";
 import { useAuth } from "../../../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 interface DeleteUserFormProps {
   className?: string;
@@ -27,6 +28,7 @@ interface DeleteUserFormProps {
 const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
   className = "",
 }) => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -42,17 +44,17 @@ const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
     try {
       const response = await axios.delete(`/users/delete/${user?.id}`, { data: { password }, withCredentials: true, });
       // Handle success response
-      console.log(response);
+      // console.log(response);
       toast({
-        title: "Account deleted",
-        description: "Your account has been deleted.",
+        title: t('deleteAccount.successTitle'),
+        description: t('deleteAccount.successMessage'),
         status: "success",
         duration: 5000,
         isClosable: true,
       });
       logout();
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       let errorMessage = error?.response?.data?.message;
       if (typeof errorMessage === "string") {
         errorMessage = error?.response?.data?.message;
@@ -62,8 +64,8 @@ const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
         setErrMsg(errorMessage);
       }
       toast({
-        title: "Error",
-        description: errorMessage || "Something went wrong.",
+        title: t('deleteAccount.errorTitle'),
+        description: errorMessage || t('deleteAccount.errorMessage'),
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -74,17 +76,15 @@ const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
   return (
     <section className={`p-5 space-y-6 ${className}`}>
       <header>
-        <h2 className="text-lg font-medium text-gray-900">Delete Account</h2>
+        <h2 className="text-lg font-medium text-gray-900">{t('deleteAccount.title')}</h2>
 
         <p className="mt-1 text-sm text-gray-600">
-          Once your account is deleted, all of its resources and data will be
-          permanently deleted. Before deleting your account, please download any
-          data or information that you wish to retain.
+          {t('deleteAccount.description')}
         </p>
       </header>
 
       <Button colorScheme="red" onClick={onOpen}>
-        Delete Account
+        {t('deleteAccount.buttonLabel')}
       </Button>
 
       <AlertDialog
@@ -96,17 +96,15 @@ const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
           <AlertDialogContent>
             <form>
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Are you sure? You can't undo this action afterwards.
+                {t('deleteAccount.confirmTitle')}
               </AlertDialogHeader>
 
               <AlertDialogBody>
-                Once your account is deleted, all of its resources and data will
-                be permanently deleted. Please enter your password to confirm
-                you would like to permanently delete your account.
+                {t('deleteAccount.confirmMessage')}
               </AlertDialogBody>
               <AlertDialogBody>
                 <FormControl id="password" isInvalid={errPassword}>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t('deleteAccount.passwordLabel')}</FormLabel>
                   <InputGroup>
                     <Input
                       isInvalid={errMsg != ""}
@@ -128,17 +126,17 @@ const DeleteUserForm: React.FC<DeleteUserFormProps> = ({
                     </InputRightElement>
                   </InputGroup>
                   <FormErrorMessage>
-                    password should not be empty
+                    {t('deleteAccount.passwordError')}
                   </FormErrorMessage>
                 </FormControl>
               </AlertDialogBody>
 
               <AlertDialogFooter>
                 <Button ref={cancelRef} onClick={onClose}>
-                  Cancel
+                  {t('deleteAccount.cancelButton')}
                 </Button>
                 <Button colorScheme="red" onClick={handleClick} ml={3}>
-                  Delete
+                  {t('deleteAccount.deleteButton')}
                 </Button>
               </AlertDialogFooter>
             </form>

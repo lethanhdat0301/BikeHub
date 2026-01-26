@@ -1,24 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
-    Button,
-    FormControl,
-    FormLabel,
-    Input,
-    Select,
-    NumberInput,
-    NumberInputField,
-    Textarea,
     useToast,
-    VStack,
-    HStack,
 } from "@chakra-ui/react";
+import { MdClose } from "react-icons/md";
 
 interface UpdateBikeModalProps {
     isOpen: boolean;
@@ -46,6 +30,7 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
         seats: 2,
         fuel_type: "gasoline",
         transmission: "manual",
+        license_plate: "",
     });
 
     useEffect(() => {
@@ -120,90 +105,257 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered scrollBehavior="inside">
-            <ModalOverlay bg="blackAlpha.600" />
-            <ModalContent mx={4} my={4} maxH="85vh" bg="white" borderRadius="lg" boxShadow="xl">
-                <ModalHeader fontSize="lg" fontWeight="600" borderBottom="1px" borderColor="gray.200" pb={3}>
-                    Edit Bike
-                </ModalHeader>
-                <ModalCloseButton />
+        <div className="fixed inset-0 z-50 bg-black/60 p-4" style={{ display: isOpen ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
+                    <h2 className="text-xl font-bold text-gray-800">
+                        Edit Motorbike
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <MdClose className="h-6 w-6" />
+                    </button>
+                </div>
+
+                {/* Form Fields - Scrollable */}
                 <form onSubmit={handleSubmit}>
-                    <ModalBody pt={6} pb={6}>
-                        <VStack spacing={5} align="stretch">
-                            <FormControl isRequired>
-                                <FormLabel fontSize="sm" color="gray.600" mb={2}>Model*</FormLabel>
-                                <Input value={formData.model} onChange={(e) => setFormData({ ...formData, model: e.target.value })} fontSize="sm" />
-                            </FormControl>
+                    <div className="px-6 py-4 max-h-[70vh] overflow-y-auto bg-white">
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Model */}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Model *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.model}
+                                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                                    placeholder="e.g., Honda Wave 110i"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                />
+                            </div>
 
-                            <HStack width="100%" spacing={4}>
-                                <FormControl isRequired flex={1}>
-                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>Status*</FormLabel>
-                                    <Select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} fontSize="sm">
-                                        <option value="available">Available</option>
-                                        <option value="rented">Rented</option>
-                                        <option value="maintenance">Maintenance</option>
-                                    </Select>
-                                </FormControl>
+                            {/* Status & Price */}
+                            <div className="col-span-1">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Status *
+                                </label>
+                                <select
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="available">Available</option>
+                                    <option value="rented">Rented</option>
+                                    <option value="maintenance">Maintenance</option>
+                                </select>
+                            </div>
 
-                                <FormControl isRequired flex={1}>
-                                    <FormLabel fontSize="sm" color="gray.600" mb={2}>Price/Day ($)*</FormLabel>
-                                    <NumberInput value={formData.price} onChange={(_, val) => setFormData({ ...formData, price: val })} min={0}>
-                                        <NumberInputField fontSize="sm" />
-                                    </NumberInput>
-                                </FormControl>
-                            </HStack>
+                            <div className="col-span-1">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Price/Day (VNĐ) *
+                                </label>
+                                <input
+                                    type="number"
+                                    value={formData.price}
+                                    onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                                    min={0}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                />
+                            </div>
 
-                            <FormControl isRequired>
-                                <FormLabel fontSize="sm" color="gray.600" mb={2}>Park*</FormLabel>
-                                <Select value={formData.park_id} onChange={(e) => setFormData({ ...formData, park_id: e.target.value })} placeholder="Select a park" fontSize="sm">
-                                    {parks.map(p => <option key={p.id} value={p.id}>{p.name} - {p.location}</option>)}
-                                </Select>
-                            </FormControl>
+                            {/* Park */}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Park *
+                                </label>
+                                <select
+                                    value={formData.park_id}
+                                    onChange={(e) => setFormData({ ...formData, park_id: e.target.value })}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                >
+                                    <option value="">Select a park</option>
+                                    {parks.map(p => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.name} - {p.location}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                            <FormControl isRequired>
-                                <FormLabel fontSize="sm" color="gray.600" mb={2}>Location*</FormLabel>
-                                <Input value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} fontSize="sm" />
-                            </FormControl>
+                            {/* Location */}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Location (Parking Slot) *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.location}
+                                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                    placeholder="e.g., Parking Slot A1"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                />
+                            </div>
 
-                            <FormControl>
-                                <FormLabel fontSize="sm" color="gray.600" mb={2}>Image</FormLabel>
-                                <input type="file" accept="image/*" onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    const file = e.target.files && e.target.files[0];
-                                    if (!file) return;
-                                    try {
-                                        const fd = new FormData();
-                                        fd.append('file', file);
-                                        const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, { method: 'POST', body: fd, credentials: 'include' });
-                                        const payload = await res.json();
-                                        if (!res.ok) throw new Error(payload?.message || 'Upload failed');
-                                        setFormData({ ...formData, image: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
-                                    } catch (err) {
-                                        console.error('Upload failed', err);
-                                        toast({ title: 'Upload failed', status: 'error' });
-                                    }
-                                }} />
+                            {/* License Plate */}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    License Plate (Biển số xe)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.license_plate || ""}
+                                    onChange={(e) => setFormData({ ...formData, license_plate: e.target.value })}
+                                    placeholder="e.g., 29A-12345"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+
+                            {/* Seats & Fuel Type */}
+                            <div className="col-span-1">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Seats
+                                </label>
+                                <input
+                                    type="number"
+                                    value={formData.seats}
+                                    onChange={(e) => setFormData({ ...formData, seats: Number(e.target.value) })}
+                                    min={1}
+                                    max={3}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+
+                            <div className="col-span-1">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Fuel Type
+                                </label>
+                                <select
+                                    value={formData.fuel_type}
+                                    onChange={(e) => setFormData({ ...formData, fuel_type: e.target.value })}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="gasoline">Gasoline</option>
+                                    <option value="electric">Electric</option>
+                                </select>
+                            </div>
+
+                            {/* Transmission */}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Transmission
+                                </label>
+                                <select
+                                    value={formData.transmission}
+                                    onChange={(e) => setFormData({ ...formData, transmission: e.target.value })}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="manual">Manual</option>
+                                    <option value="automatic">Automatic</option>
+                                </select>
+                            </div>
+
+                            {/* Dealer Name & Contact */}
+                            <div className="col-span-1">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Dealer Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.dealer_name || ""}
+                                    onChange={(e) => setFormData({ ...formData, dealer_name: e.target.value })}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+
+                            <div className="col-span-1">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Dealer Contact
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.dealer_contact || ""}
+                                    onChange={(e) => setFormData({ ...formData, dealer_contact: e.target.value })}
+                                    placeholder="Phone number"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+
+                            {/* Image Upload */}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Image
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                        const file = e.target.files && e.target.files[0];
+                                        if (!file) return;
+                                        try {
+                                            const fd = new FormData();
+                                            fd.append('file', file);
+                                            const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, { method: 'POST', body: fd, credentials: 'include' });
+                                            const payload = await res.json();
+                                            if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                            setFormData({ ...formData, image: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
+                                        } catch (err) {
+                                            console.error('Upload failed', err);
+                                            toast({ title: 'Upload failed', status: 'error' });
+                                        }
+                                    }}
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                                 {formData.image_preview || (formData.image && formData.image.startsWith('http') ? formData.image : null) ? (
-                                    <div className="mt-2 h-24 w-32 overflow-hidden rounded bg-gray-100">
+                                    <div className="mt-2 h-32 w-48 overflow-hidden rounded-lg bg-gray-100 border border-gray-200">
                                         <img src={formData.image_preview || formData.image} className="h-full w-full object-cover" alt="preview" />
                                     </div>
                                 ) : null}
-                            </FormControl>
+                            </div>
 
-                            <FormControl>
-                                <FormLabel fontSize="sm" color="gray.600" mb={2}>Description</FormLabel>
-                                <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} fontSize="sm" />
-                            </FormControl>
+                            {/* Description */}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                                    Description
+                                </label>
+                                <textarea
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    rows={3}
+                                    placeholder="Enter motorbike description..."
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                />
+                            </div>
+                        </div>
+                    </div>
 
-                        </VStack>
-                    </ModalBody>
-
-                    <ModalFooter borderTop="1px" borderColor="gray.200" pt={4}>
-                        <Button variant="ghost" mr={3} onClick={onClose} fontSize="sm">Cancel</Button>
-                        <Button colorScheme="blue" type="submit" isLoading={loading} fontSize="sm">Save</Button>
-                    </ModalFooter>
+                    {/* Footer */}
+                    <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Saving...' : 'Save Changes'}
+                        </button>
+                    </div>
                 </form>
-            </ModalContent>
-        </Modal>
+            </div>
+        </div>
     );
 };
 

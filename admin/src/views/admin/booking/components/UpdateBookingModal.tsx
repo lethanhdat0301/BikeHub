@@ -14,6 +14,7 @@ import {
     Select,
     useToast,
     VStack,
+    Text
 } from "@chakra-ui/react";
 
 interface UpdateBookingModalProps {
@@ -31,11 +32,14 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
 }) => {
     const toast = useToast();
     const [loading, setLoading] = useState(false);
-    const [bikes, setBikes] = useState<any[]>([]);
+    const [dealers, setDealers] = useState<any[]>([]);
+    const [allBikes, setAllBikes] = useState<any[]>([]);
+    const [filteredBikes, setFilteredBikes] = useState<any[]>([]);
 
     // State cho form Create Rental
     const [formData, setFormData] = useState({
         user_id: "",
+        dealer_id: "",
         bike_id: "",
         start_time: "",
         end_time: "",
@@ -55,11 +59,13 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
 
     useEffect(() => {
         if (isOpen && booking) {
+            fetchDealers();
             fetchBikes();
 
             // Auto-fill dữ liệu từ booking
             setFormData({
                 user_id: booking.user_id || "",
+                dealer_id: "",
                 bike_id: "", // Cần chọn thủ công
                 start_time: booking.start_date ? formatDateForInput(booking.start_date) : "",
                 end_time: booking.end_date ? formatDateForInput(booking.end_date) : "",
@@ -72,101 +78,111 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
         }
     }, [isOpen, booking]);
 
+    useEffect(() => {
+        if (formData.dealer_id) {
+            // Chỉ hiện xe thuộc Dealer đã chọn và đang available
+            const bikesForDealer = allBikes.filter(
+                b => b.dealer_id === Number(formData.dealer_id) && b.status === 'available'
+            );
+            setFilteredBikes(bikesForDealer);
+        } else {
+            setFilteredBikes([]);
+        }
+    }, [formData.dealer_id, allBikes]);
+
+    const fetchDealers = async () => {
+        try {
+            // Giả sử API trả về list dealers
+            const res = await fetch(`${process.env.REACT_APP_API_URL}dealers`, { credentials: "include" });
+            const data = await res.json();
+            setDealers(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error fetching dealers:", error);
+        }
+    };
+
     const fetchBikes = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}bikes`, {
-                credentials: "include",
-            });
-            const data = await response.json();
-            setBikes(Array.isArray(data) ? data : []);
+            const res = await fetch(`${process.env.REACT_APP_API_URL}bikes`, { credentials: "include" });
+            const data = await res.json();
+            setAllBikes(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error fetching bikes:", error);
         }
     };
 
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+
+        // Nếu thay đổi dealer -> reset bike_id
+        if (name === 'dealer_id') {
+            setFormData(prev => ({ ...prev, dealer_id: value, bike_id: "" }));
+        }
     };
 
     const handleCreateRental = async () => {
-        // Validate
-        if (!formData.bike_id || !formData.start_time || !formData.end_time || !formData.price) {
-            toast({
-                title: "Missing Information",
-                description: "Please fill in all required fields (Bike, Time, Price)",
-                status: "warning",
-                duration: 3000,
-                isClosable: true,
-            });
+        // Validation chặt chẽ
+        if (!formData.dealer_id || !formData.bike_id || !formData.start_time || !formData.end_time) {
+            toast({ title: "Thiếu thông tin", description: "Vui lòng chọn Dealer, Xe và Thời gian", status: "warning" });
             return;
         }
 
         setLoading(true);
         try {
-            // 1. Tạo Rental
-            const rentalResponse = await fetch(
-                `${process.env.REACT_APP_API_URL}rentals/rental`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({
-                        user_id: Number(formData.user_id),
-                        bike_id: Number(formData.bike_id),
-                        start_time: new Date(formData.start_time).toISOString(),
-                        end_time: new Date(formData.end_time).toISOString(),
-                        status: formData.status,
-                        price: Number(formData.price),
-                        qrcode: formData.qrcode,
-                        payment_id: formData.payment_id,
-                        order_id: formData.order_id,
-                        contact_name: booking.name,
-                        contact_phone: booking.contact_details,
-                        pickup_location: booking.pickup_location,
-                    }),
-                }
-            );
+            // === BƯỚC 1: TẠO RENTAL (Có Dealer ID đàng hoàng) ===
+            const rentalPayload = {
+                user_id: Number(formData.user_id),
+                bike_id: Number(formData.bike_id),
+                dealer_id: Number(formData.dealer_id), // 🔥 QUAN TRỌNG: Gửi dealer_id explicit
+                start_time: new Date(formData.start_time).toISOString(),
+                end_time: new Date(formData.end_time).toISOString(),
+                status: formData.status,
+                price: Number(formData.price),
+                qrcode: formData.qrcode,
+                order_id: formData.order_id,
+                // Fallback contact info
+                contact_name: booking.name,
+                contact_phone: booking.contact_details,
+                pickup_location: booking.pickup_location,
+                booking_request_id: booking.id, // Link ngược lại booking luôn cho chắc
+                booking_code: booking.booking_code // Mang mã code sang
+            };
 
-            if (rentalResponse.ok) {
-                // 2. Cập nhật Booking Request thành COMPLETED
-                await fetch(
-                    `${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`,
-                    {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include",
-                        body: JSON.stringify({
-                            status: "COMPLETED",
-                            admin_notes: `Converted to rental (Order: ${formData.order_id})`,
-                        }),
-                    }
-                );
-
-                toast({
-                    title: "Success",
-                    description: "Rental created successfully!",
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                onSuccess();
-                onClose();
-            } else {
-                const errorData = await rentalResponse.json();
-                throw new Error(errorData.message || "Failed to create rental");
-            }
-        } catch (error: any) {
-            console.error("Error creating rental:", error);
-            toast({
-                title: "Error",
-                description: error.message || "An error occurred",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
+            const rentalResponse = await fetch(`${process.env.REACT_APP_API_URL}rentals/rental`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify(rentalPayload),
             });
+
+            if (!rentalResponse.ok) {
+                const err = await rentalResponse.json();
+                throw new Error(err.message || "Failed to create rental");
+            }
+
+            // === BƯỚC 2: UPDATE BOOKING REQUEST (Hoàn tất quy trình) ===
+            const bookingPayload = {
+                status: "COMPLETED",
+                admin_notes: `Converted to rental (Order: ${formData.order_id})`,
+                bike_id: Number(formData.bike_id),
+                dealer_id: Number(formData.dealer_id) // 🔥 ĐỒNG BỘ: Update đúng dealer vừa chọn
+            };
+
+            await fetch(`${process.env.REACT_APP_API_URL}booking-requests/${booking.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify(bookingPayload),
+            });
+
+            toast({ title: "Thành công", description: "Đã tạo Rental và cập nhật Booking!", status: "success" });
+            onSuccess();
+            onClose();
+
+        } catch (error: any) {
+            console.error("Process Error:", error);
+            toast({ title: "Lỗi", description: error.message, status: "error" });
         } finally {
             setLoading(false);
         }
@@ -186,33 +202,40 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
                 <ModalBody py={6}>
                     <VStack spacing={4} align="stretch">
                         {/* User ID */}
-                        <FormControl>
-                            <FormLabel fontSize="sm" color="gray.600">user_id</FormLabel>
-                            <Input
-                                name="user_id"
-                                value={formData.user_id}
-                                isReadOnly
-                                bg="gray.50"
-                            />
+                        <FormControl isRequired>
+                            <FormLabel>Assign Dealer</FormLabel>
+                            <Select
+                                name="dealer_id"
+                                placeholder="Select Dealer first"
+                                value={formData.dealer_id}
+                                onChange={handleInputChange}
+                                bg={formData.dealer_id ? "green.50" : "white"}
+                            >
+                                {dealers.map(d => (
+                                    <option key={d.id} value={d.id}>{d.name} (ID: {d.id})</option>
+                                ))}
+                            </Select>
                         </FormControl>
 
                         {/* Bike Selection */}
-                        <FormControl isRequired>
-                            <FormLabel fontSize="sm" color="gray.600">bike_id</FormLabel>
-                            <Select
-                                name="bike_id"
-                                placeholder="Select a bike"
-                                value={formData.bike_id}
-                                onChange={handleInputChange}
-                            >
-                                {bikes
-                                    .filter((b) => b.status === "available")
-                                    .map((bike) => (
+                        <FormControl isRequired isDisabled={!formData.dealer_id}>
+                            <FormLabel>Select Motorbike</FormLabel>
+                            {formData.dealer_id && filteredBikes.length === 0 ? (
+                                <Text color="red.500" fontSize="sm">This dealer doesn't have available motorbikes now!</Text>
+                            ) : (
+                                <Select
+                                    name="bike_id"
+                                    placeholder={formData.dealer_id ? "Select a bike" : "Please select dealer first"}
+                                    value={formData.bike_id}
+                                    onChange={handleInputChange}
+                                >
+                                    {filteredBikes.map((bike) => (
                                         <option key={bike.id} value={bike.id}>
-                                            {bike.model} - {bike.license_plate} (${bike.price}/day)
+                                            {bike.model} - {bike.license_plate} ({bike.price.toLocaleString('vi-VN')} VNĐ)
                                         </option>
                                     ))}
-                            </Select>
+                                </Select>
+                            )}
                         </FormControl>
 
                         {/* Start Time */}
@@ -305,7 +328,7 @@ const UpdateBookingModal: React.FC<UpdateBookingModalProps> = ({
                     </Button>
                 </ModalFooter>
             </ModalContent>
-        </Modal>
+        </Modal >
     );
 };
 

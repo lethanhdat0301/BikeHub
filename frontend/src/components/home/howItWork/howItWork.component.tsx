@@ -1,5 +1,6 @@
 import { Center, Flex, Heading, Box, Text } from "@chakra-ui/react";
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import { Reveal } from "../../motion/reveal.component";
 import {
   FaMagnifyingGlass,
@@ -11,35 +12,36 @@ import {
 import CardSteps from "./cardSteps.component";
 
 const HowItWork: React.FC = () => {
+  const { t } = useTranslation();
   const dataSteps = [
     {
       icon: FaMagnifyingGlass,
-      title: "Find Your Bike",
-      text: "Browse our wide selection of motorcycles and find the perfect one for your trip.",
+      title: t('howItWorks.step1Title'),
+      text: t('howItWorks.step1Text'),
       after: true,
       delay: 0.5,
       id: 1,
     },
     {
       icon: FaCalendarDays,
-      title: "Book & Pay",
-      text: "Select your rental dates, provide your details, and complete the secure payment.",
+      title: t('howItWorks.step2Title'),
+      text: t('howItWorks.step2Text'),
       after: true,
       delay: 1.0,
       id: 2,
     },
     {
       icon: FaMotorcycle,
-      title: "Receive Your Bike",
-      text: "We deliver the motorcycle directly to your location at the specified time.",
+      title: t('howItWorks.step3Title'),
+      text: t('howItWorks.step3Text'),
       after: true,
       delay: 1.5,
       id: 3,
     },
     {
       icon: FaTruckFast,
-      title: "Free Delivery & Return",
-      text: "We will deliver and pick up the motorcycle right at your location with no extra fee.",
+      title: t('howItWorks.step4Title'),
+      text: t('howItWorks.step4Text'),
       after: false,
       delay: 2,
       id: 4,
@@ -75,7 +77,7 @@ const HowItWork: React.FC = () => {
             size={{ base: "sm", md: "2xl" }}
             className="capitalize text-center"
           >
-            How It Works
+            {t('howItWorks.pageTitle')}
           </Heading>
         </Reveal>
       </Center>

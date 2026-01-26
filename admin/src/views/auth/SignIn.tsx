@@ -15,7 +15,7 @@ export default function SignIn() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const data = { "email": email, "password": password}
+    const data = { "email": email, "password": password }
     try {
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL}auth/login`,
@@ -34,7 +34,7 @@ export default function SignIn() {
       }
 
       logIn(user);
-      console.log()
+      // console.log()
       navigate("/admin");
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");

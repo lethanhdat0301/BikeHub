@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Heading, Box, Center, Text, Flex } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import { Reveal } from "../../motion/reveal.component";
 import CardReview from "./cardReview.component";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -14,48 +15,45 @@ import "../../../index.css";
 // import required modules
 
 const SwiperReviews = () => {
+  const { t } = useTranslation();
   const swiperRef = useRef<SwiperCore>();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   const reviews = [
     {
       id: 1,
-      name: "— Sarah Smith, Commuter Extraordinaire",
-      tag: "@sarahsmith",
+      name: `— ${t('home.review1Author')}, ${t('home.review1Title')}`,
+      tag: t('home.review1Tag'),
       avatar:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      review:
-        "RentnRide made my Ha Giang Loop adventure unforgettable! The manual bike was powerful enough for the steep passes, and having the helmet and rain gear included saved me so much hassle. Highly recommended!",
+      review: t('home.review1Text'),
     },
     {
       id: 2,
-      name: "— Michael Johnson, Cycling Enthusiast",
-      tag: "@michaeljohnson",
+      name: `— ${t('home.review2Author')}, ${t('home.review2Title')}`,
+      tag: t('home.review2Tag'),
       avatar:
         "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
-      review:
-        "I loved the chatbot booking feature! It took less than 2 minutes to rent a scooter. They delivered it right to my resort in Phu Quoc for free. The bike was new, clean, and fuel-efficient.",
+      review: t('home.review2Text'),
     },
     {
       id: 3,
-      name: "— Alex Turner, Adventure Seeker",
-      tag: "@alexturner",
+      name: `— ${t('home.review3Author')}, ${t('home.review3Title')}`,
+      tag: t('home.review3Tag'),
       avatar:
         "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
-      review:
-        "As an avid cyclist, finding BikeHub was a game-changer. The variety of bikes caters to all preferences, and the ease of renting makes planning spontaneous rides a breeze. Thank you, BikeHub, for turning my biking dreams into a reality!",
+      review: t('home.review3Text'),
     },
     {
       id: 4,
-      name: "— Meriem, Fitness Enthusiast",
-      tag: "@meriem",
+      name: `— ${t('home.review4Author')}, ${t('home.review4Title')}`,
+      tag: t('home.review4Tag'),
       avatar:
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 
-      review:
-        "BikeHub has nailed the perfect combination of convenience and quality. Renting a bike has never been this easy, and the bikes themselves are in top-notch condition. Kudos to BikeHub for providing a hassle-free biking experience!",
+      review: t('home.review4Text'),
     },
   ];
 
@@ -88,12 +86,12 @@ const SwiperReviews = () => {
             size={{ base: "md", md: "lg" }}
             className="capitalizesl sm:text-start text-center"
           >
-            What Our Riders Say
+            {t('home.whatOurRidersSay')}
           </Heading>
         </Reveal>
         <Reveal>
           <Text className="text-gray-500 sm:text-base text-sm font-medium sm:text-start text-center">
-            Discovering Vietnam on two wheels with RentnRide.
+            {t('home.discoveringVietnam')}
           </Text>
         </Reveal>
         <Flex gap={3} alignSelf={{ base: "center", md: "start" }} zIndex={99}>

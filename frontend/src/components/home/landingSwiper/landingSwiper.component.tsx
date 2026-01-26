@@ -29,7 +29,7 @@ const LandingSwiper = () => {
       title: "Feel the Wind, Embrace the Ride",
       sousTitle: "Starting from 15$ per day",
       text1: "Experience the thrill of riding with our ", //
-      text2: "Premium bikes designed for speed and comfort.",
+      text2: "Premium motorbikes designed for speed and comfort.",
       id: 2,
     },
     {

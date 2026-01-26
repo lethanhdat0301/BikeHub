@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTable, usePagination, useSortBy, useGlobalFilter } from "react-table";
 import { MdSearch, MdAdd, MdEdit } from "react-icons/md";
 import UpdateBookingRequestModal from "../../booking-request/components/UpdateBookingModal";
+import CreateBookingModal from "./CreateBookingModal";
 
 type Props = {
     tableContent: any[];
@@ -14,6 +15,7 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => 
     const [statusFilter, setStatusFilter] = useState("All");
     const [selectedBooking, setSelectedBooking] = useState<any>(null);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const data = React.useMemo(() => {
         if (!tableContent) return [];
@@ -70,10 +72,17 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => 
             {
                 Header: "Vehicle",
                 accessor: "vehicle_model",
-                Cell: ({ value }: any) => (
-                    <p className="text-sm text-navy-700 dark:text-white">
-                        {value || "N/A"}
-                    </p>
+                Cell: ({ row }: any) => (
+                    <div>
+                        <p className="text-sm font-bold text-navy-700 dark:text-white">
+                            {row.original.vehicle_model || "N/A"}
+                        </p>
+                        {row.original.vehicle_license_plate && (
+                            <p className="text-xs text-black-600 dark:text-black-400 font-medium">
+                                {row.original.vehicle_license_plate}
+                            </p>
+                        )}
+                    </div>
                 ),
             },
             {
@@ -201,7 +210,10 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => 
                         className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-navy-700 dark:text-white"
                     />
                 </div>
-                <button className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+                <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                >
                     <MdAdd className="h-5 w-5" />
                     Create Booking
                 </button>
@@ -307,6 +319,16 @@ const BookingTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => 
                 }}
                 booking={selectedBooking}
                 onSuccess={() => {
+                    if (onRefresh) onRefresh();
+                }}
+            />
+
+            {/* Create Booking Modal */}
+            <CreateBookingModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={() => {
+                    setIsCreateModalOpen(false);
                     if (onRefresh) onRefresh();
                 }}
             />

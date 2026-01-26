@@ -2,7 +2,7 @@ import {
     Box, StepIcon, Step, StepSeparator, StepIndicator, StepNumber, StepStatus, StepTitle, Stepper
 } from "@chakra-ui/react";
 const steps = [
-    { title: "Choose Location & Bike" },
+    { title: "Choose Location & Motorbike" },
     { title: "Select Date & Payment" },
     { title: "Take QR-CODE & Enjoy Ride!" },
 ];

@@ -2,14 +2,17 @@ import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
 import { MdAdd, MdEdit, MdDelete, MdCheckCircle } from "react-icons/md";
 import UpdateRentalModal from "./UpdateRentalModal";
+import DealerUpdateRentalModal from "./DealerUpdateRentalModal";
+import { calculateAdminRentalPeriod } from "../../../../utils/adminRentalCalculations";
 
 type Props = {
     tableContent: any[];
     loading: boolean;
     onRefresh?: () => void;
+    userRole?: string; // 'admin' or 'dealer'
 };
 
-const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
+const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRole = 'admin' }) => {
     const [statusFilter, setStatusFilter] = useState("All");
     const [selectedRental, setSelectedRental] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,10 +38,12 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "id",
                 Cell: ({ row }: any) => {
                     // Use booking_request_id if available, otherwise use rental id
-                    const bookingId = row.original.booking_request_id || row.original.id;
+                    const displayId = row.original.booking_code
+                        ? row.original.booking_code
+                        : `BK${String(row.original.booking_request_id || row.original.id).padStart(6, '0')}`;
                     return (
                         <p className="text-sm font-bold text-navy-700 dark:text-white">
-                            BK{String(bookingId).padStart(6, '0')}
+                            {displayId}
                         </p>
                     );
                 },
@@ -49,26 +54,46 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 Cell: ({ row }: any) => {
                     const user = row.original.User;
                     const contactName = row.original.contact_name;
+                    const contactEmail = row.original.contact_email;
+                    const contactPhone = row.original.contact_phone;
+
+                    // console.log('Customer data:', {
+                    //     user,
+                    //     contactName,
+                    //     contactEmail,
+                    //     contactPhone,
+                    // });
+
                     return (
                         <div>
                             <p className="text-sm font-bold text-navy-700 dark:text-white">
                                 {user ? user.name : contactName || "Guest"}
                             </p>
                             <p className="text-xs text-gray-600 dark:text-gray-400">
-                                {user ? user.email : row.original.contact_email || "N/A"}
+                                {user ? user.email : contactEmail || "N/A"}
                             </p>
+                            {!user && contactPhone && (
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    {contactPhone}
+                                </p>
+                            )}
                         </div>
                     );
                 },
             },
             {
-                Header: "Bike",
+                Header: "Motorbike",
                 accessor: "Bike",
                 Cell: ({ value }: any) => (
                     <div>
                         <p className="text-sm font-bold text-navy-700 dark:text-white">
                             {value?.model || "N/A"}
                         </p>
+                        {value?.license_plate && (
+                            <p className="text-xs text-black-600 dark:text-black-400 font-medium">
+                                {value.license_plate}
+                            </p>
+                        )}
                         <p className="text-xs text-gray-600 dark:text-gray-400">
                             {value?.location || ""}
                         </p>
@@ -79,14 +104,30 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 Header: "Period",
                 accessor: "start_time",
                 Cell: ({ row }: any) => {
-                    const start = new Date(row.original.start_time);
-                    const end = row.original.end_time ? new Date(row.original.end_time) : null;
+                    const startTime = row.original.start_time;
+                    const endTime = row.original.end_time;
+
+                    if (!startTime || !endTime) {
+                        return <p className="text-sm text-gray-500">N/A</p>;
+                    }
+
+                    const period = calculateAdminRentalPeriod(startTime, endTime);
+                    const start = new Date(startTime);
+                    const end = new Date(endTime);
+
                     return (
                         <div>
-                            <p className="text-sm text-navy-700 dark:text-white">
-                                {start.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                                {end && ` - ${end.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
+                            <p className="text-sm text-navy-700 dark:text-white font-medium">
+                                {period.displayText}
                             </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {start.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                {" - "}
+                                {end.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </p>
+                            {period.isHourlyRental && (
+                                <p className="text-xs text-blue-600 font-medium">Hourly Rate</p>
+                            )}
                         </div>
                     );
                 },
@@ -94,11 +135,38 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
             {
                 Header: "Price",
                 accessor: "price",
-                Cell: ({ value }: any) => (
-                    <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"}
-                    </p>
-                ),
+                Cell: ({ value, row }: any) => {
+                    const startTime = row.original.start_time;
+                    const endTime = row.original.end_time;
+
+                    if (!startTime || !endTime) {
+                        return (
+                            <p className="text-sm font-bold text-navy-700 dark:text-white">
+                                {(value || 0).toLocaleString('vi-VN')} VNĐ
+                            </p>
+                        );
+                    }
+
+                    const period = calculateAdminRentalPeriod(startTime, endTime);
+
+                    return (
+                        <div>
+                            <p className="text-sm font-bold text-navy-700 dark:text-white">
+                                {(value || 0).toLocaleString('vi-VN')} VNĐ
+                            </p>
+                            {period.isHourlyRental && period.hours > 0 && (
+                                <p className="text-xs text-gray-500">
+                                    {Math.ceil(value / period.hours).toLocaleString('vi-VN')} VNĐ/h
+                                </p>
+                            )}
+                            {period.days > 0 && !period.isHourlyRental && (
+                                <p className="text-xs text-gray-500">
+                                    {Math.ceil(value / period.days).toLocaleString('vi-VN')} VNĐ/day
+                                </p>
+                            )}
+                        </div>
+                    );
+                },
             },
             {
                 Header: "Status",
@@ -123,13 +191,21 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 Cell: ({ value }: any) => {
                     const date = new Date(value);
                     return (
-                        <p className="text-sm text-navy-700 dark:text-white">
-                            {date.toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                            })}
-                        </p>
+                        <div>
+                            <p className="text-sm text-navy-700 dark:text-white">
+                                {date.toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                })}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {date.toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </p>
+                        </div>
                     );
                 },
             },
@@ -185,17 +261,31 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     return (
         <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-navy-800">
             {selectedRental && (
-                <UpdateRentalModal
-                    isOpen={isModalOpen}
-                    onClose={() => {
-                        setIsModalOpen(false);
-                        setSelectedRental(null);
-                    }}
-                    rental={selectedRental}
-                    onSuccess={() => {
-                        if (onRefresh) onRefresh();
-                    }}
-                />
+                userRole === 'dealer' ? (
+                    <DealerUpdateRentalModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedRental(null);
+                        }}
+                        rental={selectedRental}
+                        onSuccess={() => {
+                            if (onRefresh) onRefresh();
+                        }}
+                    />
+                ) : (
+                    <UpdateRentalModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedRental(null);
+                        }}
+                        rental={selectedRental}
+                        onSuccess={() => {
+                            if (onRefresh) onRefresh();
+                        }}
+                    />
+                )
             )}
 
             {/* Header */}

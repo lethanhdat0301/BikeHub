@@ -15,17 +15,17 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: `${process.env.CALLBACK}/api/v1/auth/google/callback`,
       scope: ['email', 'profile'],
     });
-    console.log('GOOGLE CALLBACK =', `${process.env.CALLBACK}/api/v1/auth/google/callback`);
+    // console.log('GOOGLE CALLBACK =', `${process.env.CALLBACK}/api/v1/auth/google/callback`);
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any): Promise<any> {
-    console.log(profile)
+    // console.log(profile)
     const generateRandomString = (length) => {
       const characters = '#@ABCDEFGHIJKLMNOPQRSTUVWXYZ#@abcdefghijklmnopqrstuvwxyz#@0123456789#@';
       return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
     };
     const data = { name: profile.displayName, email: profile.emails[0].value, password: generateRandomString(10), birthdate: new Date("1111-11-11"), phone: "", image: profile.photos[0].value }
-    console.log(data)
+    // console.log(data)
     const user = await this.authService.validateUser(data);
     return user || null;
   }

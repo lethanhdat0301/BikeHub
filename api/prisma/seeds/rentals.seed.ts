@@ -1,6 +1,17 @@
 import { PrismaClient, User, Bike } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
+export function generateSeedBookingCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return result;
+}
+
 export async function seedRentals(prisma: PrismaClient, users: User[], bikes: Bike[]) {
   if (users.length === 0 || bikes.length === 0) return;
 
@@ -18,15 +29,18 @@ export async function seedRentals(prisma: PrismaClient, users: User[], bikes: Bi
       const startTime = faker.date.past();
       const endTime = new Date(startTime.getTime() + (2 * 24 * 60 * 60 * 1000)); // Thuê 2 ngày
 
+      const bookingCode = generateSeedBookingCode();
+
       const rental = await prisma.rental.create({
         data: {
           user_id: user.id,
           bike_id: bike.id,
           start_time: startTime,
           end_time: endTime,
-          status: faker.helpers.arrayElement(['completed', 'ongoing', 'cancelled']),
+          status: faker.helpers.arrayElement(['completed', 'active', 'cancelled']),
           price: bike.price * 2, // Giá 2 ngày
           qrcode: '',
+          booking_code: bookingCode,
         }
       });
       rentals.push(rental);

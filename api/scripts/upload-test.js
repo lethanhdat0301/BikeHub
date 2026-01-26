@@ -30,7 +30,7 @@ async function ensureImage() {
     await ensureImage();
 
     // 1) Login
-    const loginResp = await fetch(`${API_URL}/auth/login`, {
+    const loginResp = await fetch(`${API_URL}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
@@ -63,7 +63,7 @@ async function ensureImage() {
     const bodyBuffer = Buffer.concat([Buffer.from(pre), fileBuffer, Buffer.from(post)]);
 
     // 3) Upload
-    const uploadResp = await fetch(`${API_URL}/uploads/image`, {
+    const uploadResp = await fetch(`${API_URL}/api/v1/uploads/image`, {
       method: 'POST',
       headers: {
         'Content-Type': `multipart/form-data; boundary=${boundary}`,

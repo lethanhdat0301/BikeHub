@@ -22,7 +22,7 @@ model Bike {
   Rental          Rental[]
   BookingRequest  BookingRequest[] @relation("BookingBike")
   image           String?
-  description     String?  // Mô tả chi tiết về xe
+  description     String?
   
   rating          Float?   @default(0)
   review_count    Int?     @default(0)
@@ -33,6 +33,7 @@ model Bike {
   seats           Int?
   fuel_type       String?
   transmission    String?
+  license_plate   String?
   
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
@@ -43,43 +44,49 @@ model Park {
   name       String
   location   String
   Bike       Bike[]
+  Dealers    Dealer[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   image      String?
 }
 
 model User {
-  id             Int              @id @default(autoincrement())
-  name           String
-  email          String           @unique
-  password       String
-  role           String           @default("user")
-  status         String           @default("active")
-  Rental         Rental[]
-  // Parks          Park[]           @relation("DealerParks")
-  BookingRequest BookingRequest[]
+  id                        Int              @id @default(autoincrement())
+  name                      String
+  email                     String           @unique
+  password                  String
+  role                      String           @default("user")
+  status                    String           @default("active")
+  Rental                    Rental[]
+  // Parks                     Park[]           @relation("DealerParks")
+  BookingRequest            BookingRequest[] @relation("BookingCustomer")
+  BookingRequestsAsDealer   BookingRequest[] @relation("BookingDealer")
   // Bikes relation for dealers
-  Bikes          Bike[]           @relation("DealerBikes")
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
-  birthdate      DateTime
-  phone          String?
-  image          String?
+  Bikes                     Bike[]           @relation("DealerBikes")
+  // Dealer business profile (1-to-1 for users with role='dealer')
+  DealerProfile             Dealer?          @relation("UserDealerProfile")
+  created_at                DateTime         @default(now())
+  updated_at                DateTime         @updatedAt
+  birthdate                 DateTime?
+  phone                     String?
+  image                     String?
 }
 
 model Rental {
-  id                  Int       @id @default(dbgenerated("nextval('booking_id_seq')"))
+  id                  Int              @id @default(autoincrement())
+  booking_code        String?          @unique
   user_id             Int?
   bike_id             Int
-  booking_request_id  Int?      // Link to original booking request
+  booking_request_id  Int?             // Link to original booking request
   start_time          DateTime
   end_time            DateTime?
   status              String
   price               Float
-  User                User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  Bike                Bike      @relation(fields: [bike_id], references: [id], onDelete: Cascade)
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
+  User                User?            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Bike                Bike             @relation(fields: [bike_id], references: [id], onDelete: Cascade)
+  BookingRequest      BookingRequest?  @relation(fields: [booking_request_id], references: [id], onDelete: SetNull)
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
   qrcode              String?
   payment_id          String?
   order_id            String?
@@ -92,8 +99,11 @@ model Rental {
 }
 
 model BookingRequest {
-  id              Int      @id @default(dbgenerated("nextval('booking_id_seq')"))
+  id              Int      @id @default(autoincrement())
+
   user_id         Int?
+  User            User?    @relation("BookingCustomer", fields: [user_id], references: [id], onDelete: SetNull)
+  
   name            String
   email           String
   contact_method  String
@@ -101,20 +111,29 @@ model BookingRequest {
   pickup_location String
   status          String   @default("PENDING")
   admin_notes     String?
-  dealer_id       Int?
+  dealer_id       Int?     // References User.id where role='dealer'
+  DealerUser      User?    @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
   bike_id         Int?
   start_date      DateTime?
   end_date        DateTime?
   estimated_price Float?
-  User            User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  booking_code    String?  @unique
   Bike            Bike?    @relation("BookingBike", fields: [bike_id], references: [id], onDelete: SetNull)
-  Dealer          Dealer?  @relation("BookingDealer", fields: [dealer_id], references: [id], onDelete: SetNull)
+  Rental          Rental[] // One booking request can have multiple rentals (though usually just one)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
 
 model Dealer {
   id                Int      @id @default(autoincrement())
+  user_id           Int      @unique // Links to User table (role='dealer')
+  User              User     @relation("UserDealerProfile", fields: [user_id], references: [id], onDelete: Cascade)
+  
+  // Thêm park_id BẮT BUỘC - dealer PHẢI thuộc một park
+  park_id           Int      // REQUIRED: dealer phải thuộc một park
+  Park              Park     @relation(fields: [park_id], references: [id], onDelete: Cascade)
+
+  // Business/Analytics fields
   name              String
   email             String   @unique
   phone             String?
@@ -127,7 +146,7 @@ model Dealer {
   last_payment_date DateTime?
   vehicle_count     Int      @default(0)
   image             String?
-  BookingRequest    BookingRequest[] @relation("BookingDealer")
+  Referrers         Referrer[] // Referrers managed by this dealer
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 }
@@ -141,6 +160,8 @@ model Referrer {
   referral_count     Int      @default(0)
   last_referral_date DateTime?
   image              String?
+  dealer_id          Int?     // Link to dealer who manages this referrer
+  Dealer             Dealer?  @relation(fields: [dealer_id], references: [id], onDelete: SetNull)
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 }

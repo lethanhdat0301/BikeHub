@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -28,6 +29,7 @@ interface RegisterCredentials {
 }
 
 const RegisterForm: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -56,19 +58,19 @@ const RegisterForm: React.FC = () => {
   const validation = () => {
     if (data.email === "") {
       setErrEmail(true);
-      console.log("pass empty");
+      // console.log("pass empty");
     } else {
       setErrEmail(false);
     }
     if (data.name === "") {
       setErrName(true);
-      console.log("name empty");
+      // console.log("name empty");
     } else {
       setErrName(false);
     }
     if (data.password === "") {
       setErrPassword(true);
-      console.log("email empty");
+      // console.log("email empty");
     } else {
       setErrPassword(false);
     }
@@ -100,20 +102,20 @@ const RegisterForm: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      console.log(response);
-      console.log(JSON.stringify(response?.data));
+      // console.log(response);
+      // console.log(JSON.stringify(response?.data));
       setData({ email: "", password: "", name: "", birthdate: "", phone: "" });
       setErrMsg("");
       navigate("/login");
       toast({
-        title: "Account created.",
-        description: "Your account has been successfully created.",
+        title: t("auth.accountCreated"),
+        description: t("auth.accountCreatedDesc"),
         status: "success",
         duration: 2500,
         isClosable: true,
       });
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       let errorMessage = error?.response?.data?.message;
       if (typeof errorMessage === "string")
         errorMessage = error?.response?.data?.message;
@@ -135,10 +137,10 @@ const RegisterForm: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-    console.log(data);
-    console.log(errName, errEmail, errPassword);
-    console.log(user);
-    console.log(errMsg);
+    // console.log(data);
+    // console.log(errName, errEmail, errPassword);
+    // console.log(user);
+    // console.log(errMsg);
     setIsSubmitting(false);
   };
 
@@ -153,33 +155,33 @@ const RegisterForm: React.FC = () => {
       </FormControl>
       <Flex gap={4} className="max-sm:flex-col">
         <FormControl id="name" isInvalid={errName}>
-          <FormLabel>Full Name</FormLabel>
+          <FormLabel>{t("auth.fullName")}</FormLabel>
           <Input
             type="text"
             value={data.name}
             onChange={(e) => {
               setData({ ...data, name: e.target.value });
             }}
-            placeholder="Full Name"
+            placeholder={t("auth.fullName")}
           />
-          <FormErrorMessage>Name is messing</FormErrorMessage>
+          <FormErrorMessage>{t("auth.errorNameEmpty")}</FormErrorMessage>
         </FormControl>
         <FormControl id="email" isInvalid={errEmail}>
-          <FormLabel>Email</FormLabel>
+          <FormLabel>{t("auth.email")}</FormLabel>
           <Input
             type="email"
             value={data.email}
             onChange={(e) => {
               setData({ ...data, email: e.target.value });
             }}
-            placeholder="Email"
+            placeholder={t("auth.email")}
           />
-          <FormErrorMessage>email should not be empty</FormErrorMessage>
+          <FormErrorMessage>{t("auth.errorEmailEmpty")}</FormErrorMessage>
         </FormControl>
       </Flex>
       <Flex gap={4} className="max-sm:flex-col">
         <FormControl id="birthdate">
-          <FormLabel>Date Of Birth</FormLabel>
+          <FormLabel>{t("auth.dateOfBirth")}</FormLabel>
           <Input
             type="date"
             value={data.birthdate}
@@ -191,7 +193,7 @@ const RegisterForm: React.FC = () => {
           <FormErrorMessage></FormErrorMessage>
         </FormControl>
         <FormControl id="phone">
-          <FormLabel>Phone Number</FormLabel>
+          <FormLabel>{t("auth.phoneNumber")}</FormLabel>
           <InputGroup>
             <InputLeftElement pointerEvents="none">
               <PhoneIcon color="gray.300" />
@@ -202,15 +204,15 @@ const RegisterForm: React.FC = () => {
               onChange={(e) => {
                 setData({ ...data, phone: e.target.value });
               }}
-              placeholder="Phone Number"
+              placeholder={t("auth.phoneNumber")}
             />
           </InputGroup>
-          <FormErrorMessage>error Phone Number</FormErrorMessage>
+          <FormErrorMessage>{t("auth.errorPhoneNumber")}</FormErrorMessage>
         </FormControl>
       </Flex>
       <Flex gap={4} className="max-sm:flex-col">
         <FormControl id="password" isInvalid={errPassword}>
-          <FormLabel>Password</FormLabel>
+          <FormLabel>{t("auth.password")}</FormLabel>
           <InputGroup>
             <Input
               type={showPassword ? "text" : "password"}
@@ -218,7 +220,7 @@ const RegisterForm: React.FC = () => {
               onChange={(e) => {
                 setData({ ...data, password: e.target.value });
               }}
-              placeholder="Password"
+              placeholder={t("auth.password")}
             />
             <InputRightElement h={"full"}>
               <Button
@@ -229,16 +231,16 @@ const RegisterForm: React.FC = () => {
               </Button>
             </InputRightElement>
           </InputGroup>
-          <FormErrorMessage>error Password</FormErrorMessage>
+          <FormErrorMessage>{t("auth.errorPasswordEmpty")}</FormErrorMessage>
         </FormControl>
         <FormControl id="confirmPassword" isInvalid={errPassword}>
-          <FormLabel>Confirm Password</FormLabel>
+          <FormLabel>{t("auth.confirmPassword")}</FormLabel>
           <InputGroup>
             <Input
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm Password"
+              placeholder={t("auth.confirmPassword")}
             />
             <InputRightElement h={"full"}>
               <Button
@@ -249,7 +251,7 @@ const RegisterForm: React.FC = () => {
               </Button>
             </InputRightElement>
           </InputGroup>
-          <FormErrorMessage>error Confirm Password</FormErrorMessage>
+          <FormErrorMessage>{t("auth.errorPasswordEmpty")}</FormErrorMessage>
         </FormControl>
       </Flex>
       <Stack spacing={2} align={"center"}>
@@ -259,9 +261,9 @@ const RegisterForm: React.FC = () => {
           align={"start"}
           justify={"space-between"}
         >
-          <Checkbox colorScheme="teal">Remember me</Checkbox>
+          <Checkbox colorScheme="teal">{t("auth.rememberMe")}</Checkbox>
           <Link to="/signup">
-            <Text color={"teal.400"}>Forgot password?</Text>
+            <Text color={"teal.400"}>{t("auth.forgotPassword")}</Text>
           </Link>
         </Stack>
         <Button
@@ -271,15 +273,15 @@ const RegisterForm: React.FC = () => {
           isLoading={isSubmitting}
           type="submit"
         >
-          Sign up
+          {t("auth.signUp")}
         </Button>
         <p className="text-sm mt-2 font-light text-gray-500 dark:text-gray-400 mb-5">
-          Already have an account?{" "}
+          {t("auth.alreadyHaveAccount")}{" "}
           <Link
             to="/login"
             className="font-medium text-teal-600 hover:underline dark:text-teal-500"
           >
-            Sign in
+            {t("auth.signIn")}
           </Link>
         </p>
       </Stack>

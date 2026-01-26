@@ -34,6 +34,7 @@ import { useAuth } from "../../hooks/useAuth";
 import logoImage from "../../assets/images/logoofficial.png";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 /**
  * Header: A functional component representing a header in React with Tailwind CSS.
  *
@@ -42,31 +43,50 @@ import { useLocation } from 'react-router-dom';
 const Header: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [language, setLanguage] = useState<string>('en');
+  const [language, setLanguage] = useState<string>(localStorage.getItem('i18nextLng') || 'en');
+  const { t, i18n } = useTranslation();
+
+  const changeLanguageTo = (lng: string) => {
+    setLanguage(lng);
+    if (i18n) {
+      i18n.changeLanguage(lng);
+      console.log('[i18n] changeLanguageTo:', lng, 'current:', i18n.language, 'available:', Object.keys(i18n.options?.resources || {}));
+    } else {
+      console.log('[i18n] no i18n instance to change language to', lng);
+    }
+    localStorage.setItem('i18nextLng', lng);
+  };
+
+  // Ensure i18n uses stored language on mount / when language changes
+  React.useEffect(() => {
+    if (i18n && i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [i18n, language]);
+
 
   const headerItems = [
-    { label: "Search", path: "search" },
-    { label: "Booking Request", path: "request-booking" },
-    { label: "Return", path: "return" },
-    { label: "Track Order", path: "tracking" },
-    { label: "How It Works", path: "howItWork", isHash: true }
+    { key: "search", path: "search" },
+    { key: "bookingRequest", path: "request-booking" },
+    { key: "return", path: "return" },
+    { key: "trackOrder", path: "tracking" },
+    { key: "howItWorks", path: "howItWork", isHash: true }
   ];
 
   const phoneNumbers = [
-    { number: "+84 123 456 789", display: "0123 456 789" },
-    { number: "+84 123 456 789", display: "0123 456 789" }
+    { number: "+84 388 817 935", display: "0388817935" },
   ];
 
   const socialLinks = {
     telegram: "https://t.me/yourusername", // Thay bằng Telegram username
-    whatsapp: "https://wa.me/84123456789", // Thay bằng số điện thoại (84XXXXXXXXX)
-    messenger: "https://m.me/yourpageid"    // Thay bằng Facebook Page ID
+    whatsapp: "https://wa.me/84388817935", // Thay bằng số điện thoại (84XXXXXXXXX)
+    messenger: "https://m.me/61586851197817"    // Thay bằng Facebook Page ID
   };
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
     // TODO: Implement language change logic
-    console.log('Language changed to:', e.target.value);
+    // console.log('Language changed to:', e.target.value);
   };
 
   const location = useLocation();
@@ -120,7 +140,7 @@ const Header: React.FC = () => {
             fontSize={{ base: "sm", lg: "md" }}
             whiteSpace="nowrap"
           >
-            Home
+            {t('header.home')}
             <Box
               position={"absolute"}
               className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
@@ -145,7 +165,7 @@ const Header: React.FC = () => {
             fontSize={{ base: "sm", lg: "md" }}
             whiteSpace="nowrap"
           >
-            {item.label}
+            {t(`header.${item.key}`)}
             <Box
               position={"absolute"}
               className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
@@ -158,72 +178,6 @@ const Header: React.FC = () => {
           </Button>
         ))}
       </HStack>
-
-      {/* Mobile: Language & Contact (right of logo) */}
-      <Box display={{ base: 'flex', md: 'none' }} alignItems="center" gap={2} ml={2}>
-        {/* Language selector */}
-        {/* Social icons */}
-        <HStack spacing={1}>
-          <IconButton
-            as="a"
-            href={socialLinks.telegram}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Telegram"
-            icon={<FaTelegram />}
-            size="sm"
-            variant="ghost"
-            colorScheme="telegram"
-            _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
-            transition="all 0.2s"
-          />
-          <IconButton
-            as="a"
-            href={socialLinks.whatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="WhatsApp"
-            icon={<FaWhatsapp />}
-            size="sm"
-            variant="ghost"
-            colorScheme="whatsapp"
-            _hover={{ bg: "green.50", transform: "scale(1.1)" }}
-            transition="all 0.2s"
-          />
-          <IconButton
-            as="a"
-            href={socialLinks.messenger}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Messenger"
-            icon={<FaFacebookMessenger />}
-            size="sm"
-            variant="ghost"
-            colorScheme="messenger"
-            _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
-            transition="all 0.2s"
-          />
-        </HStack>
-        {/* Phone number (first) */}
-        <HStack spacing={1}>
-          <FaPhone size={12} color="#319795" />
-          <Text fontSize="xs" fontWeight="medium" color="teal.600">
-            <a href={`tel:${phoneNumbers[0].number}`}>{phoneNumbers[0].display}</a>
-          </Text>
-        </HStack>
-        <Select
-          value={language}
-          onChange={handleLanguageChange}
-          size="sm"
-          width="80px"
-          borderColor="teal.300"
-          _hover={{ borderColor: "teal.500" }}
-          focusBorderColor="teal.500"
-        >
-          <option value="en">EN</option>
-          <option value="vi">VI</option>
-        </Select>
-      </Box>
 
       {/* Social Media Icons */}
       {/* Desktop social icons */}
@@ -286,7 +240,7 @@ const Header: React.FC = () => {
       {/* Desktop language selector */}
       <Select
         value={language}
-        onChange={handleLanguageChange}
+        onChange={(e) => changeLanguageTo(e.target.value)}
         size="sm"
         width="90px"
         display={{ base: "none", lg: "block" }}
@@ -295,8 +249,10 @@ const Header: React.FC = () => {
         focusBorderColor="teal.500"
         flexShrink={0}
       >
-        <option value="en">English</option>
-        <option value="vi">Tiếng Việt</option>
+        <option value="en">EN</option>
+        <option value="ru">RU</option>
+        <option value="vi">VI</option>
+        <option value="de">DE</option>
       </Select>
 
 
@@ -370,7 +326,7 @@ const Header: React.FC = () => {
                         className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
                       >
                         <Text fontWeight={500} fontSize={16}>
-                          Profile
+                          {t('header.profile')}
                         </Text>
                       </Link>
                     </MenuItem>
@@ -386,7 +342,7 @@ const Header: React.FC = () => {
                         className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
                       >
                         <Text fontWeight={500} fontSize={16}>
-                          Settings
+                          {t('header.settings')}
                         </Text>
                       </Link>
                     </MenuItem>
@@ -399,7 +355,7 @@ const Header: React.FC = () => {
                     >
                       <LogoutButton>
                         <TbLogout className="mr-2 text-red-500" />
-                        <Text color="red.400">Logout</Text>
+                        <Text color="red.400">{t('header.logout')}</Text>
                       </LogoutButton>
                     </MenuItem>
                   </MenuList>
@@ -407,11 +363,31 @@ const Header: React.FC = () => {
               </Flex>
             )}
           </div> */}
+
+      {/* Mobile Phone Number - Show on mobile only, before hamburger menu */}
+      <HStack spacing={2} display={{ base: "flex", md: "none" }} flexShrink={0}>
+        <Button
+          as="a"
+          href={`tel:${phoneNumbers[0].number}`}
+          leftIcon={<FaPhone size={14} />}
+          size="sm"
+          colorScheme="teal"
+          variant="solid"
+          rounded="full"
+          fontWeight="semibold"
+          fontSize="sm"
+          _hover={{ transform: "scale(1.05)" }}
+          transition="all 0.2s"
+        >
+          {phoneNumbers[0].display}
+        </Button>
+      </HStack>
+
       <IconButton
         size={"sm"}
         aria-label="Toggle navigation"
         icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-        onClick={onOpen}
+        onClick={isOpen ? onClose : onOpen}
         display={{ base: "block", md: "none" }}
       />
       <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>
@@ -434,7 +410,7 @@ const Header: React.FC = () => {
                   onClick={onClose}
                   w="full"
                 >
-                  Home
+                  {t('header.home')}
                 </Button>
               </Link>
 
@@ -452,7 +428,7 @@ const Header: React.FC = () => {
                   }}
                   w="full"
                 >
-                  {item.label}
+                  {t(`header.${item.key}`)}
                 </Button>
               ))}
             </VStack>
@@ -477,14 +453,20 @@ const Header: React.FC = () => {
                   _hover={{ bg: "teal.50", borderColor: "teal.500" }}
                   _active={{ bg: "teal.100" }}
                 >
-                  {language === 'en' ? 'English' : 'Tiếng Việt'}
+                  {t(`lang.${language}`)}
                 </MenuButton>
                 <MenuList minW="150px" fontSize="sm" zIndex={1500}>
-                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'en' } })}>
-                    🇺🇸 English
+                  <MenuItem onClick={() => changeLanguageTo('en')}>
+                    🇺🇸 {t('lang.en')}
                   </MenuItem>
-                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'vi' } })}>
-                    🇻🇳 Tiếng Việt
+                  <MenuItem onClick={() => changeLanguageTo('ru')}>
+                    🇷🇺 {t('lang.ru')}
+                  </MenuItem>
+                  <MenuItem onClick={() => changeLanguageTo('vi')}>
+                    🇻🇳 {t('lang.vi')}
+                  </MenuItem>
+                  <MenuItem onClick={() => changeLanguageTo('de')}>
+                    🇩🇪 {t('lang.de')}
                   </MenuItem>
                 </MenuList>
               </Menu>

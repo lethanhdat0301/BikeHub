@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTable, usePagination, useSortBy } from "react-table";
-import { MdAdd, MdMoreHoriz } from "react-icons/md";
+import { MdAdd, MdMoreHoriz, MdVisibility } from "react-icons/md";
+import ReferralHistoryModal from "./ReferralHistoryModal";
 
 type Props = {
     tableContent: any[];
@@ -8,6 +9,8 @@ type Props = {
 };
 
 const ReferrerTable: React.FC<Props> = ({ tableContent, loading }) => {
+    const [selectedReferrer, setSelectedReferrer] = useState<{ id: number, name: string } | null>(null);
+
     const data = React.useMemo(() => {
         if (!tableContent) return [];
         if (Array.isArray(tableContent)) return tableContent;
@@ -50,7 +53,7 @@ const ReferrerTable: React.FC<Props> = ({ tableContent, loading }) => {
                 accessor: "total_earnings",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        {value?.toLocaleString() || "0"} đ
+                        {Number(value || 0).toLocaleString('vi-VN')} VNĐ
                     </p>
                 ),
             },
@@ -83,10 +86,19 @@ const ReferrerTable: React.FC<Props> = ({ tableContent, loading }) => {
             {
                 Header: "",
                 id: "actions",
-                Cell: () => (
-                    <button className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-navy-700">
-                        <MdMoreHoriz className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                    </button>
+                Cell: ({ row }: any) => (
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setSelectedReferrer({ id: row.original.id, name: row.original.name })}
+                            className="rounded-lg p-2 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                            title="View Referral History"
+                        >
+                            <MdVisibility className="h-4 w-4" />
+                        </button>
+                        <button className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-navy-700">
+                            <MdMoreHoriz className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </button>
+                    </div>
                 ),
             },
         ],
@@ -215,7 +227,13 @@ const ReferrerTable: React.FC<Props> = ({ tableContent, loading }) => {
                     </div>
                 </div>
             )}
-        </div>
+            {/* Referral History Modal */}
+            <ReferralHistoryModal
+                isOpen={!!selectedReferrer}
+                onClose={() => setSelectedReferrer(null)}
+                referrerId={selectedReferrer?.id || 0}
+                referrerName={selectedReferrer?.name || ''}
+            />        </div>
     );
 };
 

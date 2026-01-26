@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Bike, Park, Rental, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,7 +22,7 @@ export class RentalService {
         },
       },
     });
-    console.log("data", data)
+    // console.log("data", data)
     if (data?.User) {
       delete data.User.password;
     }
@@ -81,10 +81,43 @@ export class RentalService {
     data: Prisma.RentalUpdateInput;
   }): Promise<Rental> {
     const { data, where } = params;
-    return this.prisma.rental.update({
+
+    // Get current rental before update
+    const currentRental = await this.prisma.rental.findUnique({
+      where,
+      include: { BookingRequest: true },
+    });
+
+    // Update the rental
+    const updatedRental = await this.prisma.rental.update({
       data,
       where,
     });
+
+    // Sync booking request status if rental has a linked booking request
+    if (currentRental?.BookingRequest && data.status) {
+      const rentalStatus = String(data.status).toLowerCase();
+      let bookingStatus = currentRental.BookingRequest.status;
+
+      // Map rental status to booking status
+      if (rentalStatus === 'completed') {
+        bookingStatus = 'COMPLETED';
+      } else if (rentalStatus === 'active') {
+        bookingStatus = 'APPROVED'; // Keep as approved when active
+      } else if (rentalStatus === 'cancelled') {
+        bookingStatus = 'REJECTED';
+      }
+
+      // Update booking request if status changed
+      if (bookingStatus !== currentRental.BookingRequest.status) {
+        await this.prisma.bookingRequest.update({
+          where: { id: currentRental.BookingRequest.id },
+          data: { status: bookingStatus },
+        });
+      }
+    }
+
+    return updatedRental;
   }
 
   async delete(where: Prisma.RentalWhereUniqueInput): Promise<Rental> {
@@ -109,10 +142,11 @@ export class RentalService {
 
     return rentals.map(rental => ({
       id: rental.id,
+      bookingId: rental.booking_code || `BK${String(rental.id).padStart(6, '0')}`,
       customer_name: rental.User ? rental.User.name : rental.contact_name || 'Guest',
       customer_phone: rental.User ? rental.User.phone : rental.contact_phone || 'N/A',
       vehicle_model: rental.Bike?.model || 'N/A',
-      dealer_name: rental.Bike?.Dealer?.name || rental.Bike?.dealer_name || 'N/A',
+      dealer_name: rental.Bike?.dealer_name || rental.Bike?.Dealer?.name || 'N/A',
       start_time: rental.start_time,
       end_time: rental.end_time,
       location: rental.Bike?.Park?.location || rental.pickup_location || 'N/A',
@@ -129,7 +163,11 @@ export class RentalService {
     });
 
     if (!rental) {
-      throw new Error('Rental not found');
+      throw new NotFoundException(`Rental with ID ${rentalId} not found`);
+    }
+
+    if (rental.status === 'completed') {
+      throw new NotFoundException(`Rental ${rentalId} has already been returned`);
     }
 
     // Update rental status to completed and set end_time
@@ -157,5 +195,47 @@ export class RentalService {
     });
 
     return updatedRental;
+  }
+
+  // Fix missing contact info for existing rentals
+  async fixMissingContactInfo() {
+    // Find rentals that have booking_request_id but missing contact info
+    const rentalsToFix = await this.prisma.rental.findMany({
+      where: {
+        booking_request_id: { not: null },
+        OR: [
+          { contact_name: null },
+          { contact_name: '' },
+          { contact_email: null },
+          { contact_email: '' },
+        ],
+      },
+    });
+
+    // console.log(`Found ${rentalsToFix.length} rentals with missing contact info`);
+
+    for (const rental of rentalsToFix) {
+      if (rental.booking_request_id) {
+        // Get the original booking request manually
+        const bookingRequest = await this.prisma.bookingRequest.findUnique({
+          where: { id: rental.booking_request_id },
+        });
+
+        if (bookingRequest) {
+          await this.prisma.rental.update({
+            where: { id: rental.id },
+            data: {
+              contact_name: bookingRequest.name,
+              contact_email: bookingRequest.email,
+              contact_phone: bookingRequest.contact_details,
+              pickup_location: bookingRequest.pickup_location,
+            },
+          });
+          // console.log(`Fixed rental ${rental.id} with booking request ${rental.booking_request_id}`);
+        }
+      }
+    }
+
+    return { fixed: rentalsToFix.length };
   }
 }

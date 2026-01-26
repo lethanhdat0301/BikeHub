@@ -13,8 +13,14 @@ import { ApiTags } from '@nestjs/swagger';
 import { BookingRequest as BookingRequestModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
 import { Roles } from '../auth/auth.roles.decorator';
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { ROLES_ENUM } from '../../shared/constants/global.constants';
 import { BookingRequestService } from './booking-request.service';
+import { EmailService } from '../email/email.service';
+import { buildBookingConfirmationHtml } from '../email/templates/booking-confirmation.template';
+import { DealerService } from '../dealer/dealer.service';
+import { generateBookingCode } from '../../ultis/ultis';
+import * as fs from 'fs';
 import {
   CreateBookingRequestDto,
   UpdateBookingRequestDto,
@@ -23,29 +29,109 @@ import {
 @ApiTags('booking-requests')
 @Controller('/booking-requests')
 export class BookingRequestController {
-  constructor(private bookingRequestService: BookingRequestService) { }
+  constructor(
+    private bookingRequestService: BookingRequestService,
+    private emailService: EmailService,
+    private dealerService: DealerService,
+  ) { }
 
   // Public endpoint - Anyone can create a booking request
   @Post('/')
   async createBookingRequest(
     @Body() createBookingRequestDto: CreateBookingRequestDto,
   ): Promise<any> {
+    // console.log('=== CREATE BOOKING REQUEST STARTED ===');
+    // console.log('=== Request payload:', createBookingRequestDto);
+
     const { user_id, ...rest } = createBookingRequestDto;
 
+    const newBookingCode = generateBookingCode();
+
     let bookingRequest;
+    const dataToSave = {
+      ...rest,
+      booking_code: newBookingCode,
+    };
+
     if (user_id) {
       bookingRequest = await this.bookingRequestService.create({
-        ...rest,
+        ...dataToSave,
         User: {
           connect: { id: user_id },
         },
       });
     } else {
-      bookingRequest = await this.bookingRequestService.create(rest);
+      bookingRequest = await this.bookingRequestService.create(dataToSave);
     }
 
+    // console.log('=== BOOKING REQUEST CREATED:', bookingRequest);
+
     // Return formatted response with Booking ID for customer display
-    const formattedBookingId = `BK${String(bookingRequest.id).padStart(6, '0')}`;
+    const formattedBookingId = bookingRequest.booking_code;
+    // console.log('=== FORMATTED BOOKING ID:', formattedBookingId);
+
+    // Send confirmation email if email provided (send both text and HTML template, do not fail request on email errors)
+    // console.log('=== Checking email for booking request:', { email: bookingRequest.email });
+    if (bookingRequest.email) {
+      // console.log('=== Email found, preparing to send confirmation email...');
+      try {
+        const emailText = `Dear ${bookingRequest.contact_details || 'Customer'},\n\nWe have received your booking request.\n\nBooking ID: ${formattedBookingId}\nContact: ${bookingRequest.contact_details || 'N/A'}\nStatus: ${bookingRequest.status || 'received'}\n\nWe will contact you shortly with next steps.\n\nBest regards,\nRentNRide Team`;
+
+        // Get the appropriate base URL based on environment
+        const getBaseUrl = () => {
+          if (process.env.NODE_ENV === 'production' && process.env.BASE_URL_PROD) {
+            return process.env.BASE_URL_PROD;
+          } else if (process.env.NODE_ENV === 'development' && process.env.BASE_URL_DEV) {
+            return process.env.BASE_URL_DEV;
+          } else if (process.env.BASE_URL_LOCAL) {
+            return process.env.BASE_URL_LOCAL;
+          } else {
+            return 'http://localhost:3000';
+          }
+        };
+
+        const baseUrl = getBaseUrl().replace(/\/$/, '') + '/'; // Ensure proper trailing slash
+
+        // Handle logo for email
+        let logoSrc = 'cid:logo';
+        let inlineLogoPath: string | undefined = undefined;
+
+        const emailLogoPath = process.env.EMAIL_LOGO_PATH;
+        if (emailLogoPath && fs.existsSync(emailLogoPath)) {
+          inlineLogoPath = emailLogoPath;
+          logoSrc = 'cid:logo';
+        } else {
+          // Fallback to online logo or remove logo if no file exists
+          logoSrc = process.env.EMAIL_LOGO_URL || '';
+        }
+
+        const emailHtml = buildBookingConfirmationHtml({
+          baseUrl,
+          name: bookingRequest.contact_details || 'Customer',
+          bookingId: formattedBookingId,
+          pickupLocation: bookingRequest.pickup_location || '',
+          contactMethod: bookingRequest.contact_method || 'Contact',
+          contactDetail: bookingRequest.contact_details || '',
+          serverName: 'RentNRide',
+          logoSrc,
+        });
+
+        // console.log('=== Calling emailService.sendEmail...');
+        await this.emailService.sendEmail(
+          bookingRequest.email,
+          'Booking Request Received - RentNRide',
+          emailText,
+          emailHtml,
+          { inlineLogoPath },
+        );
+        // console.log('=== Booking request email sent successfully to:', bookingRequest.email);
+      } catch (error) {
+        console.error('=== Failed to send booking request email:', error);
+      }
+    } else {
+      console.log('=== No email provided for booking request, skipping email');
+    }
+
     return {
       ...bookingRequest,
       bookingId: formattedBookingId,
@@ -78,14 +164,25 @@ export class BookingRequestController {
     return this.bookingRequestService.findAll({ where });
   }
 
-  // Admin only - Get all booking requests
+  // Admin và Dealer - Get all booking requests
+  // Admin xem tất cả, Dealer chỉ xem booking requests được gán cho mình
   @Get('/')
-  @Roles(ROLES_ENUM.ADMIN)
-  // @UseGuards(JwtAuthGuard)
+  @Roles(ROLES_ENUM.ADMIN, ROLES_ENUM.DEALER)
+  @UseGuards(JwtAuthGuard)
   async getAllBookingRequests(
+    @CurrentUser() user: any,
     @Query('status') status?: string,
   ): Promise<BookingRequestModel[]> {
-    const where = status ? { status } : {};
+    let where: any = status ? { status } : {};
+
+    // Dealer chỉ xem booking requests được gán cho mình
+    if (user.role === ROLES_ENUM.DEALER) {
+      where = {
+        ...where,
+        dealer_id: user.id,
+      };
+    }
+
     return this.bookingRequestService.findAll({ where });
   }
 
@@ -110,16 +207,56 @@ export class BookingRequestController {
   // Admin only - Update booking request (approve/reject/complete)
   @Put('/:id')
   @Roles(ROLES_ENUM.ADMIN)
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateBookingRequest(
     @Param('id') id: string,
     @Body() updateBookingRequestDto: UpdateBookingRequestDto,
+    @CurrentUser() user: any,
   ): Promise<BookingRequestModel> {
-    console.log('Updating booking request:', id, updateBookingRequestDto);
-    return this.bookingRequestService.update({
-      where: { id: Number(id) },
-      data: updateBookingRequestDto,
-    });
+    try {
+      // console.log('=== UPDATE BOOKING REQUEST START ===');
+      // console.log('Booking ID:', id);
+      // console.log('User:', { id: user?.id, role: user?.role });
+      // console.log('Request body:', JSON.stringify(updateBookingRequestDto, null, 2));
+
+      const bookingId = Number(id);
+      if (isNaN(bookingId)) {
+        console.error('Invalid booking ID:', id);
+        throw new Error('Invalid booking ID');
+      }
+
+      // For dealers, verify they own this booking
+      if (user.role === ROLES_ENUM.DEALER) {
+        const dealer = await this.dealerService.findDealerByUserId(user.id);
+        if (dealer) {
+          const booking = await this.bookingRequestService.findOne({ id: bookingId });
+          if (booking && booking.dealer_id !== dealer.id) {
+            console.error('Dealer access denied. Booking dealer_id:', booking.dealer_id, 'User dealer_id:', dealer.id);
+            throw new Error('You can only update your own bookings');
+          }
+        }
+      }
+
+      // Validate bike belongs to dealer if both are specified
+      if (updateBookingRequestDto.dealer_id && updateBookingRequestDto.bike_id) {
+        // console.log('Validating bike belongs to dealer...');
+        // Add validation logic here if needed
+      }
+
+      // console.log('Calling service update...');
+      const result = await this.bookingRequestService.update({
+        where: { id: bookingId },
+        data: updateBookingRequestDto,
+      });
+
+      // console.log('=== UPDATE BOOKING REQUEST SUCCESS ===');
+      return result;
+    } catch (error) {
+      console.error('=== UPDATE BOOKING REQUEST ERROR ===');
+      console.error('Error details:', error);
+      console.error('Stack trace:', error.stack);
+      throw error;
+    }
   }
 
   // Admin only - Delete booking request

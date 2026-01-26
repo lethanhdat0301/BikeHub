@@ -22,7 +22,11 @@ import { ROLES_ENUM } from '../../shared/constants/global.constants';
 import { RentalService } from './rental.service';
 import { CreateRentalDto, UpdateRentalDto } from './rental.dto';
 import { EmailService } from '../email/email.service';
+import { buildRentalConfirmationHtml } from '../email/templates/rental-confirmation.template';
 import { UserService } from '../user/user.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { generateBookingCode } from 'src/ultis/ultis';
+import * as fs from 'fs';
 
 @ApiTags('rentals')
 @Controller('/rentals')
@@ -31,6 +35,7 @@ export class RentalController {
     private rentalService: RentalService,
     private emailService: EmailService,
     private userService: UserService,
+    private prisma: PrismaService,
   ) { }
 
   // ================= PUBLIC ENDPOINT =================
@@ -82,6 +87,8 @@ export class RentalController {
       }
     }
 
+    const newBookingCode = generateBookingCode();
+
     // Create rental with pending status
     const rental = await this.rentalService.create({
       start_time: new Date(start_date),
@@ -93,6 +100,7 @@ export class RentalController {
       contact_email: contact_email || '',
       contact_phone: contact_phone || '',
       pickup_location: pickup_location || '',
+      booking_code: newBookingCode,
       ...(finalUserId ? { User: { connect: { id: finalUserId } } } : {}),
       Bike: { connect: { id: bike_id } },
     });
@@ -100,8 +108,8 @@ export class RentalController {
     // Fetch complete rental details with bike and dealer info
     const rentalDetails: any = await this.rentalService.findOne({ id: rental.id });
 
-    // Prepare booking details response with formatted booking ID
-    const formattedBookingId = `BK${String(rental.id).padStart(6, '0')}`;
+    const formattedBookingId = rental.booking_code;
+
     const bookingDetails = {
       bookingId: formattedBookingId,
       bikeCode: rentalDetails?.Bike?.id || bike_id,
@@ -116,47 +124,73 @@ export class RentalController {
       status: rental.status,
     };
 
-    // Send confirmation email
+    // Send confirmation email (plain-text + HTML template)
     if (contact_email) {
       try {
-        console.log('=== Attempting to send confirmation email to:', contact_email);
-        const emailContent = `
-Dear ${contact_name || 'Customer'},
+        // console.log('=== Attempting to send confirmation email to:', contact_email);
 
-Your bike rental booking has been confirmed!
+        const emailText = `Dear ${contact_name || 'Customer'},\n\nYour bike rental booking has been confirmed!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: ${price}\n\nThank you for choosing RentNRide!\n\nBest regards,\nRentNRide Team`;
 
-Booking Details:
-- Booking ID: ${formattedBookingId}
-- Bike Model: ${bookingDetails.bikeModel}
-- Bike Code: ${bookingDetails.bikeCode}
-- Booking Date: ${new Date(bookingDetails.bookingDate).toLocaleDateString()}
-- Rental Period: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}
-- Pickup Location: ${bookingDetails.pickupLocation}
-- Total Price: $${price}
-- Dealer: ${bookingDetails.dealerName}
-- Dealer Contact: ${bookingDetails.dealerPhone}
+        // Get the appropriate base URL based on environment
+        const getBaseUrl = () => {
+          if (process.env.NODE_ENV === 'production' && process.env.BASE_URL_PROD) {
+            return process.env.BASE_URL_PROD;
+          } else if (process.env.NODE_ENV === 'development' && process.env.BASE_URL_DEV) {
+            return process.env.BASE_URL_DEV;
+          } else if (process.env.BASE_URL_LOCAL) {
+            return process.env.BASE_URL_LOCAL;
+          } else {
+            return 'http://localhost:3000';
+          }
+        };
 
-Thank you for choosing BikeHub!
+        const baseUrl = getBaseUrl().replace(/\/$/, '') + '/'; // Ensure proper trailing slash
 
-Best regards,
-BikeHub Team
-        `;
+        // Handle logo for email
+        let logoSrc = 'cid:logo';
+        let inlineLogoPath: string | undefined = undefined;
+
+        const emailLogoPath = process.env.EMAIL_LOGO_PATH;
+        if (emailLogoPath && fs.existsSync(emailLogoPath)) {
+          inlineLogoPath = emailLogoPath;
+          logoSrc = 'cid:logo';
+        } else {
+          // Fallback to online logo or remove logo if no file exists
+          logoSrc = process.env.EMAIL_LOGO_URL || '';
+        }
+
+        const emailHtml = buildRentalConfirmationHtml({
+          name: contact_name || 'Customer',
+          bookingId: formattedBookingId,
+          bikeModel: bookingDetails.bikeModel,
+          bikeCode: bookingDetails.bikeCode,
+          startDate: new Date(start_date).toLocaleDateString(),
+          endDate: new Date(end_date).toLocaleDateString(),
+          pickupLocation: bookingDetails.pickupLocation,
+          price: price,
+          dealerName: bookingDetails.dealerName,
+          dealerPhone: bookingDetails.dealerPhone,
+          baseUrl,
+          logoSrc,
+        });
 
         await this.emailService.sendEmail(
           contact_email,
-          'Booking Confirmation - BikeHub',
-          emailContent,
+          'Booking Confirmation - RentNRide',
+          emailText,
+          emailHtml,
+          { inlineLogoPath },
         );
-        console.log('=== Email sent successfully to:', contact_email);
+        // console.log('=== Email sent successfully to:', contact_email);
       } catch (error) {
         console.error('=== Failed to send confirmation email:', error);
         // Don't fail the request if email fails
       }
     } else {
-      console.log('=== No contact_email provided, skipping email notification');
+      // console.log('=== No contact_email provided, skipping email notification');
     }
 
-    console.log('=== Returning booking details:', bookingDetails);
+    // console.log('=== Returning booking details:', bookingDetails);
     return bookingDetails;
   }
 
@@ -164,17 +198,28 @@ BikeHub Team
   private async checkDealerOwnRental(
     rentalId: number,
     user: any,
-  ): Promise<RentalModel> {
-    const rental = await this.rentalService.findOne({ id: rentalId });
+  ): Promise<any> {
+    const rental = await this.rentalService.findOne({ id: rentalId }) as any;
 
     if (!rental) {
       throw new ForbiddenException('Rental not found');
     }
 
-    if (
-      user.role !== ROLES_ENUM.ADMIN &&
-      rental.user_id !== user.id
-    ) {
+    // Admin can access any rental
+    if (user.role === ROLES_ENUM.ADMIN) {
+      return rental;
+    }
+
+    // Dealer can only access rentals for bikes they own
+    if (user.role === ROLES_ENUM.DEALER) {
+      if (rental.Bike?.dealer_id !== user.id) {
+        throw new ForbiddenException('You do not own this rental - bike belongs to different dealer');
+      }
+      return rental;
+    }
+
+    // Regular users can only access their own rentals
+    if (rental.user_id !== user.id) {
       throw new ForbiddenException('You do not own this rental');
     }
 
@@ -193,7 +238,7 @@ BikeHub Team
         orderBy: { created_at: 'desc' },
       });
     }
-    
+
     // Dealers see rentals for bikes they own
     if (user.role === ROLES_ENUM.DEALER) {
       return this.rentalService.findAll({
@@ -260,19 +305,11 @@ BikeHub Team
   async searchRentals(
     @Param('query') query: string,
   ): Promise<RentalModel[]> {
-    // Search by booking ID (format: BK001234), phone, or email
-    // First check if query is a booking ID format
-    let bookingId: number | null = null;
-    if (query.toUpperCase().startsWith('BK')) {
-      const idStr = query.substring(2);
-      bookingId = parseInt(idStr, 10);
-    }
-
     // Search in multiple fields
     const rentals = await this.rentalService.findAll({
       where: {
         OR: [
-          ...(bookingId ? [{ id: bookingId }] : []),
+          { booking_code: query },
           { contact_phone: { contains: query } },
           { contact_email: { contains: query.toLowerCase() } },
           {
@@ -284,6 +321,14 @@ BikeHub Team
             }
           }
         ]
+      },
+      include: {
+        Bike: {
+          include: {
+            Dealer: true
+          }
+        },
+        User: true
       },
       orderBy: { created_at: 'desc' },
     } as any);
@@ -344,8 +389,11 @@ BikeHub Team
       throw new ForbiddenException('You can only create rentals for yourself');
     }
 
+    const newBookingCode = generateBookingCode();
+
     return this.rentalService.create({
       ...rest,
+      booking_code: newBookingCode,
       User: {
         connect: { id: user_id },
       },
@@ -366,7 +414,7 @@ BikeHub Team
   ): Promise<RentalModel> {
     await this.checkDealerOwnRental(id, user);
 
-    const { user_id, bike_id, ...rest } = dto;
+    const { user_id, bike_id, transfer_park_id, transfer_dealer_id, current_location, ...rest } = dto;
 
     if (
       user.role !== ROLES_ENUM.ADMIN &&
@@ -374,6 +422,44 @@ BikeHub Team
       user_id !== user.id
     ) {
       throw new ForbiddenException('You cannot change rental owner');
+    }
+
+    // Handle transfer logic if provided
+    let transferData = {};
+    if (transfer_park_id && user.role === ROLES_ENUM.ADMIN) {
+      // Transfer bike to new park (admin only)
+      const currentRental = await this.rentalService.findOne({ id });
+      if (currentRental?.bike_id) {
+        await this.prisma.bike.update({
+          where: { id: currentRental.bike_id },
+          data: { park_id: transfer_park_id }
+        });
+        // console.log(`Transferred bike ${currentRental.bike_id} to park ${transfer_park_id}`);
+      }
+    }
+
+    if (transfer_dealer_id && user.role === ROLES_ENUM.ADMIN) {
+      // Transfer bike to new dealer (admin only)
+      const currentRental = await this.rentalService.findOne({ id });
+      if (currentRental?.bike_id) {
+        await this.prisma.bike.update({
+          where: { id: currentRental.bike_id },
+          data: { dealer_id: transfer_dealer_id }
+        });
+        // console.log(`Transferred bike ${currentRental.bike_id} to dealer ${transfer_dealer_id}`);
+      }
+    }
+
+    // Update bike location if current_location is provided
+    if (current_location) {
+      const currentRental = await this.rentalService.findOne({ id });
+      if (currentRental?.bike_id) {
+        await this.prisma.bike.update({
+          where: { id: currentRental.bike_id },
+          data: { location: current_location }
+        });
+        // console.log(`Updated bike ${currentRental.bike_id} location to: ${current_location}`);
+      }
     }
 
     return this.rentalService.update({
@@ -411,5 +497,13 @@ BikeHub Team
     @Body() body: { rating?: number; review?: string },
   ): Promise<RentalModel> {
     return this.rentalService.returnBike(id, body.rating, body.review);
+  }
+
+  // ================= FIX MISSING CONTACT INFO =================
+  @Post('fix-contact-info')
+  @Roles(ROLES_ENUM.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  async fixMissingContactInfo(): Promise<any> {
+    return this.rentalService.fixMissingContactInfo();
   }
 }
