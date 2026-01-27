@@ -181,7 +181,34 @@ export class RentalController {
           emailHtml,
           { inlineLogoPath },
         );
-        // console.log('=== Email sent successfully to:', contact_email);
+
+        // Send email to dealer
+        if (rentalDetails?.Bike?.Dealer?.email) {
+          const dealerEmailText = `Dear ${bookingDetails.dealerName},\n\nA new booking has been made for one of your bikes!\n\nBooking ID: ${formattedBookingId}\nBike: ${bookingDetails.bikeModel} (${bookingDetails.bikeCode})\nPeriod: ${new Date(start_date).toLocaleDateString()} - ${new Date(end_date).toLocaleDateString()}\nPickup: ${bookingDetails.pickupLocation}\nTotal: ${price}\n\nPlease ensure the bike is ready for the customer.\n\nBest regards,\nRentNRide Team`;
+
+          const dealerEmailHtml = buildRentalConfirmationHtml({
+            name: bookingDetails.dealerName,
+            bookingId: formattedBookingId,
+            bikeModel: bookingDetails.bikeModel,
+            bikeCode: bookingDetails.bikeCode,
+            startDate: new Date(start_date).toLocaleDateString(),
+            endDate: new Date(end_date).toLocaleDateString(),
+            pickupLocation: bookingDetails.pickupLocation,
+            price: price,
+            dealerName: bookingDetails.dealerName,
+            dealerPhone: bookingDetails.dealerPhone,
+            baseUrl,
+            logoSrc,
+          });
+
+          await this.emailService.sendEmail(
+            rentalDetails.Bike.Dealer.email,
+            'New Booking Notification - RentNRide',
+            dealerEmailText,
+            dealerEmailHtml,
+            { inlineLogoPath },
+          );
+        }
       } catch (error) {
         console.error('=== Failed to send confirmation email:', error);
         // Don't fail the request if email fails
@@ -307,20 +334,23 @@ export class RentalController {
   ): Promise<RentalModel[]> {
     // Search in multiple fields
     const rentals = await this.rentalService.findAll({
-      where: {
-        OR: [
-          { booking_code: query },
-          { contact_phone: { contains: query } },
-          { contact_email: { contains: query.toLowerCase() } },
-          {
-            User: {
-              OR: [
-                { phone: { contains: query } },
-                { email: { contains: query.toLowerCase() } },
-              ]
+      where:
+      {
+        OR:
+          [
+            { booking_code: query },
+            { contact_phone: { contains: query } },
+            { contact_email: { contains: query.toLowerCase() } },
+            {
+              User: {
+                OR:
+                  [
+                    { phone: { contains: query } },
+                    { email: { contains: query.toLowerCase() } },
+                  ]
+              }
             }
-          }
-        ]
+          ]
       },
       include: {
         Bike: {
