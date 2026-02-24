@@ -36,9 +36,7 @@ import { SearchIcon, StarIcon } from "@chakra-ui/icons";
 import { useTranslation } from 'react-i18next';
 import { FaMotorcycle, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign, FaPhone, FaUser } from "react-icons/fa";
 import api from "../../apis/axios";
-import bike1 from "../../assets/images/bikes/bike1.jpg";
-import bike2 from "../../assets/images/bikes/bike2.webp";
-import bike3 from "../../assets/images/bikes/bike3.webp";
+import bike1 from "../../assets/images/bikes/bike-placeholder.jpg";
 
 interface Rental {
     id: number;
@@ -88,54 +86,7 @@ const ReturnPage: React.FC = () => {
         }
     }, [isOpen]);
 
-    // Mock data for rentals
-    const mockRentals: Rental[] = [
-        {
-            id: 1,
-            bookingId: "BK001234",
-            bikeName: "Honda SH 150i",
-            bikeModel: "Scooter",
-            bikeImage: bike1,
-            startDate: "2024-12-20",
-            endDate: "2024-12-27",
-            pickupLocation: "Phu Quoc Airport",
-            status: "active",
-            totalPrice: 8750000,
-            daysRented: 7,
-            dealerName: "Nguyen Van A",
-            dealerPhone: "0912345678",
-        },
-        {
-            id: 2,
-            bookingId: "BK001235",
-            bikeName: "Yamaha Exciter 155",
-            bikeModel: "Standard",
-            bikeImage: bike2,
-            startDate: "2024-12-22",
-            endDate: "2024-12-29",
-            pickupLocation: "Nha Trang Center",
-            status: "active",
-            totalPrice: 6125000,
-            daysRented: 7,
-            dealerName: "Tran Thi B",
-            dealerPhone: "0987654321",
-        },
-        {
-            id: 3,
-            bookingId: "BK001236",
-            bikeName: "Honda Wave Alpha",
-            bikeModel: "Standard",
-            bikeImage: bike3,
-            startDate: "2024-12-15",
-            endDate: "2024-12-22",
-            pickupLocation: "Downtown",
-            status: "completed",
-            totalPrice: 4375000,
-            daysRented: 7,
-            dealerName: "Le Van C",
-            dealerPhone: "0901234567",
-        },
-    ];
+
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();

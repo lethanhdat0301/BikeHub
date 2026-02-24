@@ -27,12 +27,8 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from "react-router-dom";
 import CardBike from "../../components/home/bikes/cardBike.component";
 import bikeService from "../../services/bikeService";
-import bike1 from "../../assets/images/bikes/bike1.jpg";
-import bike2 from "../../assets/images/bikes/bike2.webp";
-import bike3 from "../../assets/images/bikes/bike3.webp";
+import bike1 from "../../assets/images/bikes/bike-placeholder.jpg";
 
-// Default images
-const defaultImages = [bike1, bike2, bike3];
 
 const SearchPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -77,7 +73,7 @@ const SearchPage: React.FC = () => {
                 // Hiển thị tất cả xe với Google Cloud Storage URL
                 const allBikes = data.map((bike) => ({
                     ...bike,
-                    image: bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : defaultImages[0],
+                    image: bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : bike1,
                 }));
 
                 // console.log(`📊 Hiển thị ${allBikes.length} xe`);
