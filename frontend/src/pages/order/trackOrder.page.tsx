@@ -44,7 +44,7 @@ import {
     FaBuilding,
 } from "react-icons/fa";
 import api from "../../apis/axios";
-import bike1 from "../../assets/images/bikes/bike1.jpg";
+import bike1 from "../../assets/images/bikes/bike-placeholder.jpg";
 import bike2 from "../../assets/images/bikes/bike2.webp";
 
 interface Order {

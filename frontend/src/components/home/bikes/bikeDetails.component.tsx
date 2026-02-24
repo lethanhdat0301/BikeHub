@@ -16,7 +16,7 @@ import {
   Tag,
 } from "@chakra-ui/react";
 import { Bike } from "./cardBike.component";
-import bikeImage from "../../../assets/images/bikes/bike1.jpg";
+import bikeImage from "../../../assets/images/bikes/bike-placeholder.jpg";
 import { TbManualGearbox } from "react-icons/tb";
 import { MdSpeed } from "react-icons/md";
 import { AiOutlineDollarCircle } from "react-icons/ai";
@@ -104,7 +104,7 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <IoPersonOutline size={26} color="orange" />
                     <Text className="text-gray-800 font-medium">
-                      {t('bike.minimalDriverAge')}: 
+                      {t('bike.minimalDriverAge')}:
                     </Text>
                     <Text className="text-gray-500 font-medium">15</Text>
                   </Flex>

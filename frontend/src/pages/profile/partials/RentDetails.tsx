@@ -7,7 +7,7 @@ import {
   // Icon,
   Text,
 } from "@chakra-ui/react";
-import bikeImg from "../../../assets/images/bikes/bike1.jpg";
+import bikeImg from "../../../assets/images/bikes/bike-placeholder.jpg";
 import qrCode from "../../../assets/images/bikes/qr-code.png";
 import { Rental } from "../Profile.page";
 import moment from "moment";

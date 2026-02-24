@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import CardBike from "./cardBike.component";
 import { Reveal } from "../../motion/reveal.component";
 import bikeService from "../../../services/bikeService";
-import bike1 from "../../../assets/images/bikes/bike1.jpg";
+import bike1 from "../../../assets/images/bikes/bike-placeholder.jpg";
 import bike2 from "../../../assets/images/bikes/bike2.webp";
 import bike3 from "../../../assets/images/bikes/bike3.webp";
 
