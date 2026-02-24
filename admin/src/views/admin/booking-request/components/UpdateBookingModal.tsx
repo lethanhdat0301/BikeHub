@@ -260,47 +260,66 @@ const UpdateBookingRequestModal: React.FC<Props> = ({ isOpen, onClose, booking, 
     const handleUpdateBooking = async () => {
         setLoading(true);
         try {
-            // Enhanced validation before sending
-            if (!formData.dealer_id || !formData.bike_id) {
-                alert("Please select both dealer and bike");
-                return;
+            // Enhanced validation for APPROVED status
+            if (formData.status === 'APPROVED') {
+                if (!formData.dealer_id || !formData.bike_id) {
+                    alert("❌ Cannot approve booking:\n\n✓ Dealer must be selected\n✓ Motorbike must be selected\n\nPlease select both before approving.");
+                    setLoading(false);
+                    return;
+                }
+
+                if (!formData.start_date || !formData.end_date) {
+                    alert("❌ Cannot approve booking:\n\n✓ Start date is required\n✓ End date is required\n\nPlease provide rental period before approving.");
+                    setLoading(false);
+                    return;
+                }
+
+                if (!formData.estimated_price || formData.estimated_price <= 0) {
+                    alert("❌ Cannot approve booking:\n\n✓ Estimated price must be greater than 0\n\nPlease set the rental price before approving.");
+                    setLoading(false);
+                    return;
+                }
             }
 
-            if (!formData.start_date || !formData.end_date) {
-                alert("Please provide both start and end dates");
-                return;
+            // General validation
+            if (formData.dealer_id && formData.bike_id) {
+                // Validate bike belongs to dealer
+                const selectedBike = bikes.find(bike => bike.id === Number(formData.bike_id));
+                const selectedDealer = dealers.find(dealer => dealer.id === Number(formData.dealer_id));
+
+                if (!selectedBike || !selectedDealer) {
+                    alert("Error: Selected bike or dealer not found");
+                    setLoading(false);
+                    return;
+                }
+
+                if (selectedBike.dealer_id !== Number(formData.dealer_id)) {
+                    alert(`❌ Error: Bike "${selectedBike.model}" does not belong to selected dealer "${selectedDealer.name}"\n\nPlease select a bike that belongs to the chosen dealer.`);
+                    setLoading(false);
+                    return;
+                }
             }
 
-            // Validate bike belongs to dealer
-            const selectedBike = bikes.find(bike => bike.id === Number(formData.bike_id));
-            const selectedDealer = dealers.find(dealer => dealer.id === Number(formData.dealer_id));
+            // Validate dates if provided
+            if (formData.start_date && formData.end_date) {
+                const startDate = new Date(formData.start_date);
+                const endDate = new Date(formData.end_date);
 
-            if (!selectedBike || !selectedDealer) {
-                alert("Error: Selected bike or dealer not found");
-                return;
-            }
+                if (startDate >= endDate) {
+                    alert("End date must be after start date");
+                    setLoading(false);
+                    return;
+                }
 
-            if (selectedBike.dealer_id !== Number(formData.dealer_id)) {
-                alert(`Error: Bike "${selectedBike.model}" does not belong to selected dealer "${selectedDealer.name}"`);
-                return;
-            }
+                // Check if dates are in the past
+                const now = new Date();
+                const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-            // Validate dates
-            const startDate = new Date(formData.start_date);
-            const endDate = new Date(formData.end_date);
-
-            if (startDate >= endDate) {
-                alert("End date must be after start date");
-                return;
-            }
-
-            // Check if dates are in the past
-            const now = new Date();
-            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-            if (startDate < yesterday && booking.status === 'PENDING') {
-                setShowPastDateConfirm(true);
-                return;
+                if (startDate < yesterday && booking.status === 'PENDING') {
+                    setShowPastDateConfirm(true);
+                    setLoading(false);
+                    return;
+                }
             }
 
             await performUpdate();
