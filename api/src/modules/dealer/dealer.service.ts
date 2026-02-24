@@ -72,47 +72,58 @@ export class DealerService {
         if (!data.park_id) {
             throw new Error('park_id is required. Dealer must be assigned to a park.');
         }
-        return this.prisma.$transaction(async (tx) => {
-            // Verify park exists
-            const park = await this.prisma.park.findUnique({
-                where: { id: data.park_id }
-            });
 
-            if (!park) {
-                throw new Error(`Park with id ${data.park_id} does not exist.`);
+        try {
+            return await this.prisma.$transaction(async (tx) => {
+                // Verify park exists
+                const park = await tx.park.findUnique({
+                    where: { id: data.park_id }
+                });
+
+                if (!park) {
+                    throw new Error(`Park with id ${data.park_id} does not exist.`);
+                }
+
+                // Prisma middleware sẽ tự động hash password, không cần hash ở đây
+                const user = await tx.user.create({
+                    data: {
+                        name: data.name,
+                        email: data.email,
+                        password: data.password, // Sẽ được hash bởi UserListener middleware
+                        phone: data.phone,
+                        role: 'dealer',
+                        birthdate: new Date(),
+                    },
+                });
+
+                const dealer = await tx.dealer.create({
+                    data: {
+                        User: {
+                            connect: { id: user.id }
+                        },
+                        Park: {
+                            connect: { id: park.id }
+                        },
+                        name: data.name,
+                        email: data.email,
+                        phone: data.phone,
+                        telegram: data.telegram,
+                        location: data.location,
+                        status: 'Active',
+                    },
+                });
+
+                return { user, dealer };
+            });
+        } catch (err: any) {
+            // Prisma unique constraint error
+            if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
+                // either user.email or dealer.email caused the conflict
+                throw new Error('Email already in use');
             }
-
-            // Prisma middleware sẽ tự động hash password, không cần hash ở đây
-            const user = await this.prisma.user.create({
-                data: {
-                    name: data.name,
-                    email: data.email,
-                    password: data.password, // Sẽ được hash bởi UserListener middleware
-                    phone: data.phone,
-                    role: 'dealer',
-                    birthdate: new Date(),
-                },
-            });
-
-            const dealer = await this.prisma.dealer.create({
-                data: {
-                    User: {
-                        connect: { id: user.id }
-                    },
-                    Park: {
-                        connect: { id: park.id }
-                    },
-                    name: data.name,
-                    email: data.email,
-                    phone: data.phone,
-                    telegram: data.telegram,
-                    location: data.location,
-                    status: 'Active',
-                },
-            });
-
-            return { user, dealer };
-        });
+            // rethrow other errors so controller can translate them
+            throw err;
+        }
     }
 
     // New method to find dealer by user ID
@@ -133,8 +144,24 @@ export class DealerService {
     }
 
     async remove(id: number) {
-        return this.prisma.dealer.delete({
-            where: { id },
+        // when deleting a dealer we also remove the associated user to allow
+        // re-creation with the same email later. use transaction to ensure both
+        // records are cleaned up.
+        return this.prisma.$transaction(async (tx) => {
+            const dealer = await tx.dealer.findUnique({
+                where: { id },
+                select: { user_id: true }
+            });
+            if (!dealer) {
+                throw new Error(`Dealer with id ${id} not found`);
+            }
+
+            // delete dealer first (optional since user onDelete is cascade)
+            await tx.dealer.delete({ where: { id } });
+            // delete the user record as well
+            await tx.user.delete({ where: { id: dealer.user_id } });
+
+            return { success: true };
         });
     }
 }

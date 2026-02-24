@@ -7,6 +7,8 @@ import {
     Param,
     Delete,
     UseGuards,
+    BadRequestException,
+    InternalServerErrorException,
 } from '@nestjs/common';
 import { DealerService } from './dealer.service';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
@@ -35,7 +37,23 @@ export class DealerController {
     @Post('create-account')
     async createDealerWithAccount(@Body() body: any) {
         // Tạo cả User và Dealer trong một endpoint
-        return this.dealerService.createDealerWithAccount(body);
+        try {
+            return await this.dealerService.createDealerWithAccount(body);
+        } catch (err: any) {
+            // map known errors to HttpException
+            if (err.message && err.message.includes('Email already')) {
+                throw new BadRequestException(err.message);
+            }
+            // prisma missing park or other business logic
+            if (err.message && err.message.includes('park_id is required')) {
+                throw new BadRequestException(err.message);
+            }
+            if (err.message && err.message.includes('does not exist')) {
+                throw new BadRequestException(err.message);
+            }
+            // fallback
+            throw new InternalServerErrorException(err.message);
+        }
     }
 
     @Post()
