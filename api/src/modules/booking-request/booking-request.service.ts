@@ -248,6 +248,149 @@ export class BookingRequestService {
       }
       // console.log('Current booking found:', currentBooking ? 'Yes' : 'No');
 
+      // Validate required fields when approving booking
+      if (processedData.status === 'APPROVED') {
+        const finalBikeId = dataAny.bike_id || currentBooking.bike_id;
+        const finalDealerId = dataAny.dealer_id || currentBooking.dealer_id;
+        const finalStartDate = processedData.start_date || currentBooking.start_date;
+        const finalEndDate = processedData.end_date || currentBooking.end_date;
+        const finalPrice = processedData.estimated_price || currentBooking.estimated_price;
+
+        if (!finalBikeId) {
+          throw new Error('Cannot approve booking: Motorbike must be selected');
+        }
+        if (!finalDealerId) {
+          throw new Error('Cannot approve booking: Dealer must be assigned');
+        }
+        if (!finalStartDate || !finalEndDate) {
+          throw new Error('Cannot approve booking: Start date and end date are required');
+        }
+        if (!finalPrice) {
+          throw new Error('Cannot approve booking: Estimated price is required');
+        }
+
+        // Validate bike belongs to dealer
+        const bike = await this.prisma.bike.findUnique({ 
+          where: { id: Number(finalBikeId) },
+          include: { Dealer: true }
+        });
+        if (bike && bike.dealer_id !== Number(finalDealerId)) {
+          throw new Error(`Cannot approve booking: Selected bike does not belong to the assigned dealer`);
+        }
+      }
+
+      // Use transaction to ensure atomic operations when approving
+      if (
+        currentBooking?.status !== 'APPROVED' &&
+        processedData.status === 'APPROVED'
+      ) {
+        // Approving booking - use transaction to ensure rental creation and bike update are atomic
+        const result = await this.prisma.$transaction(async (prisma) => {
+          // Update booking status
+          const updatedBooking = await prisma.bookingRequest.update({
+            data: processedData,
+            where,
+            include: {
+              User: true,
+            },
+          });
+
+          // Check if rental already exists for this booking
+          const existingRental = await prisma.rental.findFirst({
+            where: { booking_request_id: updatedBooking.id },
+          });
+
+          if (existingRental) {
+            console.log('Rental already exists for this booking, skipping creation');
+            return updatedBooking;
+          }
+
+          // Create rental if all required fields are present
+          if (
+            updatedBooking.bike_id &&
+            updatedBooking.start_date &&
+            updatedBooking.end_date &&
+            updatedBooking.estimated_price
+          ) {
+            console.log('Creating rental from approved booking...');
+            await prisma.rental.create({
+              data: {
+                user_id: updatedBooking.user_id,
+                bike_id: updatedBooking.bike_id,
+                booking_request_id: updatedBooking.id,
+                start_time: updatedBooking.start_date,
+                end_time: updatedBooking.end_date,
+                status: 'active',
+                price: updatedBooking.estimated_price,
+                contact_name: updatedBooking.name,
+                contact_email: updatedBooking.email,
+                contact_phone: updatedBooking.contact_details,
+                pickup_location: updatedBooking.pickup_location,
+                booking_code: updatedBooking.booking_code,
+              },
+            });
+            console.log('Rental created successfully');
+
+            // Update bike status to rented
+            await prisma.bike.update({
+              where: { id: updatedBooking.bike_id },
+              data: { status: 'rented' },
+            });
+            console.log('Bike status updated to rented');
+          }
+
+          return updatedBooking;
+        });
+
+        return result;
+      }
+
+      // Handle reverting from APPROVED to PENDING/REJECTED - cancel/delete rental
+      if (
+        currentBooking?.status === 'APPROVED' &&
+        (processedData.status === 'PENDING' || processedData.status === 'REJECTED')
+      ) {
+        console.log('Reverting booking from APPROVED, cleaning up rental...');
+        const result = await this.prisma.$transaction(async (prisma) => {
+          // Update booking status
+          const updatedBooking = await prisma.bookingRequest.update({
+            data: processedData,
+            where,
+            include: {
+              User: true,
+            },
+          });
+
+          // Find and delete associated rental
+          const rental = await prisma.rental.findFirst({
+            where: { booking_request_id: updatedBooking.id },
+          });
+
+          if (rental) {
+            console.log('Found rental to delete:', rental.id);
+            // Delete the rental
+            await prisma.rental.delete({
+              where: { id: rental.id },
+            });
+            console.log('Rental deleted successfully');
+
+            // Update bike status back to available if bike exists
+            if (rental.bike_id) {
+              await prisma.bike.update({
+                where: { id: rental.bike_id },
+                data: { status: 'available' },
+              });
+              console.log('Bike status updated to available');
+            }
+          }
+
+          return updatedBooking;
+        });
+
+        return result;
+      }
+
+      // Regular update (not approving or reverting)
       // console.log('Updating booking in database...');
       const updatedBooking = await this.prisma.bookingRequest.update({
         data: processedData,
@@ -257,42 +400,6 @@ export class BookingRequestService {
         },
       });
       // console.log('Database update successful');
-
-      // If status changed to APPROVED and all required fields are present, create rental
-      if (
-        currentBooking?.status !== 'APPROVED' &&
-        updatedBooking.status === 'APPROVED' &&
-        updatedBooking.bike_id &&
-        updatedBooking.start_date &&
-        updatedBooking.end_date &&
-        updatedBooking.estimated_price
-      ) {
-        // console.log('Creating rental from approved booking...');
-        await this.prisma.rental.create({
-          data: {
-            user_id: updatedBooking.user_id,
-            bike_id: updatedBooking.bike_id,
-            booking_request_id: updatedBooking.id,
-            start_time: updatedBooking.start_date,
-            end_time: updatedBooking.end_date,
-            status: 'active',
-            price: updatedBooking.estimated_price,
-            contact_name: updatedBooking.name,
-            contact_email: updatedBooking.email,
-            contact_phone: updatedBooking.contact_details,
-            pickup_location: updatedBooking.pickup_location,
-            booking_code: updatedBooking.booking_code,
-          },
-        });
-        // console.log('Rental created successfully');
-
-        // Update bike status to rented
-        await this.prisma.bike.update({
-          where: { id: updatedBooking.bike_id },
-          data: { status: 'rented' },
-        });
-        // console.log('Bike status updated to rented');
-      }
 
       // console.log('=== BOOKING REQUEST SERVICE UPDATE SUCCESS ===');
       return updatedBooking;

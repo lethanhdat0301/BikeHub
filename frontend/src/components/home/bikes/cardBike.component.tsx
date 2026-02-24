@@ -14,7 +14,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Reveal } from "../../motion/reveal.component";
-import bikeImage from "../../../assets/images/bikes/bike1.jpg";
+import bikeImage from "../../../assets/images/bikes/bike-placeholder.jpg";
 import { FaStar, FaHeart, FaGasPump, FaBolt, FaUsers } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 import BikeDetails from "./bikeDetails.component";
@@ -129,7 +129,7 @@ const CardBike = ({
           </Heading>
           {bike.license_plate && (
             <Badge colorScheme="purple" fontSize="xs" mt={1} px={2} py={0.5} borderRadius="md">
-              🏍️ {bike.license_plate}
+              🏍️ xx-xx{bike.license_plate.slice(-3)}
             </Badge>
           )}
           {bike.code && (
