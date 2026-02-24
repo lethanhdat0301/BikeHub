@@ -44,11 +44,22 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
         }
 
         try {
+            const token =
+                localStorage.getItem("token") ||
+                localStorage.getItem("accessToken") ||
+                localStorage.getItem("user_token");
+
+            const headers: HeadersInit = {};
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}dealers/${dealerId}`,
                 {
                     method: "DELETE",
                     credentials: "include",
+                    headers,
                 }
             );
 
@@ -56,11 +67,12 @@ const DealerTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 alert("Dealer deleted successfully!");
                 if (onRefresh) onRefresh();
             } else {
-                alert("Failed to delete dealer");
+                const errorData = await response.json().catch(() => ({}));
+                alert(`Failed to delete dealer: ${errorData.message || response.statusText}`);
             }
         } catch (error) {
             console.error("Error deleting dealer:", error);
-            alert("An error occurred");
+            alert("An error occurred while deleting the dealer");
         }
     };
 

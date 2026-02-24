@@ -9,6 +9,7 @@ import {
     UseGuards,
     BadRequestException,
     InternalServerErrorException,
+    NotFoundException,
 } from '@nestjs/common';
 import { DealerService } from './dealer.service';
 import { JwtAuthGuard } from '../auth/auth.jwt.guard';
@@ -73,7 +74,14 @@ export class DealerController {
     @Delete(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    remove(@Param('id') id: string) {
-        return this.dealerService.remove(+id);
+    async remove(@Param('id') id: string) {
+        try {
+            return await this.dealerService.remove(+id);
+        } catch (err: any) {
+            if (err.message?.includes('not found')) {
+                throw new NotFoundException(err.message);
+            }
+            throw new InternalServerErrorException(err.message);
+        }
     }
 }

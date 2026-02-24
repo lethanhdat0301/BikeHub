@@ -116,10 +116,16 @@ export class DealerService {
                 return { user, dealer };
             });
         } catch (err: any) {
-            // Prisma unique constraint error
-            if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
-                // either user.email or dealer.email caused the conflict
-                throw new Error('Email already in use');
+            // Prisma unique constraint error (P2002)
+            if (err.code === 'P2002') {
+                const target = err.meta?.target;
+                // target can be an array of field names or a constraint-name string
+                const targetStr = Array.isArray(target)
+                    ? target.join(',')
+                    : String(target ?? '');
+                if (targetStr.toLowerCase().includes('email')) {
+                    throw new Error('Email already in use');
+                }
             }
             // rethrow other errors so controller can translate them
             throw err;
@@ -144,24 +150,21 @@ export class DealerService {
     }
 
     async remove(id: number) {
-        // when deleting a dealer we also remove the associated user to allow
-        // re-creation with the same email later. use transaction to ensure both
-        // records are cleaned up.
-        return this.prisma.$transaction(async (tx) => {
-            const dealer = await tx.dealer.findUnique({
-                where: { id },
-                select: { user_id: true }
-            });
-            if (!dealer) {
-                throw new Error(`Dealer with id ${id} not found`);
-            }
-
-            // delete dealer first (optional since user onDelete is cascade)
-            await tx.dealer.delete({ where: { id } });
-            // delete the user record as well
-            await tx.user.delete({ where: { id: dealer.user_id } });
-
-            return { success: true };
+        // Find the dealer to get the associated user_id
+        const dealer = await this.prisma.dealer.findUnique({
+            where: { id },
+            select: { user_id: true },
         });
+
+        if (!dealer) {
+            throw new Error(`Dealer with id ${id} not found`);
+        }
+
+        // Deleting the User automatically deletes the Dealer via
+        // the Dealer.user_id FK ON DELETE CASCADE constraint.
+        // This avoids any transaction-ordering issues.
+        await this.prisma.user.delete({ where: { id: dealer.user_id } });
+
+        return { success: true };
     }
 }
