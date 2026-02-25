@@ -18,6 +18,8 @@ import { ROLES_ENUM } from '../../shared/constants/global.constants';
 import { BookingRequestService } from './booking-request.service';
 import { EmailService } from '../email/email.service';
 import { buildBookingConfirmationHtml } from '../email/templates/booking-confirmation.template';
+import { buildDealerBookingNotificationHtml } from '../email/templates/dealer-booking-notification.template';
+import { buildRentalConfirmationHtml } from '../email/templates/rental-confirmation.template';
 import { DealerService } from '../dealer/dealer.service';
 import { generateBookingCode } from '../../ultis/ultis';
 import * as fs from 'fs';
@@ -250,6 +252,117 @@ export class BookingRequestController {
       });
 
       // console.log('=== UPDATE BOOKING REQUEST SUCCESS ===');
+
+      // =========================================================
+      // POST-UPDATE: Send email notifications to dealer / customer
+      // =========================================================
+      try {
+        const dtoAny = updateBookingRequestDto as any;
+        const dealerWasAssigned = dtoAny.dealer_id != null;
+        const bookingWasApproved = dtoAny.status === 'APPROVED';
+
+        if (dealerWasAssigned || bookingWasApproved) {
+          // Fetch full booking with all relations needed for email content
+          const fullBookings = await this.bookingRequestService.findAll({
+            where: { id: bookingId },
+          });
+          const fullBooking = fullBookings[0] as any;
+
+          if (fullBooking) {
+            const dealerUser = fullBooking.DealerUser;
+            const bike = fullBooking.Bike;
+            const customer = fullBooking.User;
+            const notifStatus = bookingWasApproved ? 'APPROVED' : 'ASSIGNED';
+
+            // Build common helpers
+            const baseUrl = (
+              process.env.BASE_URL_PROD ||
+              process.env.BASE_URL_DEV ||
+              process.env.BASE_URL_LOCAL ||
+              'http://localhost:3000'
+            ).replace(/\/$/, '') + '/';
+
+            let inlineLogoPath: string | undefined;
+            let logoSrc = process.env.EMAIL_LOGO_URL || '';
+            const emailLogoPath = process.env.EMAIL_LOGO_PATH;
+            if (emailLogoPath && fs.existsSync(emailLogoPath)) {
+              inlineLogoPath = emailLogoPath;
+              logoSrc = 'cid:logo';
+            }
+
+            const startDateStr = fullBooking.start_date
+              ? new Date(fullBooking.start_date).toLocaleDateString('en-GB')
+              : '';
+            const endDateStr = fullBooking.end_date
+              ? new Date(fullBooking.end_date).toLocaleDateString('en-GB')
+              : '';
+
+            // ── Email to DEALER ──
+            if (dealerUser?.email) {
+              const dealerHtml = buildDealerBookingNotificationHtml({
+                dealerName: dealerUser.name || 'Dealer',
+                bookingCode: fullBooking.booking_code || String(bookingId),
+                customerName: fullBooking.name || customer?.name || 'Customer',
+                customerContact: fullBooking.contact_details || customer?.phone || '',
+                bikeModel: bike?.model || '',
+                startDate: startDateStr,
+                endDate: endDateStr,
+                pickupLocation: fullBooking.pickup_location || '',
+                estimatedPrice: fullBooking.estimated_price,
+                status: notifStatus,
+                baseUrl,
+                logoSrc,
+              });
+              const dealerText =
+                notifStatus === 'APPROVED'
+                  ? `Dear ${dealerUser.name},\n\nBooking ${fullBooking.booking_code} has been APPROVED and you are assigned.\n\nCustomer: ${fullBooking.name}\nContact: ${fullBooking.contact_details}\nBike: ${bike?.model || 'N/A'}\nPeriod: ${startDateStr} - ${endDateStr}\nPickup: ${fullBooking.pickup_location}\n\nPlease prepare the bike for the customer.\n\nRentNRide Team`
+                  : `Dear ${dealerUser.name},\n\nYou have been assigned to booking ${fullBooking.booking_code}.\n\nCustomer: ${fullBooking.name}\nContact: ${fullBooking.contact_details}\nPickup: ${fullBooking.pickup_location}\n\nPlease log in to the dealer portal for details.\n\nRentNRide Team`;
+              await this.emailService.sendEmail(
+                dealerUser.email,
+                notifStatus === 'APPROVED'
+                  ? `Booking Approved – ${fullBooking.booking_code} | RentNRide`
+                  : `New Booking Assigned – ${fullBooking.booking_code} | RentNRide`,
+                dealerText,
+                dealerHtml,
+                { inlineLogoPath },
+              );
+            }
+
+            // ── Email to CUSTOMER when booking is APPROVED ──
+            if (bookingWasApproved) {
+              const customerEmail = fullBooking.email || customer?.email;
+              if (customerEmail) {
+                const customerHtml = buildRentalConfirmationHtml({
+                  name: fullBooking.name || customer?.name || 'Customer',
+                  bookingId: fullBooking.booking_code || String(bookingId),
+                  bikeModel: bike?.model || '',
+                  bikeCode: bike ? String(bike.id) : '',
+                  startDate: startDateStr,
+                  endDate: endDateStr,
+                  pickupLocation: fullBooking.pickup_location || '',
+                  price: fullBooking.estimated_price,
+                  dealerName: dealerUser?.name || '',
+                  dealerPhone: dealerUser?.phone || '',
+                  baseUrl,
+                  logoSrc,
+                });
+                const customerText = `Dear ${fullBooking.name || 'Customer'},\n\nGreat news! Your booking ${fullBooking.booking_code} has been APPROVED.\n\nBike: ${bike?.model || 'N/A'}\nPeriod: ${startDateStr} - ${endDateStr}\nPickup: ${fullBooking.pickup_location}\nEstimated Price: ${fullBooking.estimated_price ? fullBooking.estimated_price.toLocaleString('vi-VN') + ' VND' : 'N/A'}\nDealer: ${dealerUser?.name || 'N/A'}\n\nThank you for choosing RentNRide!`;
+                await this.emailService.sendEmail(
+                  customerEmail,
+                  `Booking Approved – ${fullBooking.booking_code} | RentNRide`,
+                  customerText,
+                  customerHtml,
+                  { inlineLogoPath },
+                );
+              }
+            }
+          }
+        }
+      } catch (emailErr) {
+        console.error('Failed to send post-update booking notifications:', emailErr);
+        // Never fail the main request because of email errors
+      }
+
       return result;
     } catch (error) {
       console.error('=== UPDATE BOOKING REQUEST ERROR ===');
