@@ -27,10 +27,16 @@ export default function SignIn() {
       });
 
       const user = res.data?.user;
+      const accessToken = res.data?.accessToken;
 
       if (user.role !== "admin" && user.role !== "dealer") {
         setError("This page is only for admins and dealers");
         return;
+      }
+
+      // Store token so API calls using Authorization header work correctly
+      if (accessToken) {
+        localStorage.setItem("token", accessToken);
       }
 
       logIn(user);

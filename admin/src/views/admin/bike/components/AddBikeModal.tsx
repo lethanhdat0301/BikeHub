@@ -134,7 +134,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
             const data = await response.json();
             const dealersList = Array.isArray(data) ? data : [];
             setAllDealers(dealersList);
-            
+
             // Filter dealers by park if park is already selected
             if (formData.park_id) {
                 const filtered = dealersList.filter((d: any) => d.park_id === parseInt(formData.park_id));
@@ -152,7 +152,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        
+
         // Filter dealers when park changes (for admin only)
         if (name === "park_id" && user && user.role === "admin") {
             if (value) {
@@ -188,12 +188,18 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                 dealerContact = dealerProfile.phone || dealerProfile.email || "";
             }
 
+            const token =
+                localStorage.getItem("token") ||
+                localStorage.getItem("accessToken") ||
+                localStorage.getItem("user_token");
+
             const response = await fetch(
                 `${process.env.REACT_APP_API_URL}bikes/bike`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
                     credentials: "include",
                     body: JSON.stringify({
@@ -333,7 +339,8 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                             {dealers.length === 0 ? "No dealers available" : "Select a dealer (optional)"}
                                         </option>
                                         {dealers.map((dealer) => (
-                                            <option key={dealer.id} value={dealer.id}>
+                                            // dealer.user_id = User table FK (= Bike.dealer_id references User.id)
+                                            <option key={dealer.id} value={dealer.user_id}>
                                                 {dealer.name} - {dealer.email}
                                             </option>
                                         ))}
