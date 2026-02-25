@@ -124,7 +124,7 @@ const AdminTable: React.FC<Props> = ({
             if (value === undefined || value === null || value === "-") return <p className="text-sm font-bold text-navy-700 dark:text-white">-</p>;
             const num = Number(value);
             if (isNaN(num)) return <p className="text-sm font-bold text-navy-700 dark:text-white">{String(value)}</p>;
-            return <p className="text-sm font-bold text-navy-700 dark:text-white">{Number(num || 0).toLocaleString('vi-VN')} VNĐ`</p>;
+            return <p className="text-sm font-bold text-navy-700 dark:text-white">{Number(num || 0).toLocaleString('vi-VN')} VNĐ</p>;
           }
 
           if (header.id === "price") {

@@ -57,24 +57,23 @@ const RentalTable: React.FC<Props> = ({ tableContent, loading, onRefresh, userRo
                     const contactEmail = row.original.contact_email;
                     const contactPhone = row.original.contact_phone;
 
-                    // console.log('Customer data:', {
-                    //     user,
-                    //     contactName,
-                    //     contactEmail,
-                    //     contactPhone,
-                    // });
+                    // Prioritise contact fields (explicitly entered by customer in booking form)
+                    // over the linked User account (which could be admin/dealer who tested the form)
+                    const displayName = contactName || user?.name || "Guest";
+                    const displayEmail = contactEmail || user?.email || "N/A";
+                    const displayPhone = contactPhone || user?.phone || null;
 
                     return (
                         <div>
                             <p className="text-sm font-bold text-navy-700 dark:text-white">
-                                {user ? user.name : contactName || "Guest"}
+                                {displayName}
                             </p>
                             <p className="text-xs text-gray-600 dark:text-gray-400">
-                                {user ? user.email : contactEmail || "N/A"}
+                                {displayEmail}
                             </p>
-                            {!user && contactPhone && (
+                            {displayPhone && (
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                                    {contactPhone}
+                                    {displayPhone}
                                 </p>
                             )}
                         </div>

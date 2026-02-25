@@ -226,11 +226,17 @@ export class UserService {
       };
     });
 
-    // Get guest customers from rentals (customers without accounts)
+    // Get guest customers from rentals:
+    // - user_id is null (true guest)
+    // - OR user_id links to a non-'user' role account (admin/dealer who submitted a booking while logged in)
     const guestRentals = await this.prisma.rental.findMany({
       where: {
-        user_id: null, // Guest rentals (no account)
         contact_name: { not: null },
+        contact_email: { not: null },
+        OR: [
+          { user_id: null },
+          { User: { role: { not: 'user' } } },
+        ],
       },
       select: {
         contact_name: true,
@@ -276,10 +282,15 @@ export class UserService {
 
     const guestCustomers = Array.from(guestCustomersMap.values());
 
-    // Get customers from booking requests (not yet converted to rentals)
+    // Get customers from booking requests:
+    // - user_id is null (guest)
+    // - OR user_id links to a non-'user' role account (admin/dealer testing)
     const bookingRequests = await this.prisma.bookingRequest.findMany({
       where: {
-        user_id: null, // Guest booking requests
+        OR: [
+          { user_id: null },
+          { User: { role: { not: 'user' } } },
+        ],
       },
       select: {
         name: true,
