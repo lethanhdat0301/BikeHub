@@ -22,14 +22,17 @@ apiClient.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Handle 401 errors globally
+// Handle 401/403 errors globally — clear session and redirect to login
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            console.warn("Unauthorized access - redirecting to login might be needed");
-            // Optional: redirect to login
-            // window.location.href = '/auth/sign-in';
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            const hasToken = !!localStorage.getItem("token");
+            if (hasToken && !window.location.pathname.includes("/auth/")) {
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+                window.location.href = "/auth/sign-in";
+            }
         }
         return Promise.reject(error);
     }
