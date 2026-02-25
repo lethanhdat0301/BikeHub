@@ -9,6 +9,7 @@ import {
   Put,
   ForbiddenException,
   UnprocessableEntityException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Bike as BikeModel } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
@@ -176,10 +177,22 @@ export class BikeController {
     if (user && user.role === ROLES_ENUM.DEALER) {
       data.Dealer = { connect: { id: user.id } };
     } else if (dealer_id) {
+      // dealer_id here is User.id (Bike.dealer_id references User.id)
       data.Dealer = { connect: { id: dealer_id } };
     }
 
-    return this.bikeService.create(data);
+    try {
+      return await this.bikeService.create(data);
+    } catch (err: any) {
+      // Prisma FK not found (e.g., park or dealer user was deleted)
+      if (err.code === 'P2025' || err.code === 'P2003') {
+        throw new UnprocessableEntityException(
+          `Could not create bike: a referenced record was not found. ${err.meta?.cause || err.message}`
+        );
+      }
+      // Re-throw as 500 with real message so frontend can display it
+      throw new InternalServerErrorException(err.message || 'Failed to create bike');
+    }
   }
 
   @Put('bike/:id')
