@@ -48,7 +48,7 @@ const AuthProvider = ({ children }: any) => {
     setIsLoading(false);
 
     // Intercept all window.fetch calls to detect 401 Unauthorized
-    originalFetch.current = window.fetch;
+    originalFetch.current = window.fetch.bind(window);
     window.fetch = async (...args) => {
       const response = await originalFetch.current!(...args);
       if (response.status === 401 || response.status === 403) {
