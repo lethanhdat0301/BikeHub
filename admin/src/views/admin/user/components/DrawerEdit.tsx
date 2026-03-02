@@ -236,10 +236,12 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
                                       try {
                                         const fd = new FormData();
                                         fd.append('file', file);
+                                        const token = localStorage.getItem('token');
                                         const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, {
                                           method: 'POST',
                                           body: fd,
                                           credentials: 'include',
+                                          headers: token ? { Authorization: `Bearer ${token}` } : {},
                                         });
                                         const payload = await res.json();
                                         if (!res.ok) throw new Error(payload?.message || 'Upload failed');
