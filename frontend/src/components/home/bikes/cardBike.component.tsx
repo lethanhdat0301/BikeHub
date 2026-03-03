@@ -63,6 +63,7 @@ const CardBike = ({
 }) => {
   const { t } = useTranslation();
   const [liked, setLiked] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const navigate = useNavigate();
 
@@ -94,12 +95,23 @@ const CardBike = ({
       <Box
         className="w-full relative overflow-hidden"
         h={{ base: "120px", sm: "180px", md: "200px" }}
+        bg={isPortrait ? "gray.100" : undefined}
       >
         <img
           src={bike.image || bikeImage}
           alt={bike.model}
+          onLoad={(e) => {
+            const img = e.target as HTMLImageElement;
+            setIsPortrait(img.naturalHeight > img.naturalWidth);
+          }}
           onError={(e) => { (e.target as HTMLImageElement).src = bikeImage; }}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: isPortrait ? 'contain' : 'cover',
+            objectPosition: 'center',
+            display: 'block',
+          }}
         />
         <FaHeart
           onClick={() => setLiked(!liked)}

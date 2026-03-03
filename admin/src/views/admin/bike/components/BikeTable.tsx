@@ -189,7 +189,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
         {
             columns,
             data,
-            initialState: { pageIndex: 0, pageSize: 10 },
+            initialState: { pageIndex: 0, pageSize: 10, sortBy: [{ id: "id", desc: false }] },
         },
         useSortBy,
         usePagination
