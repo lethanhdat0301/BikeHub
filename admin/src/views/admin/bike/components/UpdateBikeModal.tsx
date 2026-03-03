@@ -79,19 +79,28 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
         if (!bikeId) return;
         setLoading(true);
         try {
+            // Exclude image_preview — it's a UI-only field, not in the DB schema.
+            // Sending it causes Prisma to throw "Unknown field" error on the backend.
+            const { image_preview, ...dataToSend } = formData;
+            const payload = {
+                ...dataToSend,
+                park_id: formData.park_id ? parseInt(formData.park_id) : undefined,
+            };
+
+            console.log('[UpdateBike] Submitting PUT payload:', payload);
+
             const response = await fetch(`${process.env.REACT_APP_API_URL}bikes/bike/${bikeId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({
-                    ...formData,
-                    park_id: formData.park_id ? parseInt(formData.park_id) : undefined,
-                }),
+                body: JSON.stringify(payload),
             });
 
+            const resBody = await response.json();
+            console.log('[UpdateBike] PUT response:', response.status, resBody);
+
             if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Failed to update bike');
+                throw new Error(resBody.message || 'Failed to update bike');
             }
 
             toast({ title: 'Bike updated', status: 'success' });
