@@ -92,13 +92,15 @@ const CardBike = ({
     >
       {/* Image Section */}
       <Box
-        className="w-full relative"
+        className="w-full relative overflow-hidden"
         h={{ base: "120px", sm: "180px", md: "200px" }}
-        bgImage={`url('${bike.image || bikeImage}')`}
-        bgPosition={"center"}
-        bgRepeat={"no-repeat"}
-        bgSize={"cover"}
       >
+        <img
+          src={bike.image || bikeImage}
+          alt={bike.model}
+          onError={(e) => { (e.target as HTMLImageElement).src = bikeImage; }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
         <FaHeart
           onClick={() => setLiked(!liked)}
           className={`absolute top-2 right-2 w-5 h-5 cursor-pointer transition-all ${liked

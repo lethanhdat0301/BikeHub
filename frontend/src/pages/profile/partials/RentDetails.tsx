@@ -52,15 +52,18 @@ const RentDetails = ({ rent }: { rent: Rental | null }) => {
       <Flex gap={6} flexDirection={"column"}>
         <Box className="flex w-full flex-row justify-around gap-4">
           <Box
-            className="h-40 w-1/3 rounded-lg"
+            className="h-40 w-1/3 rounded-lg overflow-hidden"
             position={"relative"}
-            bgImage={`url('${rent?.Bike?.image || bikeImg}')`}
             bgColor={"gray.100"}
-            bgPosition={"center"}
-            bgRepeat={"no-repeat"}
-            bgSize={"cover"}
             shadow={"md"}
-          ></Box>
+          >
+            <img
+              src={rent?.Bike?.image || bikeImg}
+              alt={rent?.Bike?.model || "bike"}
+              onError={(e) => { (e.target as HTMLImageElement).src = bikeImg; }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </Box>
           <Box
             className="h-40 w-40  rounded-lg"
             position={"relative"}
