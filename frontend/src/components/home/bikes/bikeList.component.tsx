@@ -53,7 +53,7 @@ const BikeList: React.FC = () => {
                 // Xử lý ảnh giống bikeDetails - sử dụng Google Cloud Storage
                 const bikesWithImages = data.map((bike: any) => ({
                     ...bike,
-                    image: bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : placeholderImage
+                    image: bike.image ? (bike.image.startsWith('http') ? bike.image : `https://storage.googleapis.com/bike_images/${bike.image}`) : placeholderImage
                 }));
 
                 setBikes(bikesWithImages);
