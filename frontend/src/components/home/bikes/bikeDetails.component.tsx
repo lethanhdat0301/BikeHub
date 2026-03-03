@@ -85,7 +85,7 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
               <Box
                 className="md:w-5/12 w-full h-80 rounded-lg"
                 position={"relative"}
-                bgImage={bike.image ? bike.image : bikeImage}
+                bgImage={`url('${bike.image ? bike.image : bikeImage}')`}
                 bgColor={"gray.100"}
                 bgPosition={"center"}
                 bgRepeat={"no-repeat"}

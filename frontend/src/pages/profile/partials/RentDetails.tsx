@@ -54,7 +54,7 @@ const RentDetails = ({ rent }: { rent: Rental | null }) => {
           <Box
             className="h-40 w-1/3 rounded-lg"
             position={"relative"}
-            bgImage={rent?.Bike?.image || bikeImg}
+            bgImage={`url('${rent?.Bike?.image || bikeImg}')`}
             bgColor={"gray.100"}
             bgPosition={"center"}
             bgRepeat={"no-repeat"}
