@@ -299,17 +299,39 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
                                     onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                                         const file = e.target.files && e.target.files[0];
                                         if (!file) return;
+
+                                        // ===== DEBUG: Update Bike - Image Upload =====
+                                        console.group('[UpdateBike] Image Upload Debug');
+                                        console.log('File info:', { name: file.name, size: file.size, type: file.type });
+
+                                        const token =
+                                            localStorage.getItem('token') ||
+                                            localStorage.getItem('accessToken') ||
+                                            localStorage.getItem('user_token');
+                                        console.log('Auth token found:', token ? `${token.substring(0, 20)}...` : 'NONE - ⚠️ No token, upload may fail 401!');
+                                        console.log('Upload URL:', `${process.env.REACT_APP_API_URL}uploads/image`);
+                                        console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+
                                         try {
                                             const fd = new FormData();
                                             fd.append('file', file);
-                                            const token = localStorage.getItem('token');
+                                            console.log('Sending upload request...');
                                             const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, { method: 'POST', body: fd, credentials: 'include', headers: token ? { Authorization: `Bearer ${token}` } : {} });
+                                            console.log('Upload response status:', res.status, res.statusText);
                                             const payload = await res.json();
-                                            if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                            console.log('Upload response payload:', payload);
+                                            if (!res.ok) {
+                                                console.error('❌ Upload failed! Server response:', payload);
+                                                console.groupEnd();
+                                                throw new Error(payload?.message || 'Upload failed');
+                                            }
+                                            console.log('✅ Upload success! image key:', payload.name, '| url:', payload.url);
+                                            console.groupEnd();
                                             setFormData({ ...formData, image: payload.name || payload.url, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
                                         } catch (err) {
-                                            console.error('Upload failed', err);
-                                            toast({ title: 'Upload failed', status: 'error' });
+                                            console.error('❌ Upload exception:', err);
+                                            console.groupEnd();
+                                            toast({ title: 'Upload failed - check console (F12)', status: 'error' });
                                         }
                                     }}
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
