@@ -377,6 +377,7 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                     name="price"
                                     value={formData.price}
                                     onChange={handleInputChange}
+                                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                     placeholder="000.000"
                                     step="0.01"
                                     min="0"
