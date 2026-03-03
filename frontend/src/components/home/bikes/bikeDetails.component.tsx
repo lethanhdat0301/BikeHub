@@ -83,15 +83,18 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
               alignItems={{ base: "center", md: "flex-start" }}
             >
               <Box
-                className="md:w-5/12 w-full h-80 rounded-lg"
+                className="md:w-5/12 w-full h-80 rounded-lg overflow-hidden"
                 position={"relative"}
-                bgImage={`url('${bike.image ? bike.image : bikeImage}')`}
                 bgColor={"gray.100"}
-                bgPosition={"center"}
-                bgRepeat={"no-repeat"}
-                bgSize={"cover"}
                 shadow={"md"}
-              ></Box>
+              >
+                <img
+                  src={bike.image || bikeImage}
+                  alt={bike.model}
+                  onError={(e) => { (e.target as HTMLImageElement).src = bikeImage; }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </Box>
               <Flex
                 className="flex-1 w-full"
                 flexDirection={"column"}
