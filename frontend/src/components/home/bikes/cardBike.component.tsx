@@ -95,7 +95,6 @@ const CardBike = ({
       <Box
         className="w-full relative overflow-hidden"
         h={{ base: "120px", sm: "180px", md: "200px" }}
-        bg={isPortrait ? "gray.100" : undefined}
       >
         <img
           src={bike.image || bikeImage}
@@ -108,8 +107,8 @@ const CardBike = ({
           style={{
             width: '100%',
             height: '100%',
-            objectFit: isPortrait ? 'contain' : 'cover',
-            objectPosition: 'center',
+            objectFit: 'cover',
+            objectPosition: isPortrait ? 'center 70%' : 'center',
             display: 'block',
           }}
         />
