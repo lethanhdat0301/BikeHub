@@ -11,6 +11,7 @@ interface AddBikeModalProps {
 const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [parks, setParks] = useState<any[]>([]);
     const [allDealers, setAllDealers] = useState<any[]>([]); // All dealers from API
     const [dealers, setDealers] = useState<any[]>([]); // Filtered dealers based on selected park
@@ -498,22 +499,18 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                         const file = e.target.files && e.target.files[0];
                                         if (!file) return;
 
-                                        // ===== DEBUG: Add Bike - Image Upload =====
+                                        setUploading(true);
                                         console.group('[AddBike] Image Upload Debug');
                                         console.log('File info:', { name: file.name, size: file.size, type: file.type });
-
                                         const token =
                                             localStorage.getItem('token') ||
                                             localStorage.getItem('accessToken') ||
                                             localStorage.getItem('user_token');
-                                        console.log('Auth token found:', token ? `${token.substring(0, 20)}...` : 'NONE - ⚠️ No token, upload may fail 401!');
-                                        console.log('Upload URL:', `${process.env.REACT_APP_API_URL}uploads/image`);
-                                        console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-
+                                        console.log('Auth token:', token ? `${token.substring(0, 20)}...` : 'NONE ⚠️');
                                         try {
                                             const fd = new FormData();
                                             fd.append('file', file);
-                                            console.log('Sending upload request...');
+                                            console.log('Sending upload...');
                                             const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, {
                                                 method: 'POST',
                                                 body: fd,
@@ -523,23 +520,20 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                             console.log('Upload response status:', res.status, res.statusText);
                                             const payload = await res.json();
                                             console.log('Upload response payload:', payload);
-                                            if (!res.ok) {
-                                                console.error('❌ Upload failed! Server response:', payload);
-                                                console.groupEnd();
-                                                throw new Error(payload?.message || 'Upload failed');
-                                            }
-                                            console.log('✅ Upload success! image key:', payload.name, '| url:', payload.url);
+                                            if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                            console.log('✅ Upload success! url:', payload.url);
                                             console.groupEnd();
-                                            // Store full URL so BikeTable can use it directly as <img src>
                                             setFormData((prev) => ({
                                                 ...prev,
                                                 image: payload.url || payload.name,
-                                                image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined)
+                                                image_preview: payload.url || undefined,
                                             }));
                                         } catch (err) {
                                             console.error('❌ Upload exception:', err);
                                             console.groupEnd();
-                                            alert('Upload failed - check browser console (F12) for details');
+                                            alert('Upload failed - Check console (F12)');
+                                        } finally {
+                                            setUploading(false);
                                         }
                                     }}
                                 />
@@ -577,10 +571,10 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || uploading}
                             className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? "Creating..." : "Create"}
+                            {uploading ? 'Uploading image...' : loading ? 'Creating...' : 'Create'}
                         </button>
                     </div>
                 </form>

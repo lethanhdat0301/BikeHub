@@ -14,6 +14,7 @@ interface UpdateBikeModalProps {
 const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bikeId, onSuccess }) => {
     const toast = useToast();
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [parks, setParks] = useState<any[]>([]);
 
     const [formData, setFormData] = useState<any>({
@@ -308,40 +309,37 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
                                     onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                                         const file = e.target.files && e.target.files[0];
                                         if (!file) return;
-
-                                        // ===== DEBUG: Update Bike - Image Upload =====
+                                        setUploading(true);
                                         console.group('[UpdateBike] Image Upload Debug');
                                         console.log('File info:', { name: file.name, size: file.size, type: file.type });
-
                                         const token =
                                             localStorage.getItem('token') ||
                                             localStorage.getItem('accessToken') ||
                                             localStorage.getItem('user_token');
-                                        console.log('Auth token found:', token ? `${token.substring(0, 20)}...` : 'NONE - ⚠️ No token, upload may fail 401!');
-                                        console.log('Upload URL:', `${process.env.REACT_APP_API_URL}uploads/image`);
-                                        console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-
+                                        console.log('Auth token:', token ? `${token.substring(0, 20)}...` : 'NONE ⚠️');
                                         try {
                                             const fd = new FormData();
                                             fd.append('file', file);
-                                            console.log('Sending upload request...');
+                                            console.log('Sending upload...');
                                             const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, { method: 'POST', body: fd, credentials: 'include', headers: token ? { Authorization: `Bearer ${token}` } : {} });
                                             console.log('Upload response status:', res.status, res.statusText);
                                             const payload = await res.json();
                                             console.log('Upload response payload:', payload);
-                                            if (!res.ok) {
-                                                console.error('❌ Upload failed! Server response:', payload);
-                                                console.groupEnd();
-                                                throw new Error(payload?.message || 'Upload failed');
-                                            }
-                                            console.log('✅ Upload success! image key:', payload.name, '| url:', payload.url);
+                                            if (!res.ok) throw new Error(payload?.message || 'Upload failed');
+                                            console.log('✅ Upload success! url:', payload.url);
                                             console.groupEnd();
-                                            // Store full URL so BikeTable can use it directly as <img src>
-                                            setFormData({ ...formData, image: payload.url || payload.name, image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined) });
+                                            // Use callback form to avoid stale closure overwriting other fields
+                                            setFormData((prev: any) => ({
+                                                ...prev,
+                                                image: payload.url || payload.name,
+                                                image_preview: payload.url || undefined,
+                                            }));
                                         } catch (err) {
                                             console.error('❌ Upload exception:', err);
                                             console.groupEnd();
-                                            toast({ title: 'Upload failed - check console (F12)', status: 'error' });
+                                            toast({ title: 'Upload failed', status: 'error' });
+                                        } finally {
+                                            setUploading(false);
                                         }
                                     }}
                                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -380,10 +378,10 @@ const UpdateBikeModal: React.FC<UpdateBikeModalProps> = ({ isOpen, onClose, bike
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || uploading}
                             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Saving...' : 'Save Changes'}
+                            {uploading ? 'Uploading image...' : loading ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </form>
