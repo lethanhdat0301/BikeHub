@@ -16,6 +16,23 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingBikeId, setEditingBikeId] = useState<number | null>(null);
 
+    const handleDelete = async (id: number, model: string) => {
+        if (!window.confirm(`Are you sure you want to delete "${model}"? This action cannot be undone.`)) return;
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}bikes/bike/${id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || "Failed to delete bike");
+            }
+            if (onRefresh) onRefresh();
+        } catch (e: any) {
+            alert(e.message || "Failed to delete bike");
+        }
+    };
+
     const data = React.useMemo(() => {
         if (!tableContent) return [];
         if (Array.isArray(tableContent)) {
@@ -145,7 +162,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                             <MdEdit className="h-4 w-4" />
                             Edit
                         </button>
-                        <button className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
+                        <button onClick={() => handleDelete(row.original.id, row.original.model)} className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
                             <MdDelete className="h-4 w-4" />
                             Delete
                         </button>
