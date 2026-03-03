@@ -530,9 +530,10 @@ const AddBikeModal: React.FC<AddBikeModalProps> = ({ isOpen, onClose, onSuccess 
                                             }
                                             console.log('✅ Upload success! image key:', payload.name, '| url:', payload.url);
                                             console.groupEnd();
+                                            // Store full URL so BikeTable can use it directly as <img src>
                                             setFormData((prev) => ({
                                                 ...prev,
-                                                image: payload.name || payload.url,
+                                                image: payload.url || payload.name,
                                                 image_preview: payload.url || (payload.name ? `${process.env.REACT_APP_API_URL}uploads/image/${encodeURIComponent(payload.name)}` : undefined)
                                             }));
                                         } catch (err) {
