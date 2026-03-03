@@ -73,7 +73,7 @@ const SearchPage: React.FC = () => {
                 // Hiển thị tất cả xe với Google Cloud Storage URL
                 const allBikes = data.map((bike) => ({
                     ...bike,
-                    image: bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : bike1,
+                    image: bike.image ? (bike.image.startsWith('http') ? bike.image : `https://storage.googleapis.com/bike_images/${bike.image}`) : bike1,
                 }));
 
                 // console.log(`📊 Hiển thị ${allBikes.length} xe`);

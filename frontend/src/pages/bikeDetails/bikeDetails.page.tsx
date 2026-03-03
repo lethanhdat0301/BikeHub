@@ -457,7 +457,7 @@ const BikeDetailsPage: React.FC = () => {
         );
     }
 
-    const bikeImageUrl = bike.image ? `https://storage.googleapis.com/bike_images/${bike.image}` : bikeImage;
+    const bikeImageUrl = bike.image ? (bike.image.startsWith('http') ? bike.image : `https://storage.googleapis.com/bike_images/${bike.image}`) : bikeImage;
 
     return (
         <Box minH="100vh" bg="gray.50" py={8}>
