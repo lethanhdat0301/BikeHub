@@ -39,14 +39,22 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
             {
                 Header: "Motorbike Model",
                 accessor: "model",
-                Cell: ({ row }: any) => (
+                Cell: ({ row }: any) => {
+                    // Support both full URLs (new) and plain GCS filenames (legacy)
+                    const imageUrl = row.original.image
+                        ? row.original.image.startsWith('http')
+                            ? row.original.image
+                            : `https://storage.googleapis.com/${process.env.REACT_APP_GCS_BUCKET || 'bike_images'}/${row.original.image}`
+                        : null;
+                    return (
                     <div className="flex items-center gap-3">
-                        {row.original.image && (
+                        {imageUrl && (
                             <div className="h-12 w-16 overflow-hidden rounded-lg bg-gray-200">
                                 <img
-                                    src={row.original.image}
+                                    src={imageUrl}
                                     alt={row.original.model}
                                     className="h-full w-full object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                 />
                             </div>
                         )}
@@ -61,7 +69,8 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                             )}
                         </div>
                     </div>
-                ),
+                    );
+                },
             },
             {
                 Header: "Status",
