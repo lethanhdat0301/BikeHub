@@ -507,7 +507,7 @@ const Header: React.FC = () => {
                   href={socialLinks.instagram}
                   target="_blank"
                   aria-label="Instagram"
-                  icon={<FaFacebookMessenger size={22} />}
+                  icon={<FaInstagram size={22} />}
                   variant="unstyled"
                   color="gray.400"
                   _hover={{ color: "#006AFF", transform: "scale(1.2)" }}
