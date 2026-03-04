@@ -63,7 +63,7 @@ const Footer = () => {
             <HStack spacing={3} pt={2}>
               <IconButton
                 as="a"
-                href="https://www.facebook.com/share/1C9eBPouDu/"
+                href="https://www.facebook.com/profile.php?id=61588489872735"
                 target="_blank"
                 aria-label="Facebook"
                 icon={<FaFacebookF />}
@@ -85,7 +85,7 @@ const Footer = () => {
               />
               <IconButton
                 as="a"
-                href="https://t.me/rentnride"
+                href="https://t.me/RentNrideVN"
                 target="_blank"
                 aria-label="Telegram"
                 icon={<FaTelegram />}

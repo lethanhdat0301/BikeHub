@@ -28,7 +28,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { TbLogout } from "react-icons/tb";
-import { FaTelegram, FaWhatsapp, FaFacebookMessenger, FaPhone, FaGlobeAsia } from "react-icons/fa";
+import { FaTelegram, FaWhatsapp, FaInstagram, FaPhone, FaGlobeAsia } from "react-icons/fa";
 import LogoutButton from "../logoutButton.component";
 import { useAuth } from "../../hooks/useAuth";
 import logoImage from "../../assets/images/logoofficial.png";
@@ -80,7 +80,7 @@ const Header: React.FC = () => {
   const socialLinks = {
     telegram: "https://t.me/RentNrideVN", // Thay bằng Telegram username
     whatsapp: "https://wa.me/84388817935", // Thay bằng số điện thoại (84XXXXXXXXX)
-    messenger: "https://m.me/61586851197817"    // Thay bằng Facebook Page ID
+    instagram: "https://www.facebook.com/messages/t/1013862038472907"    // Thay bằng Facebook Page ID
   };
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -210,14 +210,14 @@ const Header: React.FC = () => {
         />
         <IconButton
           as="a"
-          href={socialLinks.messenger}
+          href={socialLinks.instagram}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Messenger"
-          icon={<FaFacebookMessenger />}
+          aria-label="Instagram"
+          icon={<FaInstagram />}
           size="sm"
           variant="ghost"
-          colorScheme="messenger"
+          colorScheme="instagram"
           _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
           transition="all 0.2s"
         />
@@ -504,9 +504,9 @@ const Header: React.FC = () => {
                 />
                 <IconButton
                   as="a"
-                  href={socialLinks.messenger}
+                  href={socialLinks.instagram}
                   target="_blank"
-                  aria-label="Messenger"
+                  aria-label="Instagram"
                   icon={<FaFacebookMessenger size={22} />}
                   variant="unstyled"
                   color="gray.400"
