@@ -164,8 +164,10 @@ const Header: React.FC = () => {
             aria-label="Telegram"
             icon={<FaTelegram />}
             size="sm"
-            variant="ghost"
+            variant="outline"
             colorScheme="telegram"
+            color="#0088CC"
+            borderColor="#0088CC"
             _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
             transition="all 0.2s"
           />
@@ -177,8 +179,10 @@ const Header: React.FC = () => {
             aria-label="WhatsApp"
             icon={<FaWhatsapp />}
             size="sm"
-            variant="ghost"
+            variant="outline"
             colorScheme="whatsapp"
+            color="#25D366"
+            borderColor="#25D366"
             _hover={{ bg: "green.50", transform: "scale(1.1)" }}
             transition="all 0.2s"
           />
@@ -190,8 +194,10 @@ const Header: React.FC = () => {
             aria-label="Instagram"
             icon={<FaInstagram />}
             size="sm"
-            variant="ghost"
+            variant="outline"
             colorScheme="pink"
+            color="#E4405F"
+            borderColor="#E4405F"
             _hover={{ bg: "pink.50", transform: "scale(1.1)" }}
             transition="all 0.2s"
           />
@@ -346,11 +352,11 @@ const Header: React.FC = () => {
                     aria-label="Telegram"
                     icon={<FaTelegram size={20} />}
                     variant="outline"
-                    color="gray.500"
+                    color="#0088CC"
                     rounded="xl"
-                    borderColor="gray.200"
+                    borderColor="#0088CC"
                     flex="1"
-                    _hover={{ color: "#0088cc", borderColor: "#0088cc" }}
+                    _hover={{ color: "#0088CC", borderColor: "#0088CC", bg: "blue.50" }}
                   />
                   <IconButton
                     as="a"
@@ -360,11 +366,11 @@ const Header: React.FC = () => {
                     aria-label="WhatsApp"
                     icon={<FaWhatsapp size={20} />}
                     variant="outline"
-                    color="gray.500"
+                    color="#25D366"
                     rounded="xl"
-                    borderColor="gray.200"
+                    borderColor="#25D366"
                     flex="1"
-                    _hover={{ color: "#25D366", borderColor: "#25D366" }}
+                    _hover={{ color: "#25D366", borderColor: "#25D366", bg: "green.50" }}
                   />
                   <IconButton
                     as="a"
@@ -374,11 +380,11 @@ const Header: React.FC = () => {
                     aria-label="Instagram"
                     icon={<FaInstagram size={20} />}
                     variant="outline"
-                    color="gray.500"
+                    color="#E4405F"
                     rounded="xl"
-                    borderColor="gray.200"
+                    borderColor="#E4405F"
                     flex="1"
-                    _hover={{ color: "#E4405F", borderColor: "#E4405F" }}
+                    _hover={{ color: "#E4405F", borderColor: "#E4405F", bg: "pink.50" }}
                   />
                 </HStack>
 

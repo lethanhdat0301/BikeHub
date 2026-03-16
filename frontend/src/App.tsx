@@ -44,7 +44,7 @@ function App() {
     return null;
   }
 
-  return (<div className="min-h-screen overflow-x-hidden bg-white"> <ScrollToSection /> <Header /> <Routes /> <Footer /> <Toaster /> <ButtonScroll /> </div>);
+  return (<div className="min-h-screen bg-white"> <ScrollToSection /> <Header /> <Routes /> <Footer /> <Toaster /> <ButtonScroll /> </div>);
 }
 
 export default App;

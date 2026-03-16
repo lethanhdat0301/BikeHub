@@ -2,17 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
+html {
+  height: auto;
   overflow-x: hidden;
-  width: 100%;
+  overflow-y: auto;
+  scroll-behavior: auto;
 }
 
 body {
+  margin: 0;
+  overflow-x: hidden;
   min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
-html {
-  scroll-behavior: smooth;
+#root {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 .swiper {
