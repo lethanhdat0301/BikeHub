@@ -68,8 +68,11 @@ const Footer = () => {
                 aria-label="Facebook"
                 icon={<FaFacebookF />}
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 colorScheme="facebook"
+                color="#1877F2"
+                borderColor="#1877F2"
+                _hover={{ bg: "blue.50" }}
                 rounded="full"
               />
               <IconButton
@@ -79,8 +82,11 @@ const Footer = () => {
                 aria-label="Instagram"
                 icon={<FaInstagram />}
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 colorScheme="pink"
+                color="#E4405F"
+                borderColor="#E4405F"
+                _hover={{ bg: "pink.50" }}
                 rounded="full"
               />
               <IconButton
@@ -90,8 +96,11 @@ const Footer = () => {
                 aria-label="Telegram"
                 icon={<FaTelegram />}
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 colorScheme="telegram"
+                color="#0088CC"
+                borderColor="#0088CC"
+                _hover={{ bg: "telegram.50" }}
                 rounded="full"
               />
             </HStack>

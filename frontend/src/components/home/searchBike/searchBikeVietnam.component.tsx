@@ -91,7 +91,7 @@ const SearchBikeVietnam: React.FC = () => {
             backgroundSize="cover"
             backgroundPosition="center"
             backgroundRepeat="no-repeat"
-            backgroundAttachment={{ base: "scroll", md: "fixed" }}
+            backgroundAttachment="scroll"
             _before={{
                 content: '""',
                 position: "absolute",
@@ -155,10 +155,10 @@ const SearchBikeVietnam: React.FC = () => {
                     {/* Search Form - Compact on mobile */}
                     <Box
                         bg="rgba(255, 255, 255, 0.92)"
-                        backdropFilter="blur(25px)"
+                        backdropFilter="blur(8px)"
                         p={{ base: 2, sm: 3, md: 8, lg: 10 }}
                         borderRadius={{ base: "md", md: "3xl" }}
-                        boxShadow="0 20px 40px -10px rgba(0, 50, 100, 0.3)"
+                        boxShadow="0 10px 24px -8px rgba(0, 50, 100, 0.22)"
                         w={{ base: "95%", md: "full" }}
                         maxW={{ base: "100%", sm: "450px", md: "1000px" }}
                         border={{ base: "1px solid", md: "2px solid" }}
@@ -315,7 +315,7 @@ const SearchBikeVietnam: React.FC = () => {
                                     _hover={{
                                         bgGradient: "linear(to-r, blue.600, cyan.600)",
                                         transform: "translateY(-2px)",
-                                        boxShadow: "0 15px 20px -5px rgba(59, 130, 246, 0.3)",
+                                        boxShadow: "0 10px 16px -5px rgba(59, 130, 246, 0.24)",
                                     }}
                                     _active={{
                                         transform: "translateY(-1px)"
@@ -323,7 +323,7 @@ const SearchBikeVietnam: React.FC = () => {
                                     transition="all 0.2s ease"
                                     w={{ base: "full", md: "auto" }}
                                     minW={{ base: "auto", md: "180px" }}
-                                    boxShadow="0 8px 12px -3px rgba(59, 130, 246, 0.2)"
+                                    boxShadow="0 6px 10px -3px rgba(59, 130, 246, 0.16)"
                                 >
                                     {t('home.findMotorbike')}
                                 </Button>
