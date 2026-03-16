@@ -118,9 +118,9 @@ const BikeList: React.FC = () => {
             </Center>
 
             <SimpleGrid
-                columns={{ base: 2, md: 2, lg: 3 }}
-                spacing={{ base: 2, md: 6, lg: 8 }}
-                gap={{ base: 2, md: 6, lg: 8 }}
+                columns={{ base: 1, sm: 2, md: 2, lg: 3 }}
+                spacing={{ base: 3, md: 6, lg: 8 }}
+                gap={{ base: 3, md: 6, lg: 8 }}
                 mt={5}
                 className="w-full md:w-4/5"
                 px={{ base: 2, md: 0 }}

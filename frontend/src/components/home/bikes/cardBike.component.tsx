@@ -94,11 +94,12 @@ const CardBike = ({
       {/* Image Section */}
       <Box
         className="w-full relative overflow-hidden"
-        h={{ base: "120px", sm: "180px", md: "200px" }}
+        h={{ base: "160px", sm: "200px", md: "220px" }}
       >
         <img
           src={bike.image || bikeImage}
           alt={bike.model}
+          loading="lazy"
           onLoad={(e) => {
             const img = e.target as HTMLImageElement;
             setIsPortrait(img.naturalHeight > img.naturalWidth);
@@ -141,12 +142,12 @@ const CardBike = ({
             {bike.model}
           </Heading>
           {bike.license_plate && (
-            <Badge colorScheme="purple" fontSize="xs" mt={1} px={2} py={0.5} borderRadius="md">
+            <Badge colorScheme="purple" fontSize="xs" mt={1} px={2} py={0.5} borderRadius="md" display={{ base: "none", md: "inline-flex" }}>
               🏍️ xx-xx{bike.license_plate.slice(-3)}
             </Badge>
           )}
           {bike.code && (
-            <Text fontSize="xs" color="gray.500" mt={1}>
+            <Text fontSize="xs" color="gray.500" mt={1} display={{ base: "none", md: "block" }}>
               Code: {bike.code}
             </Text>
           )}
@@ -192,8 +193,8 @@ const CardBike = ({
           </Text>
         </Reveal>
 
-        {/* Condition & Features */}
-        <Reveal>
+        {/* Condition & Features - Hidden on smaller screens */}
+        <Reveal display={{ base: "none", md: "block" }}>
           <VStack align="stretch" spacing={1}>
             <HStack spacing={2}>
               <Text fontSize={{ base: "xs", md: "sm" }} fontWeight={600} color="gray.700">
@@ -217,10 +218,10 @@ const CardBike = ({
           </VStack>
         </Reveal>
 
-        <Divider />
+        <Divider display={{ base: "none", md: "flex" }} />
 
-        {/* Specifications */}
-        <Reveal>
+        {/* Specifications - Compact on mobile, full on desktop */}
+        <Reveal display={{ base: "none", md: "block" }}>
           <HStack spacing={{ base: 2, md: 4 }} justifyContent="space-between" fontSize={{ base: "xs", md: "sm" }}>
             <HStack spacing={1}>
               <FaUsers color="#319795" size={14} />
@@ -241,7 +242,7 @@ const CardBike = ({
           </HStack>
         </Reveal>
 
-        <Reveal>
+        <Reveal display={{ base: "none", md: "flex" }}>
           <HStack spacing={1} fontSize={{ base: "xs", md: "sm" }}>
             <GiGearStickPattern color="#319795" size={16} />
             <Text color="gray.700" fontWeight={500} textTransform="capitalize">
