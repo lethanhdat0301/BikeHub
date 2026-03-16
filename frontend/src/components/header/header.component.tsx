@@ -15,7 +15,6 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Select,
   Text,
   VStack,
   useDisclosure,
@@ -214,22 +213,34 @@ const Header: React.FC = () => {
           ))}
         </VStack>
 
-        <Select
-          value={language}
-          onChange={(e) => changeLanguageTo(e.target.value)}
-          size="sm"
-          width="90px"
-          display={{ base: "none", lg: "block" }}
-          borderColor="teal.300"
-          _hover={{ borderColor: "teal.500" }}
-          focusBorderColor="teal.500"
-          flexShrink={0}
-        >
-          <option value="en">EN</option>
-          <option value="ru">RU</option>
-          <option value="vi">VI</option>
-          <option value="de">DE</option>
-        </Select>
+        <Box display={{ base: "none", lg: "block" }} flexShrink={0}>
+          <Menu autoSelect={false}>
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              leftIcon={<FaGlobeAsia />}
+              variant="outline"
+              size="sm"
+              minW="108px"
+              justifyContent="space-between"
+              borderColor="teal.300"
+              color="teal.700"
+              bg="white"
+              rounded="md"
+              fontWeight="semibold"
+              _hover={{ bg: "teal.50", borderColor: "teal.500" }}
+              _active={{ bg: "teal.100" }}
+            >
+              {language.toUpperCase()}
+            </MenuButton>
+            <MenuList minW="140px" fontSize="sm" zIndex={1600}>
+              <MenuItem onClick={() => changeLanguageTo("en")}>🇺🇸 {t("lang.en")}</MenuItem>
+              <MenuItem onClick={() => changeLanguageTo("ru")}>🇷🇺 {t("lang.ru")}</MenuItem>
+              <MenuItem onClick={() => changeLanguageTo("vi")}>🇻🇳 {t("lang.vi")}</MenuItem>
+              <MenuItem onClick={() => changeLanguageTo("de")}>🇩🇪 {t("lang.de")}</MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
 
         <HStack spacing={2} display={{ base: "flex", md: "none" }} marginLeft="auto" flexShrink={0}>
           <IconButton
