@@ -86,7 +86,6 @@ const SearchBikeVietnam: React.FC = () => {
             alignItems="center"
             width="100%"
             maxW="100vw"
-            overflowX="hidden"
             background={bgLoaded ? `url(${backgroundImage})` : "linear-gradient(135deg, #003b4f 0%, #001c3d 50%, #142846 100%)"}
             backgroundSize="cover"
             backgroundPosition="center"
