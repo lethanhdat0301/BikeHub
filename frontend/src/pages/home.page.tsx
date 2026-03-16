@@ -11,7 +11,7 @@ const HomePage: React.FC = () => {
   // console.log("🏠 HomePage rendered!");
 
   return (
-    <Box overflowX="hidden" width="100%">
+    <Box width="100%">
       <SearchBikeVietnam />
       <HowItWork />
       <WhyChoose />
