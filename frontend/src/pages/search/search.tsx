@@ -21,6 +21,13 @@ import {
     Flex,
     useDisclosure,
     useBreakpointValue,
+    Drawer,
+    DrawerBody,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    Badge,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { useTranslation } from 'react-i18next';
@@ -38,9 +45,7 @@ const SearchPage: React.FC = () => {
 
     // Default filter open state: closed on mobile, open on desktop
     const isMobile = useBreakpointValue({ base: true, lg: false });
-    const { isOpen: isFilterOpen, onToggle: onFilterToggle } = useDisclosure({
-        defaultIsOpen: !isMobile
-    });
+    const { isOpen: isFilterOpen, onOpen: onFilterOpen, onClose: onFilterClose } = useDisclosure();
     const { t } = useTranslation();
 
     // Filter states
@@ -143,47 +148,181 @@ const SearchPage: React.FC = () => {
                 </Text>
             </Box>
 
-            <Flex gap={6} direction={{ base: "column", lg: "row" }}>
-                {/* Mobile Filter Toggle Button */}
-                <Box display={{ base: "block", lg: "none" }} mb={4}>
-                    <Button
-                        leftIcon={isFilterOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                        onClick={onFilterToggle}
-                        width="full"
-                        variant="outline"
-                        colorScheme="teal"
-                        borderRadius="lg"
-                        size="lg"
-                        fontWeight="semibold"
-                    >
-                        {isFilterOpen ? t('search.hideFilters') : t('search.showFilters')}
-                        {!isFilterOpen && (
-                            <Text ml={2} fontSize="sm" color="gray.500">
-                                ({t('search.foundResults', { count: filteredBikes.length })})
-                            </Text>
-                        )}
-                    </Button>
+            <Flex gap={6} direction={{ base: "column", lg: "row" }} align="flex-start">
+                {/* Mobile Filter Button - Sticky Top Bar */}
+                <Box
+                    display={{ base: "block", lg: "none" }}
+                    position="sticky"
+                    top={0}
+                    left={0}
+                    right={0}
+                    bg="white"
+                    borderBottom="1px solid"
+                    borderColor="gray.200"
+                    zIndex={10}
+                    py={3}
+                    px={4}
+                    boxShadow="sm"
+                    mb={4}
+                >
+                    <HStack justify="space-between" gap={3}>
+                        <Button
+                            leftIcon={<ChevronDownIcon />}
+                            onClick={onFilterOpen}
+                            size="sm"
+                            colorScheme="teal"
+                            variant="solid"
+                            flex={1}
+                        >
+                            {t('search.filters')}
+                        </Button>
+                        <Badge
+                            bg="orange.500"
+                            color="white"
+                            px={3}
+                            py={2}
+                            borderRadius="md"
+                            fontSize="sm"
+                            fontWeight="bold"
+                        >
+                            {filteredBikes.length} {t('search.results')}
+                        </Badge>
+                    </HStack>
                 </Box>
 
-                {/* Filters Sidebar */}
+                {/* Bottom Sheet Drawer - Mobile Only */}
+                <Drawer
+                    isOpen={isFilterOpen}
+                    placement="bottom"
+                    onClose={onFilterClose}
+                    size="full"
+                >
+                    <DrawerOverlay />
+                    <DrawerContent borderTopRadius="2xl" maxH="85vh">
+                        <DrawerHeader bg="gray.50" borderBottom="1px solid" borderColor="gray.200">
+                            <Flex justify="space-between" align="center">
+                                <Heading size="md">{t('search.filters')}</Heading>
+                                <DrawerCloseButton position="static" />
+                            </Flex>
+                        </DrawerHeader>
+
+                        <DrawerBody overflowY="auto" py={4}>
+                            <VStack
+                                align="stretch"
+                                spacing={6}
+                                mb={6}
+                            >
+                                {/* Price Range Filter */}
+                                <Box>
+                                    <Text fontWeight="semibold" mb={3}>
+                                        {t('search.priceRangeLabel')}
+                                    </Text>
+                                    <RangeSlider
+                                        aria-label={["min", "max"]}
+                                        value={priceRange}
+                                        onChange={setPriceRange}
+                                        min={0}
+                                        max={1000000}
+                                        step={50000}
+                                    >
+                                        <RangeSliderTrack bg="teal.100">
+                                            <RangeSliderFilledTrack bg="teal.500" />
+                                        </RangeSliderTrack>
+                                        <RangeSliderThumb index={0} />
+                                        <RangeSliderThumb index={1} />
+                                    </RangeSlider>
+                                    <HStack justify="space-between" mt={2}>
+                                        <Text fontSize="sm" color="gray.600">
+                                            {priceRange[0].toLocaleString()} đ
+                                        </Text>
+                                        <Text fontSize="sm" color="gray.600">
+                                            {priceRange[1].toLocaleString()} đ
+                                        </Text>
+                                    </HStack>
+                                </Box>
+
+                                <Divider />
+
+                                {/* Motorcycle Type Filter */}
+                                <Box>
+                                    <Text fontWeight="semibold" mb={3}>
+                                        {t('search.motorcycleType')}
+                                    </Text>
+                                    <CheckboxGroup
+                                        colorScheme="teal"
+                                        value={selectedTypes}
+                                        onChange={(values) => setSelectedTypes(values as string[])}
+                                    >
+                                        <Stack spacing={2}>
+                                            <Checkbox value="Electric Scooter">{t('search.filter.type.electricScooter')}</Checkbox>
+                                            <Checkbox value="Scooter">{t('search.filter.type.scooter')}</Checkbox>
+                                            <Checkbox value="Manual Bike">{t('search.filter.type.manualBike')}</Checkbox>
+                                        </Stack>
+                                    </CheckboxGroup>
+                                </Box>
+
+                                <Divider />
+
+                                {/* Transmission Filter */}
+                                <Box>
+                                    <Text fontWeight="semibold" mb={3}>
+                                        {t('search.transmission')}
+                                    </Text>
+                                    <CheckboxGroup
+                                        colorScheme="teal"
+                                        value={selectedTransmission}
+                                        onChange={(values) => setSelectedTransmission(values as string[])}
+                                    >
+                                        <Stack spacing={2}>
+                                            <Checkbox value="automatic">{t('search.filter.transmission.automatic')}</Checkbox>
+                                            <Checkbox value="manual">{t('search.filter.transmission.manual')}</Checkbox>
+                                        </Stack>
+                                    </CheckboxGroup>
+                                </Box>
+
+                                {/* Bottom Sheet Action Buttons */}
+                                <HStack gap={2} pt={4}>
+                                    <Button
+                                        width="full"
+                                        variant="outline"
+                                        colorScheme="teal"
+                                        onClick={handleResetFilters}
+                                        size="md"
+                                    >
+                                        {t('search.reset')}
+                                    </Button>
+                                    <Button
+                                        width="full"
+                                        colorScheme="teal"
+                                        onClick={onFilterClose}
+                                        size="md"
+                                    >
+                                        {t('search.apply')} ({filteredBikes.length})
+                                    </Button>
+                                </HStack>
+                            </VStack>
+                        </DrawerBody>
+                    </DrawerContent>
+                </Drawer>
+
+                {/* Desktop Filters Sidebar - Always Visible */}
                 <Box
                     w={{ base: "100%", lg: "300px" }}
                     bg="white"
                     borderRadius="lg"
                     boxShadow="md"
                     h="fit-content"
-                    position={{ base: "relative", lg: "sticky" }}
-                    top={{ lg: "20px" }}
-                    display={{ base: isFilterOpen ? "block" : "none", lg: "block" }}
+                    position="sticky"
+                    top="20px"
+                    display={{ base: "none", lg: "block" }}
                 >
-                    {/* Filter Header - Only Visible on Desktop */}
+                    {/* Filter Header */}
                     <Flex
                         justify="space-between"
                         align="center"
                         p={4}
                         bg="gray.50"
                         borderTopRadius="lg"
-                        display={{ base: "none", lg: "flex" }}
                     >
                         <Heading size="md">{t('search.filters')}</Heading>
                         <Button
@@ -196,96 +335,80 @@ const SearchPage: React.FC = () => {
                         </Button>
                     </Flex>
 
-                    {/* Filter Content */}
-                    <Box display={{ base: isFilterOpen ? "block" : "none", lg: "block" }}>
-                        <VStack
-                            align="stretch"
-                            spacing={6}
-                            p={6}
-                            borderTopRadius={{ base: "lg", lg: "none" }}
-                        >
-                            {/* Price Range Filter */}
-                            <Box>
-                                <Text fontWeight="semibold" mb={3}>
-                                    {t('search.priceRangeLabel')}
+                    {/* Desktop Filter Content */}
+                    <VStack
+                        align="stretch"
+                        spacing={6}
+                        p={6}
+                    >
+                        {/* Price Range Filter */}
+                        <Box>
+                            <Text fontWeight="semibold" mb={3}>
+                                {t('search.priceRangeLabel')}
+                            </Text>
+                            <RangeSlider
+                                aria-label={["min", "max"]}
+                                value={priceRange}
+                                onChange={setPriceRange}
+                                min={0}
+                                max={1000000}
+                                step={50000}
+                            >
+                                <RangeSliderTrack bg="teal.100">
+                                    <RangeSliderFilledTrack bg="teal.500" />
+                                </RangeSliderTrack>
+                                <RangeSliderThumb index={0} />
+                                <RangeSliderThumb index={1} />
+                            </RangeSlider>
+                            <HStack justify="space-between" mt={2}>
+                                <Text fontSize="sm" color="gray.600">
+                                    {priceRange[0].toLocaleString()} đ
                                 </Text>
-                                <RangeSlider
-                                    aria-label={["min", "max"]}
-                                    value={priceRange}
-                                    onChange={setPriceRange}
-                                    min={0}
-                                    max={1000000}
-                                    step={50000}
-                                >
-                                    <RangeSliderTrack bg="teal.100">
-                                        <RangeSliderFilledTrack bg="teal.500" />
-                                    </RangeSliderTrack>
-                                    <RangeSliderThumb index={0} />
-                                    <RangeSliderThumb index={1} />
-                                </RangeSlider>
-                                <HStack justify="space-between" mt={2}>
-                                    <Text fontSize="sm" color="gray.600">
-                                        {priceRange[0].toLocaleString()} đ
-                                    </Text>
-                                    <Text fontSize="sm" color="gray.600">
-                                        {priceRange[1].toLocaleString()} đ
-                                    </Text>
-                                </HStack>
-                            </Box>
-
-                            <Divider />
-
-                            {/* Motorcycle Type Filter */}
-                            <Box>
-                                <Text fontWeight="semibold" mb={3}>
-                                    {t('search.motorcycleType')}
+                                <Text fontSize="sm" color="gray.600">
+                                    {priceRange[1].toLocaleString()} đ
                                 </Text>
-                                <CheckboxGroup
-                                    colorScheme="teal"
-                                    value={selectedTypes}
-                                    onChange={(values) => setSelectedTypes(values as string[])}
-                                >
-                                    <Stack spacing={2}>
-                                        <Checkbox value="Electric Scooter">{t('search.filter.type.electricScooter')}</Checkbox>
-                                        <Checkbox value="Scooter">{t('search.filter.type.scooter')}</Checkbox>
-                                        <Checkbox value="Manual Bike">{t('search.filter.type.manualBike')}</Checkbox>
-                                    </Stack>
-                                </CheckboxGroup>
-                            </Box>
+                            </HStack>
+                        </Box>
 
-                            <Divider />
+                        <Divider />
 
-                            {/* Transmission Filter */}
-                            <Box>
-                                <Text fontWeight="semibold" mb={3}>
-                                    {t('search.transmission')}
-                                </Text>
-                                <CheckboxGroup
-                                    colorScheme="teal"
-                                    value={selectedTransmission}
-                                    onChange={(values) => setSelectedTransmission(values as string[])}
-                                >
-                                    <Stack spacing={2}>
-                                        <Checkbox value="automatic">{t('search.filter.transmission.automatic')}</Checkbox>
-                                        <Checkbox value="manual">{t('search.filter.transmission.manual')}</Checkbox>
-                                    </Stack>
-                                </CheckboxGroup>
-                            </Box>
+                        {/* Motorcycle Type Filter */}
+                        <Box>
+                            <Text fontWeight="semibold" mb={3}>
+                                {t('search.motorcycleType')}
+                            </Text>
+                            <CheckboxGroup
+                                colorScheme="teal"
+                                value={selectedTypes}
+                                onChange={(values) => setSelectedTypes(values as string[])}
+                            >
+                                <Stack spacing={2}>
+                                    <Checkbox value="Electric Scooter">{t('search.filter.type.electricScooter')}</Checkbox>
+                                    <Checkbox value="Scooter">{t('search.filter.type.scooter')}</Checkbox>
+                                    <Checkbox value="Manual Bike">{t('search.filter.type.manualBike')}</Checkbox>
+                                </Stack>
+                            </CheckboxGroup>
+                        </Box>
 
-                            {/* Mobile Reset Button */}
-                            <Box display={{ base: "block", lg: "none" }} pt={4}>
-                                <Button
-                                    width="full"
-                                    variant="outline"
-                                    colorScheme="teal"
-                                    onClick={handleResetFilters}
-                                    size="lg"
-                                >
-                                    {t('search.resetAll')}
-                                </Button>
-                            </Box>
-                        </VStack>
-                    </Box>
+                        <Divider />
+
+                        {/* Transmission Filter */}
+                        <Box>
+                            <Text fontWeight="semibold" mb={3}>
+                                {t('search.transmission')}
+                            </Text>
+                            <CheckboxGroup
+                                colorScheme="teal"
+                                value={selectedTransmission}
+                                onChange={(values) => setSelectedTransmission(values as string[])}
+                            >
+                                <Stack spacing={2}>
+                                    <Checkbox value="automatic">{t('search.filter.transmission.automatic')}</Checkbox>
+                                    <Checkbox value="manual">{t('search.filter.transmission.manual')}</Checkbox>
+                                </Stack>
+                            </CheckboxGroup>
+                        </Box>
+                    </VStack>
                 </Box>
 
                 {/* Bikes Grid */}
