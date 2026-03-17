@@ -2,5 +2,6 @@
 	"eslint.workingDirectories": [
 		{ "mode": "auto" }
 	],
-	"discord.enabled": true
+	"discord.enabled": true,
+	"chat.agent.maxRequests": 150
 }

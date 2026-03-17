@@ -16,7 +16,7 @@ import {
   Tag,
 } from "@chakra-ui/react";
 import { Bike } from "./cardBike.component";
-import bikeImage from "../../../assets/images/bikes/bike1.jpg";
+import bikeImage from "../../../assets/images/bikes/bike-placeholder.jpg";
 import { TbManualGearbox } from "react-icons/tb";
 import { MdSpeed } from "react-icons/md";
 import { AiOutlineDollarCircle } from "react-icons/ai";
@@ -24,6 +24,7 @@ import { MdOutlineAirlineSeatReclineNormal } from "react-icons/md";
 import { IoPersonOutline } from "react-icons/io5";
 import { MdDoneAll } from "react-icons/md";
 import { IoLocationOutline } from "react-icons/io5";
+import { useTranslation } from 'react-i18next';
 
 import { generatePath, useNavigate } from "react-router-dom";
 
@@ -45,6 +46,7 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
   // });
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleBooking = () => {
     bike.id && navigate(generatePath(`/booking/${bike.id}`));
@@ -81,15 +83,18 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
               alignItems={{ base: "center", md: "flex-start" }}
             >
               <Box
-                className="md:w-5/12 w-full h-80 rounded-lg"
+                className="md:w-5/12 w-full h-80 rounded-lg overflow-hidden"
                 position={"relative"}
-                bgImage={bike.image ? bike.image : bikeImage}
                 bgColor={"gray.100"}
-                bgPosition={"center"}
-                bgRepeat={"no-repeat"}
-                bgSize={"cover"}
                 shadow={"md"}
-              ></Box>
+              >
+                <img
+                  src={bike.image || bikeImage}
+                  alt={bike.model}
+                  onError={(e) => { (e.target as HTMLImageElement).src = bikeImage; }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </Box>
               <Flex
                 className="flex-1 w-full"
                 flexDirection={"column"}
@@ -102,30 +107,30 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <IoPersonOutline size={26} color="orange" />
                     <Text className="text-gray-800 font-medium">
-                      Minimal driver age:{" "}
+                      {t('bike.minimalDriverAge')}:
                     </Text>
                     <Text className="text-gray-500 font-medium">15</Text>
                   </Flex>
 
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <TbManualGearbox size={26} color="orange" />
-                    <Text className="text-gray-800 font-medium">Gearbox:</Text>
+                    <Text className="text-gray-800 font-medium">{t('bike.gearbox')}:</Text>
                     <Text className="text-gray-500 font-medium">2</Text>
                   </Flex>
                 </Box>
                 <Box className="flex gap-2  flex-col sm:flex-row">
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <MdSpeed size={26} color="orange" />
-                    <Text className="text-gray-800 font-medium">Mileage:</Text>
+                    <Text className="text-gray-800 font-medium">{t('bike.mileage')}:</Text>
                     <Text className="text-gray-500 font-medium">Unlimited</Text>
                   </Flex>
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <AiOutlineDollarCircle size={26} color="orange" />
                     <Text className="text-gray-800 font-medium">
-                      Price from:
+                      {t('bike.priceFrom')}:
                     </Text>
                     <Text className="text-gray-500 font-medium">
-                      ${bike.price}/hour
+                      {Number(bike?.price).toLocaleString('vi-VN')} VNĐ/hour
                     </Text>
                   </Flex>
                 </Box>
@@ -136,13 +141,13 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
                       color="orange"
                     />
                     <Text className="text-gray-800 font-medium">
-                      Max passengers:
+                      {t('bike.maxPassengers')}:
                     </Text>
                     <Text className="text-gray-500 font-medium">2</Text>
                   </Flex>
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <IoLocationOutline size={26} color="orange" />
-                    <Text className="text-gray-800 font-medium">Location:</Text>
+                    <Text className="text-gray-800 font-medium">{t('bike.location')}:</Text>
                     <Text className="text-gray-500 font-medium">
                       {bike.location}
                     </Text>
@@ -157,19 +162,19 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
                   className="capitalize"
                   borderBottom={"2px solid gray"}
                 >
-                  ADDITIONAL INFORMATION
+                  {t('bike.additionalInfo')}
                 </Heading>
                 <Box className="flex gap-2 flex-col sm:flex-row">
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <MdDoneAll size={18} color="teal" />
                     <Text className="text-gray-800 font-medium">
-                      Marin Alloy
+                      {t('bike.marinAlloy')}
                     </Text>
                   </Flex>
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <MdDoneAll size={18} color="teal" />
                     <Text className="text-gray-800 font-medium">
-                      Safety Helmet
+                      {t('bike.safetyHelmet')}
                     </Text>
                   </Flex>
                 </Box>
@@ -177,13 +182,13 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <MdDoneAll size={18} color="teal" />
                     <Text className="text-gray-800 font-medium">
-                      SunRace 11-Speed Cassette
+                      {t('bike.sunRaceCassette')}
                     </Text>
                   </Flex>
                   <Flex className="sm:w-1/2 w-full gap-2 border-b py-2">
                     <MdDoneAll size={18} color="teal" />
                     <Text className="text-gray-800 font-medium">
-                      Tubeless Compatible
+                      {t('bike.tubelessCompatible')}
                     </Text>
                   </Flex>
                 </Box>
@@ -201,7 +206,7 @@ const BikeDetails = ({ isOpen, onClose, bike }: Model) => {
                 colorScheme="teal"
                 onClick={handleBooking}
               >
-                Book now
+                {t('bike.bookNow')}
               </Button>
             </Box>
           </ModalFooter>

@@ -9,6 +9,7 @@ import {
   Put,
   ForbiddenException,
   UnprocessableEntityException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Bike as BikeModel } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
@@ -41,7 +42,7 @@ export class BikeController {
     // Debugging: log current user and return counts in non-production for traceability
     if (process.env.NODE_ENV !== 'production') {
       try {
-        console.log('GET /bikes requested by user:', user ? { id: user.id, role: user.role } : null);
+        // console.log('GET /bikes requested by user:', user ? { id: user.id, role: user.role } : null);
       } catch (e) {
         // ignore
       }
@@ -49,12 +50,12 @@ export class BikeController {
 
     if (user && user.role === ROLES_ENUM.DEALER) {
       const bikes = await this.bikeService.findByDealer(user.id);
-      if (process.env.NODE_ENV !== 'production') console.log('Returning bikes for dealer:', bikes.length);
+      // if (process.env.NODE_ENV !== 'production') console.log('Returning bikes for dealer:', bikes.length);
       return bikes;
     }
 
     const all = await this.bikeService.findAll({});
-    if (process.env.NODE_ENV !== 'production') console.log('Returning all bikes:', all.length);
+    // if (process.env.NODE_ENV !== 'production') console.log('Returning all bikes:', all.length);
     return all;
   }
 
@@ -104,6 +105,7 @@ export class BikeController {
       park_id: number;
       dealer_id?: number; // optional when admin creates for another dealer
       image?: string;
+      description?: string;
       // Thông tin đánh giá
       rating?: number;
       review_count?: number;
@@ -114,12 +116,13 @@ export class BikeController {
       seats?: number;
       fuel_type?: string;
       transmission?: string;
+      license_plate?: string;
     },
     @CurrentUser() user: any,
   ): Promise<BikeModel> {
-    const { model, status, lock, location, price, park_id, dealer_id, image,
+    const { model, status, lock, location, price, park_id, dealer_id, image, description,
       rating, review_count, dealer_name, dealer_contact,
-      seats, fuel_type, transmission } = bikeData;
+      seats, fuel_type, transmission, license_plate } = bikeData;
 
     if (!model) {
       throw new UnprocessableEntityException({ message: "Argument `model` is missing." });
@@ -134,6 +137,21 @@ export class BikeController {
       throw new UnprocessableEntityException({ message: "Argument `park_id` is missing." });
     }
 
+    // VALIDATION: Nếu dealer tạo xe, kiểm tra park_id có khớp với park được gán cho dealer
+    if (user && user.role === ROLES_ENUM.DEALER) {
+      const dealerProfile = await this.bikeService.getDealerProfile(user.id);
+      if (!dealerProfile) {
+        throw new UnprocessableEntityException({
+          message: "Dealer profile not found. Please contact administrator."
+        });
+      }
+      if (dealerProfile.park_id !== park_id) {
+        throw new UnprocessableEntityException({
+          message: `You can only add bikes to your assigned park (Park ID: ${dealerProfile.park_id}). Selected park ID ${park_id} is not allowed.`
+        });
+      }
+    }
+
     const data: any = {
       model,
       status,
@@ -141,6 +159,7 @@ export class BikeController {
       location,
       price,
       image,
+      description,
       rating,
       review_count,
       dealer_name,
@@ -148,6 +167,7 @@ export class BikeController {
       seats,
       fuel_type,
       transmission,
+      license_plate,
       Park: {
         connect: { id: park_id },
       },
@@ -157,10 +177,22 @@ export class BikeController {
     if (user && user.role === ROLES_ENUM.DEALER) {
       data.Dealer = { connect: { id: user.id } };
     } else if (dealer_id) {
+      // dealer_id here is User.id (Bike.dealer_id references User.id)
       data.Dealer = { connect: { id: dealer_id } };
     }
 
-    return this.bikeService.create(data);
+    try {
+      return await this.bikeService.create(data);
+    } catch (err: any) {
+      // Prisma FK not found (e.g., park or dealer user was deleted)
+      if (err.code === 'P2025' || err.code === 'P2003') {
+        throw new UnprocessableEntityException(
+          `Could not create bike: a referenced record was not found. ${err.meta?.cause || err.message}`
+        );
+      }
+      // Re-throw as 500 with real message so frontend can display it
+      throw new InternalServerErrorException(err.message || 'Failed to create bike');
+    }
   }
 
   @Put('bike/:id')

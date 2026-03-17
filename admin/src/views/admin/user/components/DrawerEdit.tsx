@@ -16,8 +16,7 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
   useEffect(() => {
     if (data) {
       fetch(
-        `${process.env.REACT_APP_API_URL}${data.module}s${
-          data.module === "user" ? "" : "/" + data.module
+        `${process.env.REACT_APP_API_URL}${data.module}s${data.module === "user" ? "" : "/" + data.module
         }/${data.id || 1}`,
         {
           credentials: "include",
@@ -85,7 +84,7 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("Data updated successfully:", data);
+          // console.log("Data updated successfully:", data);
           onClose();
         })
         .catch((error) => {
@@ -116,9 +115,8 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 transform overflow-hidden transition-transform duration-500 ease-in-out ${
-        isOpen ? "translate-x-0" : "translate-x-full"
-      }`}
+      className={`fixed inset-0 z-50 transform overflow-hidden transition-transform duration-500 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
     >
       <div className="absolute inset-0 overflow-hidden">
         <div
@@ -238,10 +236,12 @@ const DrawerEdit: React.FC<EditDrawerProps> = ({ isOpen, onClose, data }) => {
                                       try {
                                         const fd = new FormData();
                                         fd.append('file', file);
+                                        const token = localStorage.getItem('token');
                                         const res = await fetch(`${process.env.REACT_APP_API_URL}uploads/image`, {
                                           method: 'POST',
                                           body: fd,
                                           credentials: 'include',
+                                          headers: token ? { Authorization: `Bearer ${token}` } : {},
                                         });
                                         const payload = await res.json();
                                         if (!res.ok) throw new Error(payload?.message || 'Upload failed');

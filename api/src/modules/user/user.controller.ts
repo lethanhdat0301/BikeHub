@@ -44,6 +44,19 @@ export class UserController {
     return this.userService.createUser(user);
   }
 
+  @Get('customers')
+  async getCustomers() {
+    return this.userService.getCustomersWithStats();
+  }
+
+  @Get('dealers')
+  @Roles(ROLES_ENUM.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  async getDealers(): Promise<User[]> {
+    return this.userService.users({
+      where: { role: ROLES_ENUM.DEALER },
+    });
+  }
 
   @Get(':id')
   @Roles(ROLES_ENUM.ADMIN)
@@ -78,10 +91,5 @@ export class UserController {
     );
 
     return { message: 'User deleted' };
-  }
-
-  @Get('customers')
-  async getCustomers() {
-    return this.userService.getCustomersWithStats();
   }
 }

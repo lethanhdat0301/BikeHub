@@ -1,17 +1,17 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: "gcr.io/cloud-builders/docker"
     args:
-      - 'build'
-      - '--build-arg'
-      - 'REACT_APP_API_URL=https://api-289273895966.asia-southeast1.run.app/api/v1/'
-      - '-t'
-      - 'gcr.io/$PROJECT_ID/admin:$BUILD_ID'
-      - '-t'
-      - 'gcr.io/$PROJECT_ID/admin:latest'
-      - '.'
+      - "build"
+      - "--build-arg"
+      - "REACT_APP_API_URL=https://api.rentnride.travel/api/v1/"
+      - "-t"
+      - "gcr.io/$PROJECT_ID/admin:$BUILD_ID"
+      - "-t"
+      - "gcr.io/$PROJECT_ID/admin:latest"
+      - "."
 
 images:
-  - 'gcr.io/$PROJECT_ID/admin:$BUILD_ID'
-  - 'gcr.io/$PROJECT_ID/admin:latest'
+  - "gcr.io/$PROJECT_ID/admin:$BUILD_ID"
+  - "gcr.io/$PROJECT_ID/admin:latest"
 
-timeout: '1200s'
+timeout: "1200s"

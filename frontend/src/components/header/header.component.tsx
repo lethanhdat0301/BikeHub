@@ -1,169 +1,160 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Button,
-  HStack,
-  Flex,
-  Menu,
-  Link as A,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Avatar,
-  Text,
-  Center,
-  MenuDivider,
   Box,
-  IconButton,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerBody,
-  useDisclosure,
-  VStack,
-  Select,
-  // DrawerHeader,
-  DrawerCloseButton,
-  // useColorMode,
+  Button,
   Divider,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerOverlay,
+  HStack,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  VStack,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { TbLogout } from "react-icons/tb";
-import { FaTelegram, FaWhatsapp, FaFacebookMessenger, FaPhone, FaGlobeAsia } from "react-icons/fa";
-import LogoutButton from "../logoutButton.component";
-import { useAuth } from "../../hooks/useAuth";
+import { ChevronDownIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { FaGlobeAsia, FaInstagram, FaPhone, FaTelegram, FaWhatsapp } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import logoImage from "../../assets/images/logoofficial.png";
-import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { useLocation } from 'react-router-dom';
-/**
- * Header: A functional component representing a header in React with Tailwind CSS.
- *
- * @returns {JSX.Element} - The JSX element representing the header.
- */
+
+type HeaderItem = {
+  key: string;
+  path: string;
+  isHash?: boolean;
+};
+
+const headerItems: HeaderItem[] = [
+  { key: "search", path: "search" },
+  { key: "bookingRequest", path: "request-booking" },
+  { key: "return", path: "return" },
+  { key: "trackOrder", path: "tracking" },
+  { key: "howItWorks", path: "howItWork", isHash: true },
+];
+
+const phoneNumbers = [{ number: "+84 388 817 935", display: "0388817935" }];
+
+const socialLinks = {
+  telegram: "https://t.me/RentNrideVN",
+  whatsapp: "https://wa.me/84388817935",
+  instagram: "https://www.instagram.com/rentnride.travel/",
+};
+
 const Header: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [language, setLanguage] = useState<string>('en');
-
-  const headerItems = [
-    { label: "Search", path: "search" },
-    { label: "Booking Request", path: "request-booking" },
-    { label: "Return", path: "return" },
-    { label: "Track Order", path: "tracking" },
-    { label: "How It Works", path: "howItWork", isHash: true }
-  ];
-
-  const phoneNumbers = [
-    { number: "+84 123 456 789", display: "0123 456 789" },
-    { number: "+84 123 456 789", display: "0123 456 789" }
-  ];
-
-  const socialLinks = {
-    telegram: "https://t.me/yourusername", // Thay bằng Telegram username
-    whatsapp: "https://wa.me/84123456789", // Thay bằng số điện thoại (84XXXXXXXXX)
-    messenger: "https://m.me/yourpageid"    // Thay bằng Facebook Page ID
-  };
-
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
-    // TODO: Implement language change logic
-    console.log('Language changed to:', e.target.value);
-  };
-
   const location = useLocation();
-  // const { colorMode, toggleColorMode } = useColorMode();
+  const { t, i18n } = useTranslation();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [language, setLanguage] = useState<string>(localStorage.getItem("i18nextLng") || "en");
 
-  const handleNavigation = (item: any) => {
-    if (item.isHash) {
-      // If on home page, just scroll
-      if (location.pathname === '/') {
-        const element = document.getElementById('howItWork');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      } else {
-        // If not on home page, navigate to home then scroll
-        navigate('/');
-        setTimeout(() => {
-          const element = document.getElementById('howItWork');
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 100);
-      }
-    } else {
-      navigate('/' + item.path);
+  const changeLanguageTo = (lng: string) => {
+    setLanguage(lng);
+    localStorage.setItem("i18nextLng", lng);
+    if (i18n.language !== lng) {
+      i18n.changeLanguage(lng);
     }
   };
 
+  useEffect(() => {
+    if (i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [i18n, language]);
+
+  const handleNavigation = (item: HeaderItem) => {
+    if (item.isHash) {
+      if (location.pathname === "/") {
+        const element = document.getElementById("howItWork");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+
+      navigate("/");
+      window.setTimeout(() => {
+        const element = document.getElementById("howItWork");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+      return;
+    }
+
+    navigate(`/${item.path}`);
+  };
+
   return (
-    <header className="flex justify-between items-center text-gray-700 py-2 px-4 sm:px-12 shadow-lg" style={{ maxWidth: '100vw', width: '100%' }}>
-      <Link to="/" style={{ flexShrink: 0 }}>
-        <img src={logoImage} className="sm:w-36 w-24 max-w-none" />
-      </Link>
-
-      {/* Desktop navigation */}
-      <HStack as="nav" spacing={{ base: "5", lg: "8" }} display={{ base: "none", md: "flex" }} flexShrink={1} overflowX="auto" css={{
-        '&::-webkit-scrollbar': {
-          display: 'none'
-        },
-        scrollbarWidth: 'none'
-      }}>
-        <Link to="/">
-          <Button
-            paddingStart={0}
-            paddingEnd={0}
-            className="group hover:text-teal-500 focus:text-teal-500"
-            variant="nav"
-            _hover={{ transition: "all 0.3s ease-in-out" }}
-            pos={"relative"}
-            fontSize={{ base: "sm", lg: "md" }}
-            whiteSpace="nowrap"
-          >
-            Home
-            <Box
-              position={"absolute"}
-              className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-              _groupFocus={{ width: "100%" }}
-              _groupHover={{
-                width: "100%",
-                transition: "all 0.3s ease-in-out",
-              }}
-            />
-          </Button>
+    <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/95 px-3 py-2 text-gray-700 shadow-sm backdrop-blur sm:px-5 lg:px-8">
+      <Box className="mx-auto flex w-full max-w-screen-2xl items-center gap-3">
+        <Link to="/" style={{ flexShrink: 0 }}>
+          <img src={logoImage} alt="Rent N Ride" className="h-11 w-auto sm:h-12 lg:h-14" />
         </Link>
-        {headerItems.map((item, i) => (
-          <Button
-            key={i}
-            paddingStart={0}
-            paddingEnd={0}
-            className="group hover:text-teal-500 focus:text-teal-500"
-            variant="nav"
-            _hover={{ transition: "all 0.3s ease-in-out" }}
-            pos={"relative"}
-            onClick={() => handleNavigation(item)}
-            fontSize={{ base: "sm", lg: "md" }}
-            whiteSpace="nowrap"
-          >
-            {item.label}
-            <Box
-              position={"absolute"}
-              className="w-0 h-[2px] bg-teal-500 rounded-xl bottom-0 left-0"
-              _groupFocus={{ width: "100%" }}
-              _groupHover={{
-                width: "100%",
-                transition: "all 0.3s ease-in-out",
-              }}
-            />
-          </Button>
-        ))}
-      </HStack>
 
-      {/* Mobile: Language & Contact (right of logo) */}
-      <Box display={{ base: 'flex', md: 'none' }} alignItems="center" gap={2} ml={2}>
-        {/* Language selector */}
-        {/* Social icons */}
-        <HStack spacing={1}>
+        <HStack
+          as="nav"
+          spacing={{ md: "4", lg: "7" }}
+          display={{ base: "none", md: "flex" }}
+          flex="1"
+          minW={0}
+          overflowX="auto"
+          css={{
+            "&::-webkit-scrollbar": { display: "none" },
+            scrollbarWidth: "none",
+          }}
+        >
+          <Link to="/">
+            <Button
+              paddingStart={0}
+              paddingEnd={0}
+              className="group hover:text-teal-500 focus:text-teal-500"
+              variant="nav"
+              _hover={{ transition: "all 0.3s ease-in-out" }}
+              pos="relative"
+              fontSize={{ md: "sm", lg: "md" }}
+              whiteSpace="nowrap"
+            >
+              {t("header.home")}
+              <Box
+                position="absolute"
+                className="bottom-0 left-0 h-[2px] w-0 rounded-xl bg-teal-500"
+                _groupFocus={{ width: "100%" }}
+                _groupHover={{ width: "100%", transition: "all 0.3s ease-in-out" }}
+              />
+            </Button>
+          </Link>
+
+          {headerItems.map((item) => (
+            <Button
+              key={item.key}
+              paddingStart={0}
+              paddingEnd={0}
+              className="group hover:text-teal-500 focus:text-teal-500"
+              variant="nav"
+              _hover={{ transition: "all 0.3s ease-in-out" }}
+              pos="relative"
+              onClick={() => handleNavigation(item)}
+              fontSize={{ md: "sm", lg: "md" }}
+              whiteSpace="nowrap"
+            >
+              {t(`header.${item.key}`)}
+              <Box
+                position="absolute"
+                className="bottom-0 left-0 h-[2px] w-0 rounded-xl bg-teal-500"
+                _groupFocus={{ width: "100%" }}
+                _groupHover={{ width: "100%", transition: "all 0.3s ease-in-out" }}
+              />
+            </Button>
+          ))}
+        </HStack>
+
+        <HStack spacing={2} display={{ base: "none", lg: "flex" }} flexShrink={0}>
           <IconButton
             as="a"
             href={socialLinks.telegram}
@@ -172,8 +163,10 @@ const Header: React.FC = () => {
             aria-label="Telegram"
             icon={<FaTelegram />}
             size="sm"
-            variant="ghost"
+            variant="outline"
             colorScheme="telegram"
+            color="#0088CC"
+            borderColor="#0088CC"
             _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
             transition="all 0.2s"
           />
@@ -185,381 +178,258 @@ const Header: React.FC = () => {
             aria-label="WhatsApp"
             icon={<FaWhatsapp />}
             size="sm"
-            variant="ghost"
+            variant="outline"
             colorScheme="whatsapp"
+            color="#25D366"
+            borderColor="#25D366"
             _hover={{ bg: "green.50", transform: "scale(1.1)" }}
             transition="all 0.2s"
           />
           <IconButton
             as="a"
-            href={socialLinks.messenger}
+            href={socialLinks.instagram}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Messenger"
-            icon={<FaFacebookMessenger />}
+            aria-label="Instagram"
+            icon={<FaInstagram />}
             size="sm"
-            variant="ghost"
-            colorScheme="messenger"
-            _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
+            variant="outline"
+            colorScheme="pink"
+            color="#E4405F"
+            borderColor="#E4405F"
+            _hover={{ bg: "pink.50", transform: "scale(1.1)" }}
             transition="all 0.2s"
           />
         </HStack>
-        {/* Phone number (first) */}
-        <HStack spacing={1}>
-          <FaPhone size={12} color="#319795" />
-          <Text fontSize="xs" fontWeight="medium" color="teal.600">
-            <a href={`tel:${phoneNumbers[0].number}`}>{phoneNumbers[0].display}</a>
-          </Text>
+
+        <VStack spacing={1} display={{ base: "none", xl: "flex" }} align="flex-start" flexShrink={0}>
+          {phoneNumbers.map((phone) => (
+            <HStack key={phone.number} spacing={1}>
+              <FaPhone size={12} color="#319795" />
+              <Text fontSize="xs" fontWeight="medium" color="teal.600">
+                <a href={`tel:${phone.number}`}>{phone.display}</a>
+              </Text>
+            </HStack>
+          ))}
+        </VStack>
+
+        <Box display={{ base: "none", lg: "block" }} flexShrink={0}>
+          <Menu autoSelect={false}>
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              leftIcon={<FaGlobeAsia />}
+              variant="outline"
+              size="sm"
+              minW="108px"
+              justifyContent="space-between"
+              borderColor="teal.300"
+              color="teal.700"
+              bg="white"
+              rounded="md"
+              fontWeight="semibold"
+              _hover={{ bg: "teal.50", borderColor: "teal.500" }}
+              _active={{ bg: "teal.100" }}
+            >
+              {language.toUpperCase()}
+            </MenuButton>
+            <MenuList minW="140px" fontSize="sm" zIndex={1600}>
+              <MenuItem onClick={() => changeLanguageTo("en")}>🇺🇸 {t("lang.en")}</MenuItem>
+              <MenuItem onClick={() => changeLanguageTo("ru")}>🇷🇺 {t("lang.ru")}</MenuItem>
+              <MenuItem onClick={() => changeLanguageTo("vi")}>🇻🇳 {t("lang.vi")}</MenuItem>
+              <MenuItem onClick={() => changeLanguageTo("de")}>🇩🇪 {t("lang.de")}</MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
+
+        <HStack spacing={2} display={{ base: "flex", md: "none" }} marginLeft="auto" flexShrink={0}>
+          <IconButton
+            as="a"
+            href={`tel:${phoneNumbers[0].number}`}
+            aria-label="Call hotline"
+            icon={<FaPhone size={16} />}
+            size="sm"
+            rounded="full"
+            colorScheme="teal"
+            variant="outline"
+            borderWidth="1.5px"
+          />
+          <IconButton
+            size="sm"
+            aria-label="Toggle navigation"
+            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+            onClick={isOpen ? onClose : onOpen}
+            display={{ base: "inline-flex", md: "none" }}
+          />
         </HStack>
-        <Select
-          value={language}
-          onChange={handleLanguageChange}
-          size="sm"
-          width="80px"
-          borderColor="teal.300"
-          _hover={{ borderColor: "teal.500" }}
-          focusBorderColor="teal.500"
-        >
-          <option value="en">EN</option>
-          <option value="vi">VI</option>
-        </Select>
       </Box>
 
-      {/* Social Media Icons */}
-      {/* Desktop social icons */}
-      <HStack spacing={2} display={{ base: "none", lg: "flex" }} flexShrink={0}>
-        <IconButton
-          as="a"
-          href={socialLinks.telegram}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Telegram"
-          icon={<FaTelegram />}
-          size="sm"
-          variant="ghost"
-          colorScheme="telegram"
-          _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
-          transition="all 0.2s"
-        />
-        <IconButton
-          as="a"
-          href={socialLinks.whatsapp}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="WhatsApp"
-          icon={<FaWhatsapp />}
-          size="sm"
-          variant="ghost"
-          colorScheme="whatsapp"
-          _hover={{ bg: "green.50", transform: "scale(1.1)" }}
-          transition="all 0.2s"
-        />
-        <IconButton
-          as="a"
-          href={socialLinks.messenger}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Messenger"
-          icon={<FaFacebookMessenger />}
-          size="sm"
-          variant="ghost"
-          colorScheme="messenger"
-          _hover={{ bg: "blue.50", transform: "scale(1.1)" }}
-          transition="all 0.2s"
-        />
-      </HStack>
-
-      {/* Phone Numbers */}
-      {/* Desktop phone numbers */}
-      <VStack spacing={1} display={{ base: "none", xl: "flex" }} align="flex-start" flexShrink={0}>
-        {phoneNumbers.map((phone, index) => (
-          <HStack key={index} spacing={1}>
-            <FaPhone size={12} color="#319795" />
-            <Text fontSize="xs" fontWeight="medium" color="teal.600">
-              <a href={`tel:${phone.number}`}>{phone.display}</a>
-            </Text>
-          </HStack>
-        ))}
-      </VStack>
-
-      {/* Language Selector */}
-      {/* Desktop language selector */}
-      <Select
-        value={language}
-        onChange={handleLanguageChange}
-        size="sm"
-        width="90px"
-        display={{ base: "none", lg: "block" }}
-        borderColor="teal.300"
-        _hover={{ borderColor: "teal.500" }}
-        focusBorderColor="teal.500"
-        flexShrink={0}
-      >
-        <option value="en">English</option>
-        <option value="vi">Tiếng Việt</option>
-      </Select>
-
-
-
-      {/* <div>
-        {!user?.id ? (
-          <> */}
-      {/* Temporarily disabled signin/signup */}
-      {/* <Link to="/login">
-              <Button
-                colorScheme="teal"
-                variant={location.pathname === '/login' || location.pathname === '/' ? 'solid' : 'outline'}
-                size={{ base: "sm", md: "md" }}
-              >
-                Signin
-              </Button>
-            </Link>
-            <Link to="/signup" className="ml-3">
-              <Button
-                colorScheme="teal"
-                variant={location.pathname === '/signup' ? 'solid' : 'outline'}
-                size={{ base: "sm", md: "md" }}
-              >
-                Signup
-              </Button>
-            </Link> */}
-      {/* </>
-        ) : (
-          <Flex alignItems={"center"}>
-                <Menu>
-                  <MenuButton
-                    as={Button}
-                    rounded={"full"}
-                    variant={"link"}
-                    cursor={"pointer"}
-                    minW={0}
-                  >
-                    <Avatar
-                      size={"lg"}
-                      src={user?.image}
-                    />
-                  </MenuButton>
-                  <MenuList zIndex={99}>
-                    <Center>
-                      <Avatar
-                        size={"2xl"}
-                        src={user?.image}
-                      />
-                    </Center>
-                    <Center>
-                      <Text
-                        color="teal.400"
-                        fontWeight={500}
-                        fontSize={18}
-                        className="my-1 capitalize"
-                      >
-                        {user?.name}
-                      </Text>
-                    </Center>
-                    <br />
-                    <MenuDivider />
-                    <MenuItem
-                      justifyContent={"center"}
-                      _hover={{ bg: "none" }}
-                      _focus={{ bg: "none" }}
-                      color="gray.700"
-                      px="14px"
-                    >
-                      <Link
-                        to="/profile"
-                        className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
-                      >
-                        <Text fontWeight={500} fontSize={16}>
-                          Profile
-                        </Text>
-                      </Link>
-                    </MenuItem>
-                    <MenuItem
-                      justifyContent={"center"}
-                      _hover={{ bg: "none" }}
-                      _focus={{ bg: "none" }}
-                      color="gray.700"
-                      px="14px"
-                    >
-                      <Link
-                        to="/setting-profile/information"
-                        className="w-full rounded-md hover:bg-teal-50 focus:bg-teal-50 text-center py-2"
-                      >
-                        <Text fontWeight={500} fontSize={16}>
-                          Settings
-                        </Text>
-                      </Link>
-                    </MenuItem>
-                    <MenuItem
-                      _hover={{ bg: "none" }}
-                      _focus={{ bg: "none" }}
-                      color="red.400"
-                      borderRadius="8px"
-                      px="14px"
-                    >
-                      <LogoutButton>
-                        <TbLogout className="mr-2 text-red-500" />
-                        <Text color="red.400">Logout</Text>
-                      </LogoutButton>
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
-              </Flex>
-            )}
-          </div> */}
-      <IconButton
-        size={"sm"}
-        aria-label="Toggle navigation"
-        icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-        onClick={onOpen}
-        display={{ base: "block", md: "none" }}
-      />
-      <Drawer placement={"top"} onClose={onClose} isOpen={isOpen}>
+      <Drawer placement="right" onClose={onClose} isOpen={isOpen} size="xs">
         <DrawerOverlay backdropFilter="blur(5px)" />
         <DrawerContent bg="white">
           <DrawerCloseButton size="lg" mt={2} />
-
-          <DrawerBody display="flex" flexDirection="column" h="100%" py={8}>
-
-            {/* PHẦN 1: MENU CHÍNH */}
-            {/* align="center" để mọi thứ căn giữa trục dọc */}
-            <VStack as="nav" spacing={5} flex="1" justify="center" w="full">
-              <Link to="/">
+          <DrawerBody display="flex" flexDirection="column" h="100%" px={5} py={6}>
+            <VStack align="stretch" spacing={6} h="100%">
+              <HStack justify="space-between" pr={10}>
+                <img src={logoImage} alt="Rent N Ride" className="h-10 w-auto" />
                 <Button
-                  variant="ghost"
-                  fontSize="lg"        // Giảm size chút cho tinh tế (từ xl -> lg)
-                  fontWeight="medium"  // 👇 SỬA Ở ĐÂY: medium thay vì bold
-                  color="gray.700"
-                  _hover={{ color: "teal.600", bg: "teal.50" }}
-                  onClick={onClose}
-                  w="full"
-                >
-                  Home
-                </Button>
-              </Link>
-
-              {headerItems.map((item, i) => (
-                <Button
-                  key={i}
-                  variant="ghost"
-                  fontSize="lg"        // Giảm size chút
-                  fontWeight="medium"  // 👇 SỬA Ở ĐÂY: medium thay vì bold
-                  color="gray.700"
-                  _hover={{ color: "teal.600", bg: "teal.50" }}
-                  onClick={() => {
-                    handleNavigation(item);
-                    onClose();
-                  }}
-                  w="full"
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </VStack>
-
-            <Divider my={6} borderColor="gray.100" />
-
-            {/* PHẦN 2: TIỆN ÍCH */}
-            <VStack spacing={6} pb={6} w="full"> {/* Thêm w="full" vào đây */}
-
-              {/* Language Selector */}
-              <Menu autoSelect={false}>
-                <MenuButton
-                  as={Button}
-                  rightIcon={<ChevronDownIcon />}
-                  leftIcon={<FaGlobeAsia />}
-                  variant="outline"
+                  as="a"
+                  href={`tel:${phoneNumbers[0].number}`}
+                  leftIcon={<FaPhone size={14} />}
                   size="sm"
-                  borderColor="teal.200"
-                  color="teal.600"
                   rounded="full"
-                  fontWeight="medium"
-                  _hover={{ bg: "teal.50", borderColor: "teal.500" }}
-                  _active={{ bg: "teal.100" }}
+                  colorScheme="teal"
+                  variant="solid"
                 >
-                  {language === 'en' ? 'English' : 'Tiếng Việt'}
-                </MenuButton>
-                <MenuList minW="150px" fontSize="sm" zIndex={1500}>
-                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'en' } })}>
-                    🇺🇸 English
-                  </MenuItem>
-                  <MenuItem onClick={() => handleLanguageChange({ target: { value: 'vi' } })}>
-                    🇻🇳 Tiếng Việt
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-
-              {/* Social Icons */}
-              {/* 👇 SỬA Ở ĐÂY: Thêm w="full" và justify="center" để icon luôn ở giữa */}
-              <HStack spacing={8} w="full" justify="center">
-                <IconButton
-                  as="a"
-                  href={socialLinks.telegram}
-                  target="_blank"
-                  aria-label="Telegram"
-                  icon={<FaTelegram size={22} />}
-                  variant="unstyled"
-                  color="gray.400"
-                  _hover={{ color: "#0088cc", transform: "scale(1.2)" }}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  transition="all 0.2s"
-                />
-                <IconButton
-                  as="a"
-                  href={socialLinks.whatsapp}
-                  target="_blank"
-                  aria-label="WhatsApp"
-                  icon={<FaWhatsapp size={22} />}
-                  variant="unstyled"
-                  color="gray.400"
-                  _hover={{ color: "#25D366", transform: "scale(1.2)" }}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  transition="all 0.2s"
-                />
-                <IconButton
-                  as="a"
-                  href={socialLinks.messenger}
-                  target="_blank"
-                  aria-label="Messenger"
-                  icon={<FaFacebookMessenger size={22} />}
-                  variant="unstyled"
-                  color="gray.400"
-                  _hover={{ color: "#006AFF", transform: "scale(1.2)" }}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  transition="all 0.2s"
-                />
+                  {phoneNumbers[0].display}
+                </Button>
               </HStack>
 
-              {/* Phone Numbers */}
-              <VStack spacing={2}>
-                {phoneNumbers.map((phone, index) => (
+              <VStack as="nav" spacing={3} align="stretch">
+                <Link to="/" onClick={onClose}>
                   <Button
-                    key={index}
-                    as="a"
-                    href={`tel:${phone.number}`}
-                    leftIcon={<FaPhone size={12} />}
-                    variant="link"
-                    color="teal.600"
-                    fontWeight="medium"
-                    fontSize="sm"
-                    _hover={{ textDecoration: 'none', color: 'teal.700' }}
+                    variant="ghost"
+                    justifyContent="flex-start"
+                    fontSize="md"
+                    fontWeight="semibold"
+                    color="gray.700"
+                    px={3}
+                    py={6}
+                    rounded="xl"
+                    _hover={{ color: "teal.600", bg: "teal.50" }}
+                    w="full"
                   >
-                    {phone.display}
+                    {t("header.home")}
+                  </Button>
+                </Link>
+
+                {headerItems.map((item) => (
+                  <Button
+                    key={item.key}
+                    variant="ghost"
+                    justifyContent="flex-start"
+                    fontSize="md"
+                    fontWeight="medium"
+                    color="gray.700"
+                    px={3}
+                    py={6}
+                    rounded="xl"
+                    _hover={{ color: "teal.600", bg: "teal.50" }}
+                    onClick={() => {
+                      handleNavigation(item);
+                      onClose();
+                    }}
+                    w="full"
+                  >
+                    {t(`header.${item.key}`)}
                   </Button>
                 ))}
               </VStack>
-            </VStack>
 
+              <Divider my={1} borderColor="gray.100" />
+
+              <VStack spacing={4} align="stretch">
+                <Menu autoSelect={false}>
+                  <MenuButton
+                    as={Button}
+                    rightIcon={<ChevronDownIcon />}
+                    leftIcon={<FaGlobeAsia />}
+                    variant="outline"
+                    size="md"
+                    justifyContent="space-between"
+                    borderColor="teal.200"
+                    color="teal.600"
+                    rounded="xl"
+                    fontWeight="medium"
+                    _hover={{ bg: "teal.50", borderColor: "teal.500" }}
+                    _active={{ bg: "teal.100" }}
+                  >
+                    {t(`lang.${language}`)}
+                  </MenuButton>
+                  <MenuList minW="160px" fontSize="sm" zIndex={1500}>
+                    <MenuItem onClick={() => changeLanguageTo("en")}>🇺🇸 {t("lang.en")}</MenuItem>
+                    <MenuItem onClick={() => changeLanguageTo("ru")}>🇷🇺 {t("lang.ru")}</MenuItem>
+                    <MenuItem onClick={() => changeLanguageTo("vi")}>🇻🇳 {t("lang.vi")}</MenuItem>
+                    <MenuItem onClick={() => changeLanguageTo("de")}>🇩🇪 {t("lang.de")}</MenuItem>
+                  </MenuList>
+                </Menu>
+
+                <HStack spacing={3} justify="space-between">
+                  <IconButton
+                    as="a"
+                    href={socialLinks.telegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Telegram"
+                    icon={<FaTelegram size={20} />}
+                    variant="outline"
+                    color="#0088CC"
+                    rounded="xl"
+                    borderColor="#0088CC"
+                    flex="1"
+                    _hover={{ color: "#0088CC", borderColor: "#0088CC", bg: "blue.50" }}
+                  />
+                  <IconButton
+                    as="a"
+                    href={socialLinks.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="WhatsApp"
+                    icon={<FaWhatsapp size={20} />}
+                    variant="outline"
+                    color="#25D366"
+                    rounded="xl"
+                    borderColor="#25D366"
+                    flex="1"
+                    _hover={{ color: "#25D366", borderColor: "#25D366", bg: "green.50" }}
+                  />
+                  <IconButton
+                    as="a"
+                    href={socialLinks.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    icon={<FaInstagram size={20} />}
+                    variant="outline"
+                    color="#E4405F"
+                    rounded="xl"
+                    borderColor="#E4405F"
+                    flex="1"
+                    _hover={{ color: "#E4405F", borderColor: "#E4405F", bg: "pink.50" }}
+                  />
+                </HStack>
+
+                <VStack spacing={2} align="stretch">
+                  {phoneNumbers.map((phone) => (
+                    <Button
+                      key={phone.number}
+                      as="a"
+                      href={`tel:${phone.number}`}
+                      leftIcon={<FaPhone size={12} />}
+                      justifyContent="flex-start"
+                      variant="ghost"
+                      rounded="xl"
+                      color="teal.600"
+                      fontWeight="medium"
+                      fontSize="sm"
+                      _hover={{ bg: "teal.50", color: "teal.700" }}
+                    >
+                      {phone.display}
+                    </Button>
+                  ))}
+                </VStack>
+              </VStack>
+
+              <Box flex="1" />
+
+              <Text fontSize="xs" color="gray.400" textAlign="center">
+                Rent N Ride
+              </Text>
+            </VStack>
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-    </header >
+    </header>
   );
 };
 

@@ -10,6 +10,9 @@ import { ROLES_ENUM } from '../../shared/constants/global.constants';
 
 import { AuthResponseDTO, LoginUserDTO, RegisterUserDTO, UserDetails } from './auth.dto';
 import { EmailService } from '../email/email.service';
+import * as fs from 'fs';
+import * as path from 'path';
+import { buildWelcomeHtml } from '../email/templates/welcome.template';
 
 @Injectable()
 export class AuthService {
@@ -63,18 +66,18 @@ export class AuthService {
   }
 
   public async register(user: RegisterUserDTO): Promise<User> {
-    const object = 'Welcome to BikeHub! - Enjoy your bike!';
+    const object = 'Welcome to RentnRide! - Enjoy your motorbike!';
     const content = `
     Hello ${user.name},
 
-    Welcome to BikeHub!
+    Welcome to RentnRide!
 
     You can update your profile information from profile settings.
 
     Link: ${process.env.REDIRECT_URL}/setting-profile/
 
     Thank you,
-    Enjoy your Bike :)
+    Enjoy your Motorbike :)
     `;
     const userData = await this.userService.findUser({
       email: user.email,
@@ -83,20 +86,50 @@ export class AuthService {
     if (userData) {
       throw new UnauthorizedException("This email already exists");
     }
-    
+
     // Allow role to be specified (for dealer creation), otherwise default to USER
-    const newUser = { 
-      ...user, 
-      role: user.role || ROLES_ENUM.USER 
+    const newUser = {
+      ...user,
+      role: user.role || ROLES_ENUM.USER
     };
-    
+
     const Res = await this.userService.createUser(newUser);
-    
+
     // Only send welcome email for regular users, not dealers
     if (newUser.role === ROLES_ENUM.USER) {
-      await this.emailService.sendEmail(user.email, object, content);
+      // Resolve logo for inline attachment if available
+      const emailLogoUrl = process.env.EMAIL_LOGO_URL;
+      let logoSrc = 'cid:logo';
+      let inlineLogoPath: string | undefined = undefined;
+
+      if (emailLogoUrl) {
+        if (/^https?:\/\//i.test(emailLogoUrl)) {
+          logoSrc = emailLogoUrl;
+        } else {
+          const candidates = [
+            path.resolve(process.cwd(), emailLogoUrl),
+            path.resolve(process.cwd(), 'frontend', emailLogoUrl),
+            path.resolve(process.cwd(), '..', 'frontend', emailLogoUrl),
+            path.resolve(__dirname, '..', '..', '..', emailLogoUrl),
+          ];
+          const found = candidates.find((p) => fs.existsSync(p));
+          if (found) {
+            logoSrc = 'cid:logo';
+            inlineLogoPath = found;
+            process.env.EMAIL_LOGO_PATH = found;
+            // console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
+          } else {
+            const base = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD.replace(/\/$/, '') : '';
+            logoSrc = base ? `${base}/${emailLogoUrl.replace(/^\//, '')}` : emailLogoUrl;
+          }
+        }
+      }
+
+      const baseUrl = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD : '/';
+      const html = buildWelcomeHtml({ baseUrl, name: user.name, profileUrl: '/setting-profile/', logoSrc });
+      await this.emailService.sendEmail(user.email, object, content, html, { inlineLogoPath });
     }
-    
+
     delete Res.password;
     return Res;
   }
@@ -112,11 +145,11 @@ export class AuthService {
   public async validateUser(details: UserDetails): Promise<AuthResponseDTO> {
     let data = null;
     let newUser = null;
-    const object = 'Welcome to BikeHub! - Your Password!';
+    const object = 'Welcome to RentnRide! - Your Password!';
     const content = `
     Hello ${details.name},
 
-    Welcome to BikeHub!
+    Welcome to RentnRide!
 
     Your password is: ${details.password}
 
@@ -125,17 +158,49 @@ export class AuthService {
     Link: ${process.env.REDIRECT_URL}/setting-profile/updatePassword
 
 
-    Enjoy your Bike :)
+    Enjoy your Motorbike :)
     `;
 
     const user = await this.prisma.user.findUnique({
       where: { email: details.email },
     });
     if (!user) {
-      console.log("new user")
-      console.log(details)
+      // console.log("new user")
+      // console.log(details)
       newUser = await this.prisma.user.create({ data: details });
-      await this.emailService.sendEmail(details.email, object, content);
+
+      // Send styled welcome email (try inline logo attachment if local file exists)
+      const emailLogoUrl = process.env.EMAIL_LOGO_URL;
+      let logoSrc = 'cid:logo';
+      let inlineLogoPath: string | undefined = undefined;
+
+      if (emailLogoUrl) {
+        if (/^https?:\/\//i.test(emailLogoUrl)) {
+          logoSrc = emailLogoUrl;
+        } else {
+          const candidates = [
+            path.resolve(process.cwd(), emailLogoUrl),
+            path.resolve(process.cwd(), 'frontend', emailLogoUrl),
+            path.resolve(process.cwd(), '..', 'frontend', emailLogoUrl),
+            path.resolve(__dirname, '..', '..', '..', emailLogoUrl),
+          ];
+          const found = candidates.find((p) => fs.existsSync(p));
+          if (found) {
+            logoSrc = 'cid:logo';
+            inlineLogoPath = found;
+            process.env.EMAIL_LOGO_PATH = found;
+            // console.log('Set EMAIL_LOGO_PATH for inline logo to:', found);
+          } else {
+            const base = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD.replace(/\/$/, '') : '';
+            logoSrc = base ? `${base}/${emailLogoUrl.replace(/^\//, '')}` : emailLogoUrl;
+          }
+        }
+      }
+
+      const baseUrl = process.env.BASE_URL_PROD ? process.env.BASE_URL_PROD : '/';
+      const html = buildWelcomeHtml({ baseUrl, name: details.name, profileUrl: '/setting-profile/', logoSrc });
+      await this.emailService.sendEmail(details.email, object, content, html, { inlineLogoPath });
+
       newUser.password = null;
     }
     data = newUser || user;

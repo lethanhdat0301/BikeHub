@@ -16,6 +16,23 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingBikeId, setEditingBikeId] = useState<number | null>(null);
 
+    const handleDelete = async (id: number, model: string) => {
+        if (!window.confirm(`Are you sure you want to delete "${model}"? This action cannot be undone.`)) return;
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}bikes/bike/${id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || "Failed to delete bike");
+            }
+            if (onRefresh) onRefresh();
+        } catch (e: any) {
+            alert(e.message || "Failed to delete bike");
+        }
+    };
+
     const data = React.useMemo(() => {
         if (!tableContent) return [];
         if (Array.isArray(tableContent)) {
@@ -37,16 +54,24 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 ),
             },
             {
-                Header: "Bike Model",
+                Header: "Motorbike Model",
                 accessor: "model",
-                Cell: ({ row }: any) => (
+                Cell: ({ row }: any) => {
+                    // Support both full URLs (new) and plain GCS filenames (legacy)
+                    const imageUrl = row.original.image
+                        ? row.original.image.startsWith('http')
+                            ? row.original.image
+                            : `https://storage.googleapis.com/${process.env.REACT_APP_GCS_BUCKET || 'bike_images'}/${row.original.image}`
+                        : null;
+                    return (
                     <div className="flex items-center gap-3">
-                        {row.original.image && (
+                        {imageUrl && (
                             <div className="h-12 w-16 overflow-hidden rounded-lg bg-gray-200">
                                 <img
-                                    src={row.original.image}
+                                    src={imageUrl}
                                     alt={row.original.model}
                                     className="h-full w-full object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                 />
                             </div>
                         )}
@@ -61,7 +86,8 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                             )}
                         </div>
                     </div>
-                ),
+                    );
+                },
             },
             {
                 Header: "Status",
@@ -84,7 +110,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 accessor: "price",
                 Cell: ({ value }: any) => (
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                        ${value?.toFixed(2) || "0.00"}
+                        {(value || 0).toLocaleString('vi-VN')} VNĐ
                     </p>
                 ),
             },
@@ -94,6 +120,15 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                 Cell: ({ value }: any) => (
                     <p className="text-sm text-navy-700 dark:text-white">
                         {value || "N/A"}
+                    </p>
+                ),
+            },
+            {
+                Header: "License Plate",
+                accessor: "license_plate",
+                Cell: ({ value }: any) => (
+                    <p className="text-sm font-semibold text-navy-700 dark:text-white">
+                        {value || "-"}
                     </p>
                 ),
             },
@@ -127,7 +162,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                             <MdEdit className="h-4 w-4" />
                             Edit
                         </button>
-                        <button className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
+                        <button onClick={() => handleDelete(row.original.id, row.original.model)} className="flex items-center gap-1 rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
                             <MdDelete className="h-4 w-4" />
                             Delete
                         </button>
@@ -154,7 +189,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
         {
             columns,
             data,
-            initialState: { pageIndex: 0, pageSize: 10 },
+            initialState: { pageIndex: 0, pageSize: 10, sortBy: [{ id: "id", desc: false }] },
         },
         useSortBy,
         usePagination
@@ -191,7 +226,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                     className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                 >
                     <MdAdd className="h-5 w-5" />
-                    Add Bike
+                    Add motorbike
                 </button>
             </div>
 
@@ -237,7 +272,7 @@ const BikeTable: React.FC<Props> = ({ tableContent, loading, onRefresh }) => {
                         {page.length === 0 ? (
                             <tr>
                                 <td colSpan={8} className="py-8 text-center text-gray-500">
-                                    No bikes found
+                                    No motorbikes found
                                 </td>
                             </tr>
                         ) : (

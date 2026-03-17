@@ -29,6 +29,11 @@ export class ReferrerController {
         return this.referrerService.findOne(+id);
     }
 
+    @Get(':id/history')
+    getReferralHistory(@Param('id') id: string) {
+        return this.referrerService.getReferralHistory(+id);
+    }
+
     @Post()
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()

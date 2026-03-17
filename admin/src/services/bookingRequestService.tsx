@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// 1. Cấu hình đường dẫn API
-const API_URL = "http://localhost:3300/api/v1/";
+// 1. Cấu hình đường dẫn API - use environment variable or fallback
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3300/api/v1/";
 
 // 2. Tạo một instance axios riêng cho Admin
 const axiosClient = axios.create({
@@ -25,6 +25,22 @@ axiosClient.interceptors.request.use((config) => {
 }, (error) => {
     return Promise.reject(error);
 });
+
+// Handle 401/403 — token expired → clear session and redirect to login
+axiosClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            const hasToken = !!localStorage.getItem("token");
+            if (hasToken && !window.location.pathname.includes("/auth/")) {
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+                window.location.href = "/auth/sign-in";
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 export interface BookingRequest {
     id?: number;

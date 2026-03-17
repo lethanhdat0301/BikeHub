@@ -1,33 +1,38 @@
-import { PrismaClient, Park, User } from '@prisma/client';
+import { PrismaClient, Park } from '@prisma/client';
 
-export async function seedParks(prisma: PrismaClient, dealers: User[]) {
-  // Map dealer theo email để lấy đúng ID
-  const pqDealer = dealers.find(u => u.email === 'dealer.pq@rentnride.com');
-  const ntDealer = dealers.find(u => u.email === 'dealer.nt@rentnride.com');
-  const hgDealer = dealers.find(u => u.email === 'dealer.hg@rentnride.com');
-
-  if (!pqDealer || !ntDealer || !hgDealer) {
-    throw new Error("Missing Dealers. Please seed users first.");
-  }
+export async function seedParks(prisma: PrismaClient) {
+  // Parks will be assigned to dealers by admin later
 
   const parksData = [
     {
-      name: 'Phú Quốc Station',
-      location: 'Phú Quốc',
-      dealer_id: pqDealer.id,
-      image: 'https://statics.vinpearl.com/du-lich-phu-quoc-2-ngay-1-dem-1_1629272392.jpg'
+      name: 'Phu Quoc Island',
+      location: 'Phu Quoc Island, Kien Giang Province',
+      image: 'https://picsum.photos/800/600?random=1'
     },
     {
-      name: 'Nha Trang Station',
-      location: 'Nha Trang',
-      dealer_id: ntDealer.id,
-      image: 'https://ik.imagekit.io/tvlk/blog/2022/11/dia-diem-du-lich-nha-trang-1.jpg'
+      name: 'Nha Trang Central',
+      location: 'Nha Trang City, Khanh Hoa Province',
+      image: 'https://picsum.photos/800/600?random=2'
     },
     {
-      name: 'Hà Giang Station',
-      location: 'Hà Giang',
-      dealer_id: hgDealer.id,
-      image: 'https://vcdn1-dulich.vnecdn.net/2021/01/15/ha-giang-1-1610680194.jpg'
+      name: 'Ha Giang Loop',
+      location: 'Ha Giang City, Ha Giang Province',
+      image: 'https://picsum.photos/800/600?random=3'
+    },
+    {
+      name: 'Ho Chi Minh City',
+      location: 'District 1, Ho Chi Minh City',
+      image: 'https://picsum.photos/800/600?random=4'
+    },
+    {
+      name: 'Da Nang Coastal',
+      location: 'Da Nang City, Central Vietnam',
+      image: 'https://picsum.photos/800/600?random=5'
+    },
+    {
+      name: 'Ha Noi City',
+      location: 'Hoan Kiem District, Hanoi City',
+      image: 'https://picsum.photos/800/600?random=6'
     },
   ];
 
@@ -51,6 +56,5 @@ export async function seedParks(prisma: PrismaClient, dealers: User[]) {
     }
   }
 
-  console.log(`✅ Seeded ${createdParks.length} Parks (Phu Quoc, Nha Trang, Ha Giang)`);
   return createdParks;
 }

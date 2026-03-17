@@ -12,6 +12,7 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 import toast from "react-hot-toast";
+import { useTranslation } from 'react-i18next';
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import axios from "../../../apis/axios";
 import { useAuth } from "../../../hooks/useAuth";
@@ -34,6 +35,7 @@ const UpdatePassword = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
 
   /**
    * Handles validation input field.
@@ -42,13 +44,13 @@ const UpdatePassword = () => {
   const validation = () => {
     if (data.oldPassword === "") {
       setErrPassword(true);
-      console.log("old Password empty");
+      // console.log("old Password empty");
     } else {
       setErrPassword(false);
     }
     if (data.newPassword === "") {
       setErrPassword(true);
-      console.log("new Password empty");
+      // console.log("new Password empty");
     } else {
       setErrPassword(false);
     }
@@ -70,7 +72,7 @@ const UpdatePassword = () => {
    */
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(event, "submit");
+    // console.log(event, "submit");
     validation();
     setErrMsg("");
     setIsSubmitting(true);
@@ -79,19 +81,19 @@ const UpdatePassword = () => {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      console.log(response);
-      console.log(JSON.stringify(response?.data));
+      // console.log(response);
+      // console.log(JSON.stringify(response?.data));
       setErrMsg("");
       toast({
-        title: "Password updated.",
-        description: "Your password has been successfully updated.",
+        title: t('profile.passwordUpdatedTitle'),
+        description: t('profile.passwordUpdatedDescription'),
         status: "success",
         duration: 2500,
         isClosable: true,
       });
       setErrPassword(false);
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       let errorMessage = error?.response?.data?.message;
       if (typeof errorMessage === 'string')
         errorMessage = error?.response?.data?.message;
@@ -99,7 +101,7 @@ const UpdatePassword = () => {
         errorMessage = error?.response?.data?.message.join(", ");
 
       toast({
-        title: "Error",
+        title: t('profile.errorGeneric'),
         description: errorMessage,
         status: "error",
         duration: 5000,
@@ -128,7 +130,7 @@ const UpdatePassword = () => {
       </FormControl>
       <Flex gap={4} className="max-sm:flex-col">
         <FormControl id="oldPassword" isInvalid={errPassword}>
-          <FormLabel>Old Password</FormLabel>
+          <FormLabel>{t('profile.oldPassword')}</FormLabel>
           <InputGroup>
             <Input
               type={showPassword ? "text" : "password"}
@@ -136,7 +138,7 @@ const UpdatePassword = () => {
               onChange={(e) => {
                 setData({ ...data, oldPassword: e.target.value });
               }}
-              placeholder="Old Password"
+              placeholder={t('profile.oldPassword') as string}
             />
             <InputRightElement h={"full"}>
               <Button
@@ -152,7 +154,7 @@ const UpdatePassword = () => {
       </Flex>
       <Flex gap={4} className="max-sm:flex-col">
         <FormControl id="password" isInvalid={errPassword}>
-          <FormLabel>New Password</FormLabel>
+          <FormLabel>{t('profile.newPassword')}</FormLabel>
           <InputGroup>
             <Input
               type={showPassword ? "text" : "password"}
@@ -160,7 +162,7 @@ const UpdatePassword = () => {
               onChange={(e) => {
                 setData({ ...data, newPassword: e.target.value });
               }}
-              placeholder="New Password"
+              placeholder={t('profile.newPassword') as string}
             />
             <InputRightElement h={"full"}>
               <Button
@@ -171,16 +173,16 @@ const UpdatePassword = () => {
               </Button>
             </InputRightElement>
           </InputGroup>
-          <FormErrorMessage>error Password</FormErrorMessage>
+          <FormErrorMessage>{t('profile.errorPassword')}</FormErrorMessage>
         </FormControl>
         <FormControl id="confirmPassword" isInvalid={errPassword}>
-          <FormLabel>Confirm Password</FormLabel>
+          <FormLabel>{t('profile.confirmPassword')}</FormLabel>
           <InputGroup>
             <Input
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm Password"
+              placeholder={t('profile.confirmPassword') as string}
             />
             <InputRightElement h={"full"}>
               <Button
@@ -191,7 +193,7 @@ const UpdatePassword = () => {
               </Button>
             </InputRightElement>
           </InputGroup>
-          <FormErrorMessage>error Confirm Password</FormErrorMessage>
+          <FormErrorMessage>{t('profile.errorPassword')}</FormErrorMessage>
         </FormControl>
       </Flex>
       <Stack spacing={2} align={"center"}>
@@ -202,7 +204,7 @@ const UpdatePassword = () => {
           isLoading={isSubmitting}
           type="submit"
         >
-          Save Change
+          {t('profile.saveChange')}
         </Button>
       </Stack>
     </form>

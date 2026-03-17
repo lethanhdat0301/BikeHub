@@ -77,6 +77,7 @@ export default function Admin(props: { [x: string]: any }) {
             <div className="pt-5s mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
               <Routes>
                 {getRoutes(routes)}
+                <Route path="/inbox" element={<Navigate to="/admin/chat" replace />} />
 
                 <Route
                   path="/"

@@ -1,11 +1,19 @@
 import RentalTable from "./components/RentalTable";
 import { useEffect, useState } from "react";
-import { Center, Spinner, Text, Box, Heading } from "@chakra-ui/react";
+import { useSearchParams } from "react-router-dom";
+import { Center, Spinner, Text, Box, Heading, Badge } from "@chakra-ui/react";
+import useAuth from "utils/auth/AuthHook";
 
 const RentalsTable = () => {
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+
+  // Get dealer filter from URL params
+  const dealerUserId = searchParams.get('dealerUserId'); // This is User.id that Bike.dealer_id references
+  const dealerName = searchParams.get('dealerName');
 
   const fetchData = async () => {
     try {
@@ -31,10 +39,19 @@ const RentalsTable = () => {
       }
 
       const rData = await response.json();
-      console.log('Rentals data:', rData);
+      // console.log('Rentals data:', rData);
 
       const rentalsList = Array.isArray(rData) ? rData : [];
-      setTableData(rentalsList);
+
+      // Filter by dealer's user_id if specified in URL params
+      // Bike.dealer_id references User.id (not Dealer.id)
+      const filteredRentals = dealerUserId
+        ? rentalsList.filter((rental: any) =>
+          rental.Bike && rental.Bike.dealer_id === parseInt(dealerUserId)
+        )
+        : rentalsList;
+
+      setTableData(filteredRentals);
     } catch (error) {
       console.error("Error loading rentals:", error);
       setError('Failed to load rentals. Please try again.');
@@ -46,13 +63,20 @@ const RentalsTable = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [dealerUserId]); // Refetch when dealer filter changes
 
   return (
     <Box className="mt-5" px={4}>
-      <Heading size="md" mb={4} color="teal.600">
-        Rentals
-      </Heading>
+      <Box mb={4} display="flex" alignItems="center" gap={3}>
+        <Heading size="md" color="teal.600">
+          Rentals
+        </Heading>
+        {dealerName && (
+          <Badge colorScheme="blue" variant="solid" px={3} py={1} borderRadius="full">
+            Dealer: {dealerName}
+          </Badge>
+        )}
+      </Box>
       {error ? (
         <Box
           bg="red.100"
@@ -75,6 +99,7 @@ const RentalsTable = () => {
           tableContent={tableData}
           loading={loading}
           onRefresh={fetchData}
+          userRole={user?.role}
         />
       )}
     </Box>

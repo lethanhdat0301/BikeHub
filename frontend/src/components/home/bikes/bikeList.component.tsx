@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Box, Center, Heading, SimpleGrid, Spinner, Text, Button, HStack, IconButton } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { useTranslation } from "react-i18next";
 import CardBike from "./cardBike.component";
 import { Reveal } from "../../motion/reveal.component";
 import bikeService from "../../../services/bikeService";
-import bike1 from "../../../assets/images/bikes/bike1.jpg";
+import bike1 from "../../../assets/images/bikes/bike-placeholder.jpg";
 import bike2 from "../../../assets/images/bikes/bike2.webp";
 import bike3 from "../../../assets/images/bikes/bike3.webp";
 
@@ -17,77 +18,15 @@ interface Bike {
     price: number;
     park_id: number;
     image?: string;
+    license_plate?: string;
 }
 
-// Default images nếu xe không có ảnh
-const defaultImages = [bike1, bike2, bike3];
-
-// Mock data để hiển thị khi database trống
-const mockBikes: Bike[] = [
-    {
-        id: 1,
-        model: "Mountain Bike Pro",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Downtown",
-        price: 50,
-        park_id: 1,
-        image: bike1
-    },
-    {
-        id: 2,
-        model: "City Cruiser",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Beach Area",
-        price: 30,
-        park_id: 2,
-        image: bike2
-    },
-    {
-        id: 3,
-        model: "Sport Racing",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Mountain Trail",
-        price: 70,
-        park_id: 3,
-        image: bike3
-    },
-    {
-        id: 4,
-        model: "Urban Commuter",
-        status: "AVAILABLE",
-        lock: false,
-        location: "City Center",
-        price: 40,
-        park_id: 1,
-        image: bike1
-    },
-    {
-        id: 5,
-        model: "Electric Bike",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Riverside",
-        price: 80,
-        park_id: 2,
-        image: bike2
-    },
-    {
-        id: 6,
-        model: "Folding Bike",
-        status: "AVAILABLE",
-        lock: false,
-        location: "Station",
-        price: 35,
-        park_id: 3,
-        image: bike3
-    }
-];
+// Placeholder image
+const placeholderImage = bike1;
 
 const BikeList: React.FC = () => {
-    console.log("🔵 BikeList component rendered!");
+    // console.log("🔵 BikeList component rendered!");
+    const { t } = useTranslation();
 
     const [bikes, setBikes] = useState<Bike[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -99,19 +38,22 @@ const BikeList: React.FC = () => {
         const fetchBikes = async () => {
             try {
                 setLoading(true);
-                console.log("🚴 Đang lấy xe từ database...");
+                // console.log("🚴 Đang lấy xe từ database...");
 
                 let data = await bikeService.getBikesByStatus('available', 20); // Lấy nhiều xe hơn để phân trang
 
                 if (!data || (Array.isArray(data) && data.length === 0)) {
-                    console.warn("⚠️ API trả về rỗng, sử dụng Mock Data");
-                    data = mockBikes;
+                    console.warn("⚠️ API trả về rỗng, không có xe");
+                    setBikes([]);
+                    setError(null);
+                    setLoading(false);
+                    return;
                 }
 
-                // Thêm ảnh mặc định nếu cần
-                const bikesWithImages = data.map((bike, index) => ({
+                // Xử lý ảnh giống bikeDetails - sử dụng Google Cloud Storage
+                const bikesWithImages = data.map((bike: any) => ({
                     ...bike,
-                    image: bike.image || defaultImages[index % defaultImages.length]
+                    image: bike.image ? (bike.image.startsWith('http') ? bike.image : `https://storage.googleapis.com/bike_images/${bike.image}`) : placeholderImage
                 }));
 
                 setBikes(bikesWithImages);
@@ -119,10 +61,8 @@ const BikeList: React.FC = () => {
             } catch (err: any) {
                 console.error("❌ Error loading bikes:", err);
                 console.error("❌ Error details:", err.response?.data || err.message);
-                console.log("⚠️ Lỗi khi tải từ API, sử dụng mock data");
-                // Nếu có lỗi, dùng mock data
-                setBikes(mockBikes);
-                setError(null);
+                setBikes([]);
+                setError("Failed to load bikes. Please try again later.");
             } finally {
                 setLoading(false);
             }
@@ -162,7 +102,7 @@ const BikeList: React.FC = () => {
             <Center mt={100} justifyContent={"center"} flexDirection={"column"}>
                 <Reveal>
                     <Heading as="h3" size={{ base: "sm", md: "xl" }} className="capitalize">
-                        What we offer
+                        {t('home.whatWeOffer')}
                     </Heading>
                 </Reveal>
                 <Reveal>
@@ -172,15 +112,15 @@ const BikeList: React.FC = () => {
                         className="py-4"
                         color={"orange.500"}
                     >
-                        Explore Our Bike Range
+                        {t('home.exploreOurBikeRange')}
                     </Heading>
                 </Reveal>
             </Center>
 
             <SimpleGrid
-                columns={{ base: 2, md: 2, lg: 3 }}
-                spacing={{ base: 2, md: 6, lg: 8 }}
-                gap={{ base: 2, md: 6, lg: 8 }}
+                columns={{ base: 1, sm: 2, md: 2, lg: 3 }}
+                spacing={{ base: 3, md: 6, lg: 8 }}
+                gap={{ base: 3, md: 6, lg: 8 }}
                 mt={5}
                 className="w-full md:w-4/5"
                 px={{ base: 2, md: 0 }}
@@ -196,7 +136,7 @@ const BikeList: React.FC = () => {
                 ) : bikes.length === 0 ? (
                     <Center gridColumn="1 / -1" py={10}>
                         <Text fontSize="lg" color="gray.500">
-                            Hiện tại chưa có xe nào. Vui lòng quay lại sau.
+                            {t('home.noBikesAvailable')}
                         </Text>
                     </Center>
                 ) : (
@@ -249,7 +189,7 @@ const BikeList: React.FC = () => {
 
                     {/* Page Info */}
                     <Text textAlign="center" mt={3} fontSize={{ base: "xs", md: "sm" }} color="gray.600">
-                        Trang {currentPage} / {totalPages} • Tổng {bikes.length} xe
+                        Page {currentPage} / {totalPages} • Total {bikes.length} motorbikes
                     </Text>
                 </Box>
             )}

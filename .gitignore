@@ -20,3 +20,11 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+<<<<<<< HEAD
+api/gen-lang-client-0406312695-b671d3b8e09c.jsonapi/cloud_sql_proxy
+api/*.json
+=======
+api/gen-lang-client-0406312695-b671d3b8e09c.json
+./CHAT_FEATURE_GUIDE.md
+>>>>>>> 9400fbebfd84e466a8d1485118e52c27ccd1c803

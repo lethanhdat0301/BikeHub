@@ -17,6 +17,7 @@ const dealersHeaders = [
   { id: "name", title: "Dealer" },
   { id: "email", title: "Contact" },
   { id: "vehicles", title: "Vehicles" },
+  { id: "total_rentals", title: "Rentals" },
   { id: "total_revenue", title: "Total Revenue" },
   { id: "platform_fee_est", title: "Platform Fee (Est.)" },
   { id: "current_debt", title: "Current Debt" },
@@ -36,6 +37,7 @@ const Tables: React.FC<{ initialTab?: 'accounts' | 'dealers' | 'customers' }> = 
   const [users, setUsers] = useState<any[]>([]);
   const [bikes, setBikes] = useState<any[]>([]);
   const [rentals, setRentals] = useState<any[]>([]);
+  const [dealers, setDealers] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"accounts" | "dealers" | "customers">(initialTab as any);
 
   // update active tab when route passes a different initialTab
@@ -48,7 +50,7 @@ const Tables: React.FC<{ initialTab?: 'accounts' | 'dealers' | 'customers' }> = 
   // listen for query param ?tab=dealers|accounts|customers to switch and refresh
   useEffect(() => {
     const q = new URLSearchParams(location.search);
-    const t = q.get('tab') as 'accounts'|'dealers'|'customers' | null;
+    const t = q.get('tab') as 'accounts' | 'dealers' | 'customers' | null;
     if (t && t !== activeTab) {
       setActiveTab(t);
     }
@@ -56,21 +58,25 @@ const Tables: React.FC<{ initialTab?: 'accounts' | 'dealers' | 'customers' }> = 
 
   useEffect(() => {
     const fetchData = async () => {
-      const [uRes, bRes, rRes] = await Promise.all([
+      const [uRes, bRes, rRes, dRes] = await Promise.all([
         fetch(`${process.env.REACT_APP_API_URL}users`, { credentials: "include" }),
         fetch(`${process.env.REACT_APP_API_URL}bikes`, { credentials: "include" }),
         fetch(`${process.env.REACT_APP_API_URL}rentals`, { credentials: "include" }),
+        fetch(`${process.env.REACT_APP_API_URL}dealers`, { credentials: "include" }),
       ]);
       const uData = await uRes.json();
       const bData = await bRes.json();
       const rData = await rRes.json();
+      const dData = await dRes.json();
       const usersList = Array.isArray(uData) ? uData : (uData && Array.isArray(uData.data) ? uData.data : []);
       const bikesList = Array.isArray(bData) ? bData : (bData && Array.isArray(bData.data) ? bData.data : []);
       const rentalsList = Array.isArray(rData) ? rData : (rData && Array.isArray((rData as any).data) ? (rData as any).data : []);
+      const dealersList = Array.isArray(dData) ? dData : [];
       setUsers(usersList);
       setBikes(bikesList);
       // store rentals locally for filtering customers
       setRentals(rentalsList);
+      setDealers(dealersList);
     };
 
     fetchData();
@@ -81,9 +87,24 @@ const Tables: React.FC<{ initialTab?: 'accounts' | 'dealers' | 'customers' }> = 
   const dealersData = users
     .filter((u) => u.role === "dealer")
     .map((d) => {
-      // bikes owned by dealer either directly via bike.dealer_id or via Park.dealer_id
+      // Find dealer record by user_id
+      const dealerRecord = dealers.find((dealer) => dealer.user_id === d.id);
+      
+      if (!dealerRecord) {
+        return {
+          ...d,
+          vehicles: 0,
+          total_rentals: 0,
+          total_revenue: 0,
+          platform_fee_est: 0,
+          current_debt: 0,
+          last_payment: null,
+        };
+      }
+
+      // bikes owned by dealer via bike.dealer_id
       const dealerBikeIds = bikes
-        .filter((b) => (b.dealer_id && b.dealer_id === d.id) || (b.Park && b.Park.dealer_id === d.id))
+        .filter((b) => b.dealer_id === dealerRecord.id)
         .map((b) => b.id);
 
       // rentals for those bikes
@@ -95,16 +116,18 @@ const Tables: React.FC<{ initialTab?: 'accounts' | 'dealers' | 'customers' }> = 
       // last payment: latest rental created_at or end_time for dealer's bikes
       const lastPayment = dealerRentals.length
         ? dealerRentals.reduce((latest: string | null, r: any) => {
-            const candidate = r.end_time ?? r.created_at;
-            if (!candidate) return latest;
-            if (!latest) return candidate;
-            return new Date(candidate) > new Date(latest) ? candidate : latest;
-          }, null)
+          const candidate = r.end_time ?? r.created_at;
+          if (!candidate) return latest;
+          if (!latest) return candidate;
+          return new Date(candidate) > new Date(latest) ? candidate : latest;
+        }, null)
         : null;
 
       return {
         ...d,
-        vehicles: bikes.filter((b) => (b.Park && b.Park.dealer_id === d.id) || b.dealer_id === d.id).length,
+        park: dealerRecord.Park?.name || 'N/A',
+        vehicles: bikes.filter((b) => b.dealer_id === dealerRecord.id).length,
+        total_rentals: dealerRentals.length,
         total_revenue: totalRevenue,
         platform_fee_est: platformFeeEst,
         current_debt: currentDebt,

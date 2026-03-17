@@ -7,7 +7,7 @@ import {
   // Icon,
   Text,
 } from "@chakra-ui/react";
-import bikeImg from "../../../assets/images/bikes/bike1.jpg";
+import bikeImg from "../../../assets/images/bikes/bike-placeholder.jpg";
 import qrCode from "../../../assets/images/bikes/qr-code.png";
 import { Rental } from "../Profile.page";
 import moment from "moment";
@@ -15,8 +15,9 @@ import QRCodeComponent from "../../../components/qrcode/qrcode";
 
 enum Status {
   completed = "green",
-  ongoing = "blue",
-  lost = "red",
+  active = "blue",
+  pending = "orange",
+  cancelled = "red",
 }
 
 const RentDetails = ({ rent }: { rent: Rental | null }) => {
@@ -51,15 +52,18 @@ const RentDetails = ({ rent }: { rent: Rental | null }) => {
       <Flex gap={6} flexDirection={"column"}>
         <Box className="flex w-full flex-row justify-around gap-4">
           <Box
-            className="h-40 w-1/3 rounded-lg"
+            className="h-40 w-1/3 rounded-lg overflow-hidden"
             position={"relative"}
-            bgImage={rent?.Bike?.image || bikeImg}
             bgColor={"gray.100"}
-            bgPosition={"center"}
-            bgRepeat={"no-repeat"}
-            bgSize={"cover"}
             shadow={"md"}
-          ></Box>
+          >
+            <img
+              src={rent?.Bike?.image || bikeImg}
+              alt={rent?.Bike?.model || "bike"}
+              onError={(e) => { (e.target as HTMLImageElement).src = bikeImg; }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </Box>
           <Box
             className="h-40 w-40  rounded-lg"
             position={"relative"}

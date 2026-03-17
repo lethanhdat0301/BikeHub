@@ -13,7 +13,7 @@ export interface Park {
 export const getAllParks = async (): Promise<Park[]> => {
   try {
     const response = await axios.get("parks/");
-    console.log("✅ Parks loaded from API:", response.data);
+    // console.log("✅ Parks loaded from API:", response.data);
     return response.data;
   } catch (error) {
     console.error("❌ Error fetching parks:", error);

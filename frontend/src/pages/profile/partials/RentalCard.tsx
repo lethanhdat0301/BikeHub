@@ -1,6 +1,6 @@
 import { Avatar, Box, Heading, Text } from "@chakra-ui/react";
 import { Rental } from "../Profile.page";
-import bikeImg from "../../../assets/images/bikes/bike1.jpg";
+import bikeImg from "../../../assets/images/bikes/bike-placeholder.jpg";
 import moment from "moment";
 import { useEffect } from "react";
 
@@ -68,7 +68,7 @@ const RentalCard = ({
         textAlign={"center"}
         color={"orange"}
       >
-        <Text>${rental?.price}</Text>
+        <Text>{Number(rental?.price).toLocaleString('vi-VN')} VNĐ</Text>
         {/* <Text></Text> */}
       </Box>
       <Box color={"gray"} fontSize={"small"} fontWeight={"medium"}>

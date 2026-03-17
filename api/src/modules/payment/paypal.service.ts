@@ -32,16 +32,16 @@ export class PaypalService {
 
   async createOrder(cart) {
     // use the cart information passed from the front-end to calculate the purchase unit details
-    console.log("----------------");
-    console.log("--------CREATE ORDER SERVICE--------");
-    console.log("----------------");
-    console.log(
-      "shopping cart information passed from the frontend createOrder() callback:",
-      cart,
-    );
+    // console.log("----------------");
+    // console.log("--------CREATE ORDER SERVICE--------");
+    // console.log("----------------");
+    // console.log(
+    //   "shopping cart information passed from the frontend createOrder() callback:",
+    //   cart,
+    // );
 
     const accessToken = await this.generateAccessToken();
-    console.log("Access Token:", accessToken);
+    // console.log("Access Token:", accessToken);
     const url = `${this.base}/v2/checkout/orders`;
 
     const response = await fetch(url, {
@@ -58,7 +58,7 @@ export class PaypalService {
       body: JSON.stringify(cart),
     });
 
-    console.log('createOrder response', await response.clone().json())
+    // console.log('createOrder response', await response.clone().json())
     return response.json()
   }
 
@@ -68,12 +68,12 @@ export class PaypalService {
   }
 
   async completeOrder(orderID) {
-    console.log("----------------");
-    console.log("--------COMPLETE ORDER SERVICE--------");
-    console.log("----------------");
+    // console.log("----------------");
+    // console.log("--------COMPLETE ORDER SERVICE--------");
+    // console.log("----------------");
     const accessToken = await this.generateAccessToken();
     const url = `${this.base}/v2/checkout/orders/${orderID}/capture`;
-    console.log('Order ID:', orderID)
+    // console.log('Order ID:', orderID)
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -86,7 +86,7 @@ export class PaypalService {
         // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
       },
     });
-    console.log('completeOrder response', await response.clone().json())
+    // console.log('completeOrder response', await response.clone().json())
     return response.json()
   }
 

@@ -15,7 +15,7 @@ export default function SignIn() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const data = { "email": email, "password": password}
+    const data = { "email": email, "password": password }
     try {
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL}auth/login`,
@@ -27,14 +27,20 @@ export default function SignIn() {
       });
 
       const user = res.data?.user;
+      const accessToken = res.data?.accessToken;
 
       if (user.role !== "admin" && user.role !== "dealer") {
         setError("This page is only for admins and dealers");
         return;
       }
 
+      // Store token so API calls using Authorization header work correctly
+      if (accessToken) {
+        localStorage.setItem("token", accessToken);
+      }
+
       logIn(user);
-      console.log()
+      // console.log()
       navigate("/admin");
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");

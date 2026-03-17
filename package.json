@@ -29,6 +29,9 @@
     "monorepo"
   ],
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "decimal.js": "^10.6.0",
     "reflect-metadata": "0.1.14"
   },
   "prisma": {

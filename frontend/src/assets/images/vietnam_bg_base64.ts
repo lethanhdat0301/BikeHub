@@ -1,0 +1,3 @@
+// Static Vietnam background image as base64 (compressed version)
+// This is a placeholder - you should replace with actual Vietnam landscape image
+export const vietnamBackgroundBase64 = `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUTExMVFhUXGR4aGBgYGBgdHRgdGh4bGhoaGxocHSggGBolHRgaITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGhAQGi0dHR8tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIALcBEwMBIgACEQEDEQH/xAAcAAAABwEBAAAAAAAAAAAAAAAAAQIDBAUGBwj/`;

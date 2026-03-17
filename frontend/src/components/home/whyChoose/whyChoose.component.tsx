@@ -2,10 +2,11 @@ import { Box, Container, Heading, Image, Text } from "@chakra-ui/react";
 import { IoTimeOutline } from "react-icons/io5";
 import { CiWallet } from "react-icons/ci";
 import { MdDirectionsBike } from "react-icons/md";
+import { useTranslation } from "react-i18next";
 import { Reveal } from "../../motion/reveal.component";
 import { IconType } from "react-icons";
 
-import BikeImage from "../../../assets/images/bikes/bikeChoose.jpg";
+import BikeImage from "../../../assets/images/bikes/Whychoose.jpg";
 
 type CardChooseProps = {
   id: number;
@@ -67,26 +68,24 @@ const CardChoose = ({ id, title, description, Icon }: CardChooseProps) => {
 };
 
 const WhyChoose = () => {
+  const { t } = useTranslation();
   const data = [
     {
       id: 1,
-      title: "Smart Booking",
-      description:
-        "Book in seconds via our Chatbot. No complex selection required—simply leave your details.",
+      title: t('home.smartBookingTitle'),
+      description: t('home.smartBookingDesc'),
       icon: IoTimeOutline,
     },
     {
       id: 2,
-      title: "Doorstep Delivery",
-      description:
-        "Free pickup and delivery within a 10km radius in Phu Quoc, Nha Trang, and Ha Giang.",
+      title: t('home.doorstepDeliveryTitle'),
+      description: t('home.doorstepDeliveryDesc'),
       icon: CiWallet,
     },
     {
       id: 3,
-      title: "Flexible Payment",
-      description:
-        "We accept Cash, Bank Transfer, PayPal, or Credit Card swipe upon delivery.",
+      title: t('home.flexiblePaymentTitle'),
+      description: t('home.flexiblePaymentDesc'),
       icon: MdDirectionsBike,
     },
   ];
@@ -111,7 +110,7 @@ const WhyChoose = () => {
             textAlign="center"
             px={{ base: 4, md: 0 }}
           >
-            Why Choose RentnRide 🚴‍♂️✨
+            {t('home.whyChooseTitle')}
           </Heading>
         </Reveal>
         {/* <Reveal>
@@ -129,11 +128,11 @@ const WhyChoose = () => {
               🤝 Community Vibes: Join a cyclist family!
             </Text>
             <Text className="text-gray-500 sm:text-base text-sm font-medium mb-5" maxWidth="600px" mx="auto">
-              Choose BikeHub – Where Every Ride is an Adventure!🚴‍♀️
+              Choose RentnRide – Where Every Ride is an Adventure!🚴‍♀️
             </Text>
           </Box>
         </Reveal> */}
-        <Box className=" w-full flex md:flex-row flex-col justify-evenly gap-5 ">
+        <Box className=" w-full flex md:flex-row flex-col justify-evenly gap-5 items-center">
           <Box className="flex-1 text-center">
             <Image
               src={BikeImage}
@@ -142,7 +141,7 @@ const WhyChoose = () => {
               mt={10}
             />
           </Box>
-          <Box className="flex flex-1 flex-col gap-4 md:justify-start items-center">
+          <Box className="flex flex-1 flex-col gap-4 justify-center items-center">
             {data.map((item) => (
               <CardChoose
                 key={item.id}

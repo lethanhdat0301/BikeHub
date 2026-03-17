@@ -11,8 +11,8 @@ export const GLOBAL_CONFIG: Config = {
   },
   swagger: {
     enabled: true,
-    title: 'BikeHub API',
-    description: 'BikeHub API build with NestJs',
+    title: 'RentnRide API',
+    description: 'RentnRide API build with NestJs',
     version: '1.5',
     path: API_PREFIX,
   },

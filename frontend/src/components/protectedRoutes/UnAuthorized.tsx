@@ -8,7 +8,7 @@ type Props = {
 const UnAuthorized: React.FC<Props> = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation().state;
-  console.log(location);
+  // console.log(location);
   return !user ? (
     children
   ) : (

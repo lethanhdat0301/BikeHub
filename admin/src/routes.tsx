@@ -8,9 +8,8 @@ import Dealers from "views/admin/dealer";
 import Customers from "views/admin/customer";
 import Bookings from "views/admin/booking";
 import Referrers from "views/admin/referrer";
-import InboxPage from "views/admin/inbox";
-import ReferralsPage from "views/admin/referrals";
 import Tables from "views/admin/user";
+import AdminChatPage from "views/admin/chat";
 
 // Auth Imports
 import SignIn from "views/auth/SignIn";
@@ -25,10 +24,9 @@ import {
   MdStore,
   MdCardGiftcard,
   MdEventNote,
-  MdFace,
   MdAccountCircle,
 } from "react-icons/md";
-import { FaFileInvoiceDollar, FaShareAlt } from "react-icons/fa";
+import { FaFileInvoiceDollar } from "react-icons/fa";
 
 const routes = [
   {
@@ -72,12 +70,12 @@ const routes = [
     roles: ["admin", "dealer"],
   },
   {
-    name: "Inbox",
+    name: "Chat",
     layout: "/admin",
-    path: "inbox",
+    path: "chat",
     icon: <MdMail className="h-6 w-6" />,
-    component: <React.Suspense fallback={<div />}><InboxPage /></React.Suspense>,
-    roles: ["admin"],
+    component: <AdminChatPage />,
+    roles: ["admin", "dealer"],
   },
   {
     name: "Rental",
@@ -85,15 +83,23 @@ const routes = [
     path: "rentals",
     icon: <FaFileInvoiceDollar className="h-6 w-6" />,
     component: <ManageRentals />,
-    roles: ["admin"],
+    roles: ["admin", "dealer"],
   },
   {
-    name: "Bikes",
+    name: "Motorbikes",
     layout: "/admin",
     icon: <MdElectricBike className="h-6 w-6" />,
-    path: "bikes",
+    path: "motorbikes",
     component: <ManageBikes />,
     roles: ["admin", "dealer"],
+  },
+  {
+    name: "Parks",
+    layout: "/admin",
+    icon: <MdLocalParking className="h-6 w-6" />,
+    path: "parks",
+    component: <ManageParks />,
+    roles: ["admin"],
   },
   {
     name: "Accounts",
