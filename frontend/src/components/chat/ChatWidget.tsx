@@ -3,6 +3,7 @@ import { Drawer, DrawerOverlay, DrawerContent, DrawerHeader, DrawerBody, DrawerC
 import { ChatIcon } from "@chakra-ui/icons";
 import { ChatWindow } from "./ChatWindow";
 import { ChatList } from "./ChatList";
+import { getChatIdentity } from "../../utils/chatSession";
 
 interface Conversation {
     id: number;
@@ -30,10 +31,18 @@ const ChatWidget: React.FC = () => {
     const [selectedConversation, setSelectedConversation] =
         useState<Conversation | null>(null);
     const [hasUnread, setHasUnread] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+    const [currentUserName, setCurrentUserName] = useState("Guest");
 
-    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-    const currentUserId = currentUser.id;
-    const currentUserName = currentUser.name;
+    useEffect(() => {
+        const initChatIdentity = async () => {
+            const identity = await getChatIdentity();
+            setCurrentUserId(identity.id);
+            setCurrentUserName(identity.name);
+        };
+
+        initChatIdentity();
+    }, []);
 
     const handleSelectConversation = (conversation: Conversation) => {
         setSelectedConversation(conversation);
@@ -97,15 +106,17 @@ const ChatWidget: React.FC = () => {
                                 conversationId={selectedConversation.id}
                                 otherUserName={getOtherUser(selectedConversation).name}
                                 otherUserImage={getOtherUser(selectedConversation).image || ""}
-                                currentUserId={currentUserId}
+                                currentUserId={currentUserId || 0}
                                 currentUserName={currentUserName}
                                 onClose={handleCloseChat}
                             />
                         ) : (
-                            <ChatList
-                                currentUserId={currentUserId}
-                                onSelectConversation={handleSelectConversation}
-                            />
+                            currentUserId && (
+                                <ChatList
+                                    currentUserId={currentUserId}
+                                    onSelectConversation={handleSelectConversation}
+                                />
+                            )
                         )}
                     </DrawerBody>
                 </DrawerContent>

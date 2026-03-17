@@ -21,6 +21,7 @@ import {
   from 'react';
 import Footer from "./components/footer/footer.component";
 import ButtonScroll from "./components/home/buttonScroll.component";
+import ChatWidget from "./components/chat/ChatWidget";
 
 function App() {
   function ScrollToSection() {
@@ -44,7 +45,7 @@ function App() {
     return null;
   }
 
-  return (<div className="min-h-screen bg-white"> <ScrollToSection /> <Header /> <Routes /> <Footer /> <Toaster /> <ButtonScroll /> </div>);
+  return (<div className="min-h-screen bg-white"> <ScrollToSection /> <Header /> <Routes /> <Footer /> <Toaster /> <ButtonScroll /> <ChatWidget /> </div>);
 }
 
 export default App;

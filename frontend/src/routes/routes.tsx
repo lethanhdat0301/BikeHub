@@ -5,8 +5,6 @@ import SignupPage from "../pages/auth/signup.page";
 import HomePage from "../pages/home.page";
 import NotFoundPage from "../pages/error/notFound.page";
 import SettingProfile from "../pages/settingProfile/settingProfile.page";
-import Protected from "../components/protectedRoutes/Protected";
-import UnAuthorized from "../components/protectedRoutes/UnAuthorized";
 import UpdateInfoPers from "../pages/settingProfile/partials/updateInfoForm.component";
 import UpdatePassword from "../pages/settingProfile/partials/updatePasswordForm.component";
 import DeleteUserForm from "../pages/settingProfile/partials/deleteUserForm.component";
@@ -28,64 +26,17 @@ const Routes: React.FC = () => {
   return (
     <ReactRouterRoutes>
       <Route path="/" element={<HomePage />} />
-      <Route
-        path="setting-profile"
-        element={
-          <Protected>
-            <SettingProfile />
-          </Protected>
-        }
-      >
+      <Route path="setting-profile" element={<SettingProfile />}>
         <Route path="information" element={<UpdateInfoPers />} />
         <Route path="updatePassword" element={<UpdatePassword />} />
         <Route path="deleteUser" element={<DeleteUserForm />} />
       </Route>
-      <Route
-        path="profile"
-        element={
-          <Protected>
-            <Profile />
-          </Protected>
-        }
-      />
-      <Route
-        path="/Booking/:id"
-        element={
-          <Protected>
-            <BookingPage />
-          </Protected>
-        }
-      />
-      <Route path="/payment-success/:id" element={
-        <Protected>
-          <PaymentSuccessPage />
-        </Protected>
-      } />
-      <Route
-        path="/chat"
-        element={
-          <Protected>
-            <ChatPage />
-          </Protected>
-        }
-      />
-      {/* Temporarily disabled login/signup routes */}
-      <Route
-        path="login"
-        element={
-          <UnAuthorized>
-            <LoginPage />
-          </UnAuthorized>
-        }
-      />
-      <Route
-        path="signup"
-        element={
-          <UnAuthorized>
-            <SignupPage />
-          </UnAuthorized>
-        }
-      />
+      <Route path="profile" element={<Profile />} />
+      <Route path="/Booking/:id" element={<BookingPage />} />
+      <Route path="/payment-success/:id" element={<PaymentSuccessPage />} />
+      <Route path="/chat" element={<ChatPage />} />
+      <Route path="login" element={<LoginPage />} />
+      <Route path="signup" element={<SignupPage />} />
       <Route path="/paypal" element={<PaymentPage />} />
       <Route path="*" element={<NotFoundPage />} />
       <Route path="/" element={<HomePage />} />

@@ -65,18 +65,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    
     // Fetch existing messages
     const fetchMessages = async () => {
       try {
         const response = await fetch(
-          `${API_URL}/api/chat/conversations/${conversationId}/messages`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `${API_URL}/api/chat/conversations/${conversationId}/messages`
         );
         const data = await response.json();
         setMessages(data.reverse());
@@ -98,7 +91,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     // Connect to WebSocket
     const newSocket = io(`${API_URL}/chat`, {
       path: "/socket.io",
-      auth: { token },
     });
 
     newSocket.on("connect", () => {
@@ -136,27 +128,26 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     setInputValue("");
     setIsSending(true);
 
-    if (socket) {
-      socket.emit("send-message", {
-        conversationId,
-        senderId: currentUserId,
-        content: messageContent,
-      });
-      socket.emit("stop-typing", { conversationId, userId: currentUserId });
-    }
-
     try {
-      const token = localStorage.getItem("token");
-      await fetch(`${API_URL}/api/chat/conversations/${conversationId}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      if (socket?.connected) {
+        socket.emit("send-message", {
+          conversationId,
+          senderId: currentUserId,
           content: messageContent,
-        }),
-      });
+        });
+        socket.emit("stop-typing", { conversationId, userId: currentUserId });
+      } else {
+        await fetch(`${API_URL}/api/chat/conversations/${conversationId}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: messageContent,
+            senderId: currentUserId,
+          }),
+        });
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
     } finally {

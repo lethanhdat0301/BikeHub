@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Box, Grid, Text, useToast } from "@chakra-ui/react";
+import { Box, Grid, Spinner, Text } from "@chakra-ui/react";
 import { ChatList } from "../../components/chat/ChatList";
 import { ChatWindow } from "../../components/chat/ChatWindow";
+import { getChatIdentity } from "../../utils/chatSession";
 
 interface Conversation {
   id: number;
@@ -27,11 +28,18 @@ interface Conversation {
 const ChatPage: React.FC = () => {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
-  const toast = useToast();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string>("Guest");
 
-  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const currentUserId = currentUser.id;
-  const currentUserName = currentUser.name;
+  React.useEffect(() => {
+    const initChatIdentity = async () => {
+      const identity = await getChatIdentity();
+      setCurrentUserId(identity.id);
+      setCurrentUserName(identity.name);
+    };
+
+    initChatIdentity();
+  }, []);
 
   const handleSelectConversation = (conversation: Conversation) => {
     setSelectedConversation(conversation);
@@ -47,6 +55,14 @@ const ChatPage: React.FC = () => {
     }
     return conv.Customer;
   };
+
+  if (!currentUserId) {
+    return (
+      <Box w="full" minH="100vh" display="flex" alignItems="center" justifyContent="center">
+        <Spinner size="lg" />
+      </Box>
+    );
+  }
 
   return (
     <Box w="full" minH="100vh" bg="gray.50" py={10} px={4}>

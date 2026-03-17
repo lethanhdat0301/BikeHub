@@ -55,12 +55,9 @@ export const ChatList: React.FC<ChatListProps> = ({
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${API_URL}/api/chat/conversations`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_URL}/api/chat/conversations?userId=${currentUserId}`
+        );
 
         if (!response.ok) throw new Error("Failed to fetch conversations");
 
@@ -80,7 +77,7 @@ export const ChatList: React.FC<ChatListProps> = ({
     };
 
     fetchConversations();
-  }, []);
+  }, [currentUserId]);
 
   const getOtherUser = (conv: Conversation) => {
     if (conv.customer_id === currentUserId) {
