@@ -8,14 +8,14 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { AuthJwtGuard } from '../auth/auth.jwt.guard';
+import { JwtAuthGuard } from '../auth/auth.jwt.guard';
 import { AuthUser } from '../auth/auth.user.decorator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Chat')
 @ApiBearerAuth()
 @Controller('chat')
-@UseGuards(AuthJwtGuard)
+@UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(private chatService: ChatService) {}
 

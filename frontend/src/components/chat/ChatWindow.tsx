@@ -12,7 +12,7 @@ import {
   useToast,
   IconButton,
 } from "@chakra-ui/react";
-import { SendIcon, AttachmentIcon, CloseIcon } from "@chakra-ui/icons";
+import { MdClose, MdSend } from "react-icons/md";
 import { io, Socket } from "socket.io-client";
 
 interface Message {
@@ -96,9 +96,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     fetchMessages();
 
     // Connect to WebSocket
-    const newSocket = io(API_URL, {
+    const newSocket = io(`${API_URL}/chat`, {
       path: "/socket.io",
-      namespace: "/chat",
       auth: { token },
     });
 
@@ -224,7 +223,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </VStack>
         </HStack>
         <IconButton
-          icon={<CloseIcon />}
+          icon={<MdClose />}
           aria-label="Close chat"
           variant="ghost"
           onClick={onClose}
@@ -323,7 +322,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           minW="40px"
           p={0}
         >
-          <SendIcon />
+          <MdSend />
         </Button>
       </HStack>
     </VStack>

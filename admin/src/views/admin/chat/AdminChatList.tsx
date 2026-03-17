@@ -27,7 +27,7 @@ interface AdminChatListProps {
     selectedConversationId?: number;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3300";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3300";
 
 export const AdminChatList: React.FC<AdminChatListProps> = ({
     currentUserId,

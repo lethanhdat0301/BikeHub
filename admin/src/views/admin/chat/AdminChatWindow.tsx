@@ -22,7 +22,7 @@ interface ChatWindowProps {
     onClose: () => void;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3300";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3300";
 
 export const AdminChatWindow: React.FC<ChatWindowProps> = ({
     conversationId,
@@ -73,9 +73,8 @@ export const AdminChatWindow: React.FC<ChatWindowProps> = ({
         fetchMessages();
 
         // Connect to WebSocket
-        const newSocket = io(API_URL, {
+        const newSocket = io(`${API_URL}/chat`, {
             path: "/socket.io",
-            namespace: "/chat",
             auth: { token },
         });
 
