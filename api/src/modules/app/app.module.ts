@@ -12,6 +12,7 @@ import { BookingRequestModule } from '../booking-request/booking-request.module'
 import { DealerModule } from '../dealer/dealer.module';
 import { ReferrerModule } from '../referrer/referrer.module';
 import { UploadsModule } from '../uploads/uploads.module';
+import { ChatModule } from '../chat/chat.module';
 import { GLOBAL_CONFIG } from '../../configs/global.config';
 
 import { AppService } from './app.service';
@@ -31,6 +32,7 @@ import { HealthModule } from '../health/health.module';
     DealerModule,
     ReferrerModule,
     UploadsModule,
+    ChatModule,
     // ConfigModule.forRoot({ isGlobal: true, load: [() => GLOBAL_CONFIG] }),
     // ConfigModule.forRoot({ 
     //   isGlobal: true, 

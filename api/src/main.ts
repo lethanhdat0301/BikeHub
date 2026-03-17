@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { WebSocketAdapter } from '@nestjs/platform-socket.io';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
@@ -46,6 +47,9 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true,
   }),);
+
+  // Enable WebSocket for Chat module
+  app.useWebSocketAdapter(new WebSocketAdapter(app));
 
   const swaggerConfig = GLOBAL_CONFIG.swagger;
 
