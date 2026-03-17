@@ -20,6 +20,7 @@ import ReturnPage from "../pages/return/return.page.tsx";
 import TrackOrderPage from "../pages/order/trackOrder.page.tsx";
 import BikeDetailsPage from "../pages/bikeDetails/bikeDetails.page.tsx";
 import TermsPage from "../pages/terms/terms.page.tsx";
+import ChatPage from "../pages/chat/chat.page.tsx";
 
 
 
@@ -60,6 +61,14 @@ const Routes: React.FC = () => {
           <PaymentSuccessPage />
         </Protected>
       } />
+      <Route
+        path="/chat"
+        element={
+          <Protected>
+            <ChatPage />
+          </Protected>
+        }
+      />
       {/* Temporarily disabled login/signup routes */}
       <Route
         path="login"

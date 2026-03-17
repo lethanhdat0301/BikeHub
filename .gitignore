@@ -22,3 +22,4 @@ yarn-debug.log*
 yarn-error.log*
 
 api/gen-lang-client-0406312695-b671d3b8e09c.json
+./CHAT_FEATURE_GUIDE.md

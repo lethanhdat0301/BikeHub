@@ -8,9 +8,10 @@ import Dealers from "views/admin/dealer";
 import Customers from "views/admin/customer";
 import Bookings from "views/admin/booking";
 import Referrers from "views/admin/referrer";
-import InboxPage from "views/admin/inbox";
+// import InboxPage from "views/admin/inbox";
 import ReferralsPage from "views/admin/referrals";
 import Tables from "views/admin/user";
+import AdminChatPage from "views/admin/chat";
 
 // Auth Imports
 import SignIn from "views/auth/SignIn";
@@ -72,13 +73,21 @@ const routes = [
     roles: ["admin", "dealer"],
   },
   {
-    name: "Inbox",
+    name: "Chat",
     layout: "/admin",
-    path: "inbox",
+    path: "chat",
     icon: <MdMail className="h-6 w-6" />,
-    component: <React.Suspense fallback={<div />}><InboxPage /></React.Suspense>,
-    roles: ["admin"],
+    component: <AdminChatPage />,
+    roles: ["admin", "dealer"],
   },
+  // {
+  //   name: "Inbox",
+  //   layout: "/admin",
+  //   path: "inbox",
+  //   icon: <MdMail className="h-6 w-6" />,
+  //   component: <React.Suspense fallback={<div />}><InboxPage /></React.Suspense>,
+  //   roles: ["admin"],
+  // },
   {
     name: "Rental",
     layout: "/admin",

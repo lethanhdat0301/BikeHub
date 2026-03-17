@@ -65,6 +65,10 @@ model User {
   Bikes                     Bike[]           @relation("DealerBikes")
   // Dealer business profile (1-to-1 for users with role='dealer')
   DealerProfile             Dealer?          @relation("UserDealerProfile")
+  // Chat relations
+  CustomerConversations     Conversation[]   @relation("CustomerConversations")
+  DealerAdminConversations  Conversation[]   @relation("DealerAdminConversations")
+  Messages                  Message[]
   created_at                DateTime         @default(now())
   updated_at                DateTime         @updatedAt
   birthdate                 DateTime?
@@ -164,4 +168,34 @@ model Referrer {
   Dealer             Dealer?  @relation(fields: [dealer_id], references: [id], onDelete: SetNull)
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
+}
+
+model Conversation {
+  id                 Int       @id @default(autoincrement())
+  customer_id        Int
+  dealer_or_admin_id Int
+  Customer           User      @relation("CustomerConversations", fields: [customer_id], references: [id], onDelete: Cascade)
+  DealerOrAdmin      User      @relation("DealerAdminConversations", fields: [dealer_or_admin_id], references: [id], onDelete: Cascade)
+  messages           Message[]
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  @@unique([customer_id, dealer_or_admin_id])
+  @@index([customer_id])
+  @@index([dealer_or_admin_id])
+}
+
+model Message {
+  id              Int      @id @default(autoincrement())
+  conversation_id Int
+  sender_id       Int
+  content         String
+  attachment      String?  // URL to attachment (image, file, etc.)
+  is_read          Boolean  @default(false)
+  Conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  Sender          User         @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+  created_at      DateTime     @default(now())
+
+  @@index([conversation_id])
+  @@index([sender_id])
 }
